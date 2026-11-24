@@ -770,6 +770,48 @@ window.previewXlsx=function(){
 })();
 </script>
 <script>document.getElementById("qc").onclick=function(){var q=document.getElementById("q");q.value="";renderArch();q.focus()};</script>
+
+<script>
+(function(){
+  var cfg = S.cfg = S.cfg || {};
+  var card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label for="pwCurrent">كلمة المرور الحالية</label><input id="pwCurrent" type="password" autocomplete="current-password" placeholder="اكتب كلمة المرور الحالية"><label for="pwNew">كلمة المرور الجديدة</label><input id="pwNew" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل"><label for="pwConfirm">تأكيد كلمة المرور الجديدة</label><input id="pwConfirm" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ / تغيير كلمة المرور</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button></div><p id="pwMsg" class="note" role="status"></p>';
+  var settings = document.getElementById("t3");
+  if(settings) settings.appendChild(card);
+  function msg(t){document.getElementById("pwMsg").textContent=t;}
+  function bytesToHex(a){return Array.from(new Uint8Array(a)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");}
+  function hexToBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a;}
+  function derive(p,s){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:180000,hash:"SHA-256"},k,256)});}
+  function check(p){if(!cfg.passHash)return Promise.resolve(true);return derive(p,hexToBytes(cfg.passSalt)).then(function(h){return bytesToHex(h)===cfg.passHash;});}
+  document.getElementById("pwSave").onclick=function(){
+    var old=document.getElementById("pwCurrent").value, n=document.getElementById("pwNew").value, confirm=document.getElementById("pwConfirm").value;
+    if(n.length<6){msg("كلمة المرور لازم تكون ٦ أحرف على الأقل.");return;}
+    if(n!==confirm){msg("تأكيد كلمة المرور غير مطابق.");return;}
+    check(old).then(function(ok){
+      if(!ok){msg("كلمة المرور الحالية غير صحيحة.");return;}
+      var salt=crypto.getRandomValues(new Uint8Array(16));
+      derive(n,salt).then(function(h){cfg.passSalt=bytesToHex(salt);cfg.passHash=bytesToHex(h);save();document.getElementById("pwCurrent").value="";document.getElementById("pwNew").value="";document.getElementById("pwConfirm").value="";msg("تم حفظ كلمة المرور. ستُطلب عند فتح التطبيق مرة أخرى.");});
+    }).catch(function(){msg("تعذر إعداد الحماية على هذا المتصفح.");});
+  };
+  document.getElementById("pwRemove").onclick=function(){
+    if(!cfg.passHash){msg("الحماية غير مفعّلة حاليًا.");return;}
+    check(document.getElementById("pwCurrent").value).then(function(ok){
+      if(!ok){msg("كلمة المرور الحالية غير صحيحة.");return;}
+      delete cfg.passHash;delete cfg.passSalt;save();document.getElementById("pwCurrent").value="";document.getElementById("pwNew").value="";document.getElementById("pwConfirm").value="";msg("تم إلغاء كلمة المرور.");
+    }).catch(function(){msg("تعذر إلغاء الحماية.");});
+  };
+  if(cfg.passHash){
+    var gate=document.createElement("div");
+    gate.id="passwordGate";
+    gate.style.cssText="position:fixed;inset:0;z-index:2147483647;background:#eef3f7;display:flex;align-items:center;justify-content:center;padding:22px;direction:rtl;font-family:Tahoma,Arial,sans-serif";
+    gate.innerHTML='<form id="gateForm" style="width:min(100%,380px);background:white;border-radius:20px;padding:24px;box-shadow:0 10px 40px #0002;text-align:center"><div style="font-size:42px;margin-bottom:10px">🔒</div><h2 style="margin:0 0 8px;color:#0f766e">كشف الرواتب</h2><p style="margin:0 0 16px;color:#52616b">أدخل كلمة المرور لفتح التطبيق</p><input id="gatePass" type="password" autocomplete="current-password" placeholder="كلمة المرور" required style="box-sizing:border-box;width:100%;padding:14px;border:1px solid #ccd5d9;border-radius:12px;font-size:18px"><button type="submit" style="width:100%;margin-top:12px;padding:13px;border:0;border-radius:12px;background:#0f766e;color:white;font-size:16px">دخول</button><p id="gateMsg" role="alert" style="color:#b42318"></p></form>';
+    document.body.appendChild(gate);
+    document.getElementById("gateForm").onsubmit=function(e){e.preventDefault();var p=document.getElementById("gatePass").value;check(p).then(function(ok){if(ok){gate.remove();}else{document.getElementById("gateMsg").textContent="كلمة المرور غير صحيحة.";document.getElementById("gatePass").value="";document.getElementById("gatePass").focus();}}).catch(function(){document.getElementById("gateMsg").textContent="تعذر التحقق من كلمة المرور على هذا المتصفح.";});};
+    setTimeout(function(){var p=document.getElementById("gatePass");if(p)p.focus();},100);
+  }
+})();
+</script>
 <script>
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   window.addEventListener("load", function () { navigator.serviceWorker.register("./sw.js").catch(function (err) { console.warn("تعذر تسجيل Service Worker", err); }); });
