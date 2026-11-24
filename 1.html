@@ -991,5 +991,32 @@ picker.onchange=function(){
 })();
 </script>
 
+
+<script>
+(function(){
+"use strict";
+function offerRestore(){
+  try{
+    if(localStorage.getItem("salary_preview_v1"))return;
+    if(sessionStorage.getItem("salary_backup_prompt_seen"))return;
+  }catch(e){}
+  var picker=document.getElementById("backupFile");
+  if(!picker)return;
+  var wrap=document.createElement("div");
+  wrap.id="firstBackupPrompt";
+  wrap.setAttribute("role","dialog");
+  wrap.setAttribute("aria-modal","true");
+  wrap.setAttribute("aria-labelledby","firstBackupTitle");
+  wrap.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl;font-family:inherit";
+  wrap.innerHTML='<div style="width:100%;max-width:390px;background:#fff;color:#172b2a;border-radius:18px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.25);text-align:right"><h2 id="firstBackupTitle" style="margin:0 0 10px;font-size:20px">هل لديك نسخة احتياطية؟</h2><p style="margin:0 0 18px;line-height:1.8">يبدو أن التطبيق لا يحتوي على بيانات محفوظة على هذا الجهاز. لو عندك نسخة سابقة في Google Drive أو «الملفات»، اختارها علشان نستعيد بيانات العمال والرواتب والأرشيف.</p><button type="button" id="chooseOldBackup" style="width:100%;padding:13px;border:0;border-radius:10px;background:#0f766e;color:#fff;font-size:16px;font-weight:700">اختيار النسخة واستعادتها</button><button type="button" id="skipOldBackup" style="width:100%;padding:12px;margin-top:8px;border:1px solid #d0d7d6;border-radius:10px;background:#fff;color:#334;font-size:15px">ليس الآن</button><p style="font-size:12px;color:#667;margin:12px 0 0">لن يتم استبدال أي بيانات إلا بعد موافقتك.</p></div>';
+  document.body.appendChild(wrap);
+  document.getElementById("chooseOldBackup").onclick=function(){wrap.remove();picker.click()};
+  document.getElementById("skipOldBackup").onclick=function(){try{sessionStorage.setItem("salary_backup_prompt_seen","1")}catch(e){}wrap.remove()};
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(offerRestore,800)},{once:true});
+else setTimeout(offerRestore,800);
+})();
+</script>
+
 </body>
 </html>
