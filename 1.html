@@ -801,7 +801,7 @@ window.previewXlsx=function(){
       delete cfg.passHash;delete cfg.passSalt;save();document.getElementById("pwCurrent").value="";document.getElementById("pwNew").value="";document.getElementById("pwConfirm").value="";msg("تم إلغاء كلمة المرور.");
     }).catch(function(){msg("تعذر إلغاء الحماية.");});
   };
-  if(cfg.passHash){
+  if(cfg.passHash && !new URLSearchParams(location.search).has("card")){
     var gate=document.createElement("div");
     gate.id="passwordGate";
     gate.style.cssText="position:fixed;inset:0;z-index:2147483647;background:#eef3f7;display:flex;align-items:center;justify-content:center;padding:22px;direction:rtl;font-family:Tahoma,Arial,sans-serif";
@@ -884,12 +884,49 @@ function history(name,parent){
  dbAll(empKey(name)).then(function(items){target.innerHTML="";if(!items.length){target.textContent="لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.";return}
  items.forEach(function(it){var d=document.createElement("div");d.className="qr-row";var b=document.createElement("button");b.textContent="حفظ / فتح PDF";b.onclick=function(){dbGet(it.id).then(function(x){if(!x)return;var u=URL.createObjectURL(x.blob),a=document.createElement("a");a.href=u;a.download=x.filename;a.click();setTimeout(function(){URL.revokeObjectURL(u)},60000)})};d.textContent=it.date+" — "+it.filename+" ";d.appendChild(b);target.appendChild(d)})}).catch(function(){target.textContent="تعذر قراءة أرشيف PDF."});
 }
+function bytesToB64Url(bytes){var bin="";for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"")}
+function b64UrlToBytes(str){var b=str.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";var bin=atob(b),out=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out}
+function packCard(data){var raw=new TextEncoder().encode(JSON.stringify(data));if(typeof CompressionStream!=="undefined"){return new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer().then(function(buf){return "z"+bytesToB64Url(new Uint8Array(buf))})}return Promise.resolve("j"+bytesToB64Url(raw))}
 function showQr(name){
- var id=getId(name),url=location.origin+location.pathname+"?worker="+encodeURIComponent(id);
- overlay("QR Code — "+name,'<p class="qr-note">امسح الكود من كاميرا موبايلك لفتح حساب العامل على نفس الجهاز وبعد إدخال كلمة المرور.</p><div class="qr-code" id="qrCanvas"></div><p class="qr-note">الكود لا يحتوي على الراتب أو السلف؛ يحتوي على رابط ومعرّف فقط.</p><button class="secondary" id="qrPng">حفظ صورة QR</button>');
- ensureQr().then(function(){var el=document.getElementById("qrCanvas");if(!el)return;new QRCode(el,{text:url,width:220,height:220,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});var b=document.getElementById("qrPng");if(b)b.onclick=function(){var im=el.querySelector("img"),cv=el.querySelector("canvas"),a=document.createElement("a");a.href=cv?cv.toDataURL("image/png"):im.src;a.download="QR-"+name+".png";a.click()}}).catch(function(){var el=document.getElementById("qrCanvas");if(el)el.textContent="تعذر تحميل مولد QR. تحقق من اتصال الإنترنت."});
+ var rs=records(name),g=totals(name);
+ var data={v:1,n:name,c:S.co||"",d:today(),t:g,r:rs.map(function(r){return [r.date,Number(r.sal)||0,Number(r.adv)||0,r.advDt||"",Number(r.abs)||0,Number(dedOf(r))||0,Number(netOf(r))||0,r.recv||""]})};
+ overlay("QR Code — "+name,'<p class="qr-note">الباركود يحتوي على بيانات العامل وقت إنشائه. بعد أي تعديل، أنشئ باركودًا جديدًا وأرسل صورته للعامل.</p><div class="qr-code" id="qrCanvas">جاري تجهيز بيانات الباركود…</div><p class="qr-note">كل من يمتلك صورة الباركود يستطيع قراءة البيانات الموجودة بداخله. لا تضعه في مكان عام.</p><button class="secondary" id="qrPng" disabled>حفظ صورة QR</button>');
+ packCard(data).then(function(payload){
+  var url=location.origin+location.pathname+"?card="+encodeURIComponent(payload);
+  if(new TextEncoder().encode(url).length>2700)throw new Error("حجم بيانات العامل أكبر من سعة باركود واحد. قلّل عدد القيود أو استخدم كشفًا مختصرًا.");
+  return ensureQr().then(function(){
+   var el=document.getElementById("qrCanvas");if(!el)return;
+   el.innerHTML="";new QRCode(el,{text:url,width:240,height:240,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});
+   var b=document.getElementById("qrPng");if(b){b.disabled=false;b.onclick=function(){var im=el.querySelector("img"),cv=el.querySelector("canvas"),a=document.createElement("a");a.href=cv?cv.toDataURL("image/png"):im.src;a.download="QR-"+name+".png";a.click()}}
+  });
+ }).catch(function(err){var el=document.getElementById("qrCanvas");if(el)el.textContent=err&&err.message?err.message:"تعذر تجهيز الباركود. تحقق من اتصال الإنترنت."});
 }
 window.salaryShowQr=showQr;window.salaryPdfHistory=function(name){askPassword(name,function(){showWorker(name)})};
+function renderSharedCard(){
+ var params=new URLSearchParams(location.search),packed=params.get("card");if(!packed)return;
+ document.body.style.overflow="hidden";
+ var root=document.createElement("div");root.id="sharedSalaryCard";root.style.cssText="position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#f1f5f5;color:#17212b;padding:18px;box-sizing:border-box;direction:rtl;font-family:Tahoma,Arial,sans-serif";
+ root.innerHTML='<style>@media print{body{background:#fff!important}#sharedSalaryCard{position:static!important;overflow:visible!important;background:#fff!important;padding:0!important}#sharedSalaryCard .no-print{display:none!important}.share-card{box-shadow:none!important;border:0!important;margin:0!important}}.share-card{max-width:680px;margin:0 auto;background:#fff;border:1px solid #dce6e6;border-radius:18px;padding:20px;box-shadow:0 8px 28px #1231}.share-card h1{font-size:23px;color:#0f766e;margin:0 0 8px}.share-card h2{font-size:16px;color:#0f766e;margin:20px 0 8px}.share-meta{color:#64748b;font-size:12px;line-height:1.8}.share-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}.share-stat{background:#f0f7f6;border-radius:12px;padding:11px}.share-stat small{display:block;color:#64748b;font-size:11px}.share-stat b{display:block;font-size:17px;margin-top:4px}.share-entry{border-top:1px solid #e5eeee;padding:10px 0;font-size:13px;line-height:1.9;overflow-wrap:anywhere}.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px auto;max-width:680px}.share-actions button{border:0;border-radius:11px;padding:12px 16px;background:#0f766e;color:white;font-size:14px}.share-actions button.secondary{background:#e2eeee;color:#20323a}@media(max-width:380px){.share-card{padding:14px}.share-stats{gap:6px}.share-stat{padding:9px}.share-stat b{font-size:15px}}</style><div class="share-card"><div id="sharedCardContent">جاري فتح كشف العامل…</div></div><div class="share-actions no-print"><button id="sharedPrint">حفظ / طباعة PDF</button><button class="secondary" id="sharedClose">إغلاق الصفحة</button></div>';
+ document.body.appendChild(root);
+ function fail(msg){root.querySelector("#sharedCardContent").textContent=msg;root.querySelector(".share-actions").style.display="none"}
+ function decode(){
+  var mode=packed.charAt(0),bytes=b64UrlToBytes(packed.slice(1));
+  if(mode==="z"){if(typeof DecompressionStream==="undefined")throw new Error("المتصفح لا يدعم فك ضغط بيانات الباركود. افتح الرابط في إصدار حديث من Safari أو Chrome.");return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text()}
+  if(mode==="j")return Promise.resolve(new TextDecoder().decode(bytes));
+  throw new Error("صيغة الباركود غير معروفة.");
+ }
+ decode().then(function(json){
+  var d=JSON.parse(json);if(!d||d.v!==1||!d.n||!Array.isArray(d.r))throw new Error("بيانات الباركود غير مكتملة.");
+  var t=d.t||{},html='<h1>كشف حساب العامل</h1><div style="font-size:18px;font-weight:bold">'+escQ(d.n)+'</div><div class="share-meta">الشركة: '+escQ(d.c||"—")+'<br>تاريخ إصدار الباركود: '+escQ(d.d||"—")+'<br>عدد القيود: '+d.r.length+'</div><div class="share-stats">'+[
+   ["إجمالي الراتب الأساسي",t.sal],["إجمالي السلف",t.adv],["أيام الغياب",t.abs],["خصم الغياب",t.ded],["المجموع بعد الخصم",t.net],["المستلم",t.rec],["المتبقي",t.pend]
+  ].map(function(x){return '<div class="share-stat"><small>'+x[0]+'</small><b>'+escQ(x[1]==null?0:x[1])+(x[0]==="أيام الغياب"?"":" درهم")+'</b></div>'}).join("")+'</div><h2>تفاصيل القيود</h2>';
+  d.r.forEach(function(r){html+='<div class="share-entry"><b>'+escQ(r[0]||"—")+'</b><br>الراتب: '+escQ(r[1])+' درهم · السلفة: '+escQ(r[2])+' درهم · تاريخ السلفة: '+escQ(r[3]||"—")+'<br>الغياب: '+escQ(r[4])+' · خصم الغياب: '+escQ(r[5])+' درهم · الصافي: '+escQ(r[6])+' درهم · الحالة: '+escQ(r[7]||"—")+'</div>'});
+  root.querySelector("#sharedCardContent").innerHTML=html;
+ }).catch(function(e){fail(e&&e.message?e.message:"تعذر قراءة بيانات الباركود.")});
+ root.querySelector("#sharedPrint").onclick=function(){window.print()};
+ root.querySelector("#sharedClose").onclick=function(){if(history.length>1)history.back();else root.querySelector("#sharedCardContent").textContent="يمكنك إغلاق علامة تبويب المتصفح للعودة."};
+}
+renderSharedCard();
 var params=new URLSearchParams(location.search),wid=params.get("worker");
 if(wid){var worker=getWorker(wid);if(worker){var tryOpen=function(){var gate=document.getElementById("passwordGate");if(gate){setTimeout(tryOpen,250);return}askPassword(worker,function(){showWorker(worker)})};setTimeout(tryOpen,100)}else{setTimeout(function(){alert("لم يتم العثور على العامل في بيانات هذا المتصفح. افتح التطبيق من نفس الموبايل الذي يحتوي على بيانات الرواتب.")},700)}}
 })();
