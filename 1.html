@@ -980,6 +980,8 @@ card.id="backupCard";
 card.innerHTML='<h2>النسخ الاحتياطي اليدوي على Google Drive</h2><p class="note">لإنشاء نسخة، اضغط الزر واختر Google Drive من قائمة المشاركة. وللاستعادة، نزّل النسخة من Google Drive إلى «الملفات» ثم اخترها هنا. لا يتم رفع أو تنزيل أي ملف دون اختيارك.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" id="makeBackup">حفظ نسخة على Google Drive</button><button type="button" class="x" id="restoreBackup">استعادة نسخة من Drive أو الملفات</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p id="backupMsg" class="note" role="status">النسخ اليدوي: اختر Google Drive بعد فتح قائمة المشاركة، أو اختر «حفظ في الملفات».</p>';
 var settings=document.getElementById("t3");
 if(settings)settings.appendChild(card);
+var appInfoAfterBackup=document.getElementById("appInfoCard");
+if(settings&&appInfoAfterBackup)settings.appendChild(appInfoAfterBackup);
 function status(t,bad){var el=document.getElementById("backupMsg");if(el){el.textContent=t;el.style.color=bad?"#b42318":""}}
 function readAsDataURL(blob){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onload=function(){resolve(fr.result)};fr.onerror=function(){reject(fr.error)};fr.readAsDataURL(blob)})}
 function openBackupDb(){return new Promise(function(resolve,reject){var q=indexedDB.open("salary_worker_pdf_v1",1);q.onupgradeneeded=function(){if(!q.result.objectStoreNames.contains("pdfs"))q.result.createObjectStore("pdfs",{keyPath:"id",autoIncrement:true})};q.onsuccess=function(){resolve(q.result)};q.onerror=function(){reject(q.error)}})}
