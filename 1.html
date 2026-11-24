@@ -889,7 +889,7 @@ function showQr(name){
  overlay("QR Code — "+name,'<p class="qr-note">امسح الكود من كاميرا موبايلك لفتح حساب العامل على نفس الجهاز وبعد إدخال كلمة المرور.</p><div class="qr-code" id="qrCanvas"></div><p class="qr-note">الكود لا يحتوي على الراتب أو السلف؛ يحتوي على رابط ومعرّف فقط.</p><button class="secondary" id="qrPng">حفظ صورة QR</button>');
  ensureQr().then(function(){var el=document.getElementById("qrCanvas");if(!el)return;new QRCode(el,{text:url,width:220,height:220,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});var b=document.getElementById("qrPng");if(b)b.onclick=function(){var im=el.querySelector("img"),cv=el.querySelector("canvas"),a=document.createElement("a");a.href=cv?cv.toDataURL("image/png"):im.src;a.download="QR-"+name+".png";a.click()}}).catch(function(){var el=document.getElementById("qrCanvas");if(el)el.textContent="تعذر تحميل مولد QR. تحقق من اتصال الإنترنت."});
 }
-window.salaryShowQr=showQr;window.salaryPdfHistory=function(name){var o=overlay("أرشيف PDF — "+name,'<div id="qrHistoryList"></div>');history(name,o)};
+window.salaryShowQr=showQr;window.salaryPdfHistory=function(name){askPassword(name,function(){showWorker(name)})};
 var params=new URLSearchParams(location.search),wid=params.get("worker");
 if(wid){var worker=getWorker(wid);if(worker){var tryOpen=function(){var gate=document.getElementById("passwordGate");if(gate){setTimeout(tryOpen,250);return}askPassword(worker,function(){showWorker(worker)})};setTimeout(tryOpen,100)}else{setTimeout(function(){alert("لم يتم العثور على العامل في بيانات هذا المتصفح. افتح التطبيق من نفس الموبايل الذي يحتوي على بيانات الرواتب.")},700)}}
 })();
