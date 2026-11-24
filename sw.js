@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v31-forced-splash-before-password";
+const CACHE_NAME = "salary-app-v32-mandatory-animated-splash";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
