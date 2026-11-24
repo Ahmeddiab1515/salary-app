@@ -778,23 +778,23 @@ window.previewXlsx=function(){
   var cfg = S.cfg = S.cfg || {};
   var card = document.createElement("div");
   card.className = "card";
-  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label id="pwLabel" for="pwEntry">كلمة المرور</label><input id="pwEntry" type="password" autocomplete="new-password" placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button><button type="button" class="x" id="pwBack" style="display:none">رجوع</button></div><p id="pwMsg" class="note" role="status"></p>';
+  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label id="pwLabel" for="pwEntry">كلمة المرور</label><input id="pwEntry" type="password" autocomplete="new-password" placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button></div><p id="pwMsg" class="note" role="status"></p>';
   var settings = document.getElementById("t3");
   if(settings) settings.appendChild(card);
   var pwStage="new";
   var pwFirst="";
-  var pwEntry=document.getElementById("pwEntry"),pwSave=document.getElementById("pwSave"),pwRemove=document.getElementById("pwRemove"),pwBack=document.getElementById("pwBack"),pwLabel=document.getElementById("pwLabel");
+  var pwEntry=document.getElementById("pwEntry"),pwSave=document.getElementById("pwSave"),pwRemove=document.getElementById("pwRemove"),pwLabel=document.getElementById("pwLabel");
   function msg(t){document.getElementById("pwMsg").textContent=t;}
   function bytesToHex(a){return Array.from(new Uint8Array(a)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");}
   function hexToBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a;}
   function derive(p,s){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:180000,hash:"SHA-256"},k,256)});}
   function check(p){if(!cfg.passHash)return Promise.resolve(true);return derive(p,hexToBytes(cfg.passSalt)).then(function(h){return bytesToHex(h)===cfg.passHash;});}
-  function resetPw(){pwStage="new";pwFirst="";pwLabel.textContent="كلمة المرور";pwEntry.type="password";pwEntry.autocomplete="new-password";pwEntry.placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل";pwEntry.value="";pwSave.textContent="حفظ";pwSave.style.display="";pwRemove.textContent="إلغاء كلمة المرور";pwRemove.style.display="";pwBack.style.display="none";}
+  function resetPw(){pwStage="new";pwFirst="";pwLabel.textContent="كلمة المرور";pwEntry.type="password";pwEntry.autocomplete="new-password";pwEntry.placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل";pwEntry.value="";pwSave.textContent="حفظ";pwSave.style.display="";pwRemove.textContent="إلغاء كلمة المرور";pwRemove.style.display="";}
   pwSave.onclick=function(){
     var v=pwEntry.value;
     if(pwStage==="new"){
       if(v.length<6){msg("كلمة المرور لازم تكون ٦ أحرف على الأقل.");return;}
-      pwFirst=v;pwStage="confirm";pwLabel.textContent="تأكيد كلمة المرور";pwEntry.value="";pwEntry.placeholder="اكتب كلمة المرور مرة ثانية للتأكيد";pwEntry.focus();pwSave.textContent="حفظ التأكيد";msg("اكتب كلمة المرور مرة ثانية في نفس المربع، ثم اضغط حفظ التأكيد.");return;
+      pwFirst=v;pwStage="confirm";pwLabel.textContent="تأكيد كلمة المرور";pwEntry.value="";pwEntry.placeholder="اكتب كلمة المرور مرة ثانية للتأكيد";pwEntry.focus();pwSave.textContent="حفظ";msg("اكتب كلمة المرور مرة ثانية في نفس المربع، ثم اضغط حفظ التأكيد.");return;
     }
     if(pwStage==="confirm"){
       if(v!==pwFirst){pwEntry.value="";pwEntry.focus();msg("كلمة المرور غير متطابقة. حاول التأكيد مرة ثانية.");return;}
@@ -811,9 +811,8 @@ window.previewXlsx=function(){
   };
   pwRemove.onclick=function(){
     if(!cfg.passHash){msg("الحماية غير مفعّلة حاليًا.");return;}
-    pwStage="remove";pwLabel.textContent="كلمة المرور القديمة";pwEntry.value="";pwEntry.autocomplete="current-password";pwEntry.placeholder="أدخل كلمة المرور القديمة";pwEntry.focus();pwSave.textContent="تأكيد إلغاء كلمة المرور";pwRemove.style.display="none";pwBack.style.display="";msg("أدخل كلمة المرور القديمة في نفس المربع، ثم اضغط تأكيد إلغاء كلمة المرور.");
+    pwStage="remove";pwLabel.textContent="كلمة المرور القديمة";pwEntry.value="";pwEntry.autocomplete="current-password";pwEntry.placeholder="أدخل كلمة المرور القديمة";pwEntry.focus();pwSave.textContent="تأكيد إلغاء كلمة المرور";pwRemove.style.display="none";msg("أدخل كلمة المرور القديمة في نفس المربع، ثم اضغط تأكيد إلغاء كلمة المرور.");
   };
-  pwBack.onclick=function(){resetPw();msg("تم الرجوع.");};
   if(cfg.passHash && !new URLSearchParams(location.search).has("card")){
     var gate=document.createElement("div");
     gate.id="passwordGate";
