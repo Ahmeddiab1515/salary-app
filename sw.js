@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v35-no-blue-password-transition";
+const CACHE_NAME = "salary-app-v36-matching-startup-background";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
