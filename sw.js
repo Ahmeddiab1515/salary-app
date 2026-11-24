@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v41-expandable-info-clean-deploy";;;;
+const CACHE_NAME = "salary-app-v21-rollback-20261124";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
