@@ -181,48 +181,20 @@ th{white-space:normal!important;line-height:1.3}
 .qn{color:var(--mut);font-size:12px;margin:8px 4px 0;min-height:14px}
 .sprof{align-items:center;gap:14px}.sprof .av{width:60px;height:60px;font-size:26px;border:2px solid var(--pri)}.sprof b{font-size:18px}.sprof small{display:block;color:var(--mut);font-size:12.5px;margin-top:3px;line-height:1.4}
 </style>
-<style id="archive-layout-v15">
-/* تنسيق الأرشيف الفعلي داخل التطبيق */
-#t1 .wrap{overflow:visible!important}
-#t1 .wrap>table{display:block!important;width:100%!important;min-width:0!important;border-collapse:separate!important;border-spacing:0 10px!important;table-layout:fixed!important}
-#t1 .wrap>table>thead{display:none!important}
-#t1 .wrap>table>tbody,#t1 .wrap>table>tfoot{display:block!important;width:100%!important}
-#t1 #arch tr.arch-employee-row{display:grid!important;grid-template-columns:minmax(210px,2fr) repeat(3,minmax(78px,.75fr)) minmax(125px,1.15fr)!important;align-items:stretch!important;margin:0 0 10px!important;background:var(--card)!important;border:1px solid var(--bd)!important;border-radius:16px!important;overflow:hidden!important;box-shadow:var(--sh)!important}
-#t1 #arch tr.arch-employee-row>td{display:flex!important;min-width:0!important;align-items:center!important;justify-content:center!important;padding:13px 8px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;background:transparent!important;text-align:center!important;white-space:normal!important;font-size:13px!important;line-height:1.5!important}
-#t1 #arch tr.arch-employee-row>td.arch-name-cell{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:center!important;gap:10px!important;text-align:start!important;border-inline-start:0!important;padding:13px!important}
-#t1 .arch-person{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}
-#t1 .arch-avatar{width:44px!important;height:44px!important;flex:0 0 44px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;border-radius:13px!important;object-fit:cover!important;background:var(--head)!important;color:var(--pri)!important;font-size:17px!important;font-weight:800!important}
-#t1 .arch-identity{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important;min-width:0!important}
-#t1 .arch-identity .nm{padding:0!important;background:transparent!important;color:var(--tx)!important;border:0!important;font-size:15px!important;font-weight:800!important;text-align:start!important;line-height:1.4!important}
-#t1 .arch-identity small{display:block!important;color:var(--mut)!important;font-size:11px!important;line-height:1.45!important;overflow-wrap:anywhere!important}
-#t1 .arch-row-actions{display:flex!important;flex-wrap:wrap!important;gap:6px!important;margin:0!important;width:100%!important}
-#t1 .arch-row-actions button{flex:1 1 0!important;min-width:0!important;padding:8px 6px!important;border-radius:9px!important;font-size:11px!important;line-height:1.3!important;white-space:normal!important}
-#t1 #arch tr.arch-employee-row>td.arch-value-cell{display:flex!important;flex-direction:column!important;justify-content:center!important;gap:4px!important;font-weight:800!important;font-variant-numeric:tabular-nums!important;overflow-wrap:anywhere!important}
-#t1 .arch-value-cell:before{content:attr(data-label)!important;display:block!important;color:var(--mut)!important;font-size:10px!important;font-weight:500!important;line-height:1.35!important}
-#t1 #arch tr.sub{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;margin:-7px 5px 12px!important;background:var(--head)!important;border:1px solid var(--bd)!important;border-radius:0 0 13px 13px!important;overflow:hidden!important}
-#t1 #arch tr.sub td{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;padding:9px 4px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;text-align:center!important;white-space:normal!important;font-size:12px!important;overflow-wrap:anywhere!important}
-#t1 #arch tr.sub td:first-child{grid-column:1/-1;flex-direction:row!important;justify-content:space-between!important;gap:8px!important;border-bottom:1px solid var(--bd)!important;font-weight:700!important}
-#t1 #arch tr.sub .record-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:0!important}
-#t1 #tot tr{display:grid!important;grid-template-columns:2fr repeat(3,.75fr) 1.15fr!important;background:var(--head)!important;border:1px solid var(--bd)!important;border-radius:12px!important;overflow:hidden!important}
-#t1 #tot td{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;padding:11px 5px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;font-size:12px!important;font-weight:800!important;text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important}
-#t1 #tot td:first-child{justify-content:flex-start!important}
-@media(max-width:600px){
- #t1 #arch tr.arch-employee-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;margin-bottom:12px!important}
- #t1 #arch tr.arch-employee-row>td{padding:11px 8px!important;border-top:1px solid var(--bd)!important;border-inline-start:1px solid var(--bd)!important}
- #t1 #arch tr.arch-employee-row>td.arch-name-cell{grid-column:1/-1!important;border-top:0!important;border-inline:0!important;padding:13px!important}
- #t1 .arch-person{gap:10px!important}
- #t1 .arch-avatar{width:42px!important;height:42px!important;flex-basis:42px!important}
- #t1 .arch-row-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
- #t1 .arch-row-actions button{padding:9px 4px!important;font-size:10px!important}
- #t1 #arch tr.arch-employee-row>td.arch-value-cell{min-height:62px!important;font-size:13px!important}
- #t1 #arch tr.arch-employee-row>td.arch-value-cell:nth-child(odd){border-inline-start:0!important}
- #t1 #arch tr.sub{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:-8px 4px 13px!important}
- #t1 #arch tr.sub td{padding:9px 5px!important;font-size:11px!important}
- #t1 #arch tr.sub td:first-child{grid-column:1/-1!important}
- #t1 #tot tr{grid-template-columns:repeat(2,minmax(0,1fr))!important}
- #t1 #tot td{padding:9px 5px!important;font-size:11px!important}
- #t1 #tot td:first-child{grid-column:1/-1!important;justify-content:center!important}
-}
+<style id="archive-layout-v16">
+#t1 .arch-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px 12px}
+#t1 .arch-heading b{font-size:16px;font-weight:800;color:var(--tx)}#t1 .arch-heading small{font-size:11px;color:var(--mut)}
+#t1 .wrap{overflow:visible!important}#t1 .wrap>table{display:block!important;width:100%!important;min-width:0!important;border-collapse:separate!important;border-spacing:0 10px!important;table-layout:fixed!important}#t1 .wrap>table>thead{display:none!important}#t1 .wrap>table>tbody,#t1 .wrap>table>tfoot{display:block!important;width:100%!important}
+#t1 #arch tr.arch-employee-row{display:grid!important;grid-template-columns:minmax(190px,1.8fr) repeat(4,minmax(82px,.8fr))!important;align-items:stretch!important;margin:0 0 12px!important;background:var(--card)!important;border:1px solid var(--bd)!important;border-radius:16px!important;overflow:hidden!important;box-shadow:var(--sh)!important}
+#t1 #arch tr.arch-employee-row>td{display:flex!important;min-width:0!important;align-items:center!important;justify-content:center!important;padding:13px 7px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;background:transparent!important;text-align:center!important;white-space:normal!important;font-size:13px!important;line-height:1.45!important}
+#t1 #arch tr.arch-employee-row>td.arch-name-cell{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:center!important;gap:11px!important;text-align:start!important;border-inline-start:0!important;padding:13px!important}
+#t1 .arch-person{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}#t1 .arch-avatar{width:44px!important;height:44px!important;flex:0 0 44px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;border-radius:13px!important;object-fit:cover!important;background:var(--head)!important;color:var(--pri)!important;font-size:17px!important;font-weight:800!important}
+#t1 .arch-identity{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important;min-width:0!important}#t1 .arch-identity .nm{padding:0!important;background:transparent!important;color:var(--tx)!important;border:0!important;font-size:15px!important;font-weight:800!important;text-align:start!important;line-height:1.4!important}#t1 .arch-identity small{display:block!important;color:var(--mut)!important;font-size:11px!important;line-height:1.45!important;overflow-wrap:anywhere!important}
+#t1 .arch-row-actions{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin:0!important;width:100%!important}#t1 .arch-row-actions button{flex:1 1 0!important;min-width:0!important;padding:8px 6px!important;border-radius:9px!important;font-size:11px!important;line-height:1.3!important;white-space:normal!important}
+#t1 #arch tr.arch-employee-row>td.arch-value-cell{display:flex!important;flex-direction:column!important;justify-content:center!important;gap:5px!important;font-weight:800!important;font-variant-numeric:tabular-nums!important;overflow-wrap:anywhere!important}#t1 .arch-value-cell:before{content:attr(data-label)!important;display:block!important;color:var(--mut)!important;font-size:10px!important;font-weight:600!important;line-height:1.35!important}
+#t1 #arch tr.sub{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;margin:-8px 5px 13px!important;background:var(--head)!important;border:1px solid var(--bd)!important;border-radius:0 0 13px 13px!important;overflow:hidden!important}#t1 #arch tr.sub td{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;padding:9px 4px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;text-align:center!important;white-space:normal!important;font-size:12px!important;overflow-wrap:anywhere!important}#t1 #arch tr.sub td:first-child{grid-column:1/-1;flex-direction:row!important;justify-content:space-between!important;gap:8px!important;border-bottom:1px solid var(--bd)!important;font-weight:700!important}#t1 #arch tr.sub .record-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:0!important}
+#t1 #tot tr{display:grid!important;grid-template-columns:1.8fr repeat(4,.8fr)!important;background:var(--head)!important;border:1px solid var(--bd)!important;border-radius:12px!important;overflow:hidden!important}#t1 #tot td{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;padding:11px 5px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;font-size:12px!important;font-weight:800!important;text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important}#t1 #tot td:first-child{justify-content:flex-start!important}
+@media(max-width:600px){#t1 #arch tr.arch-employee-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding:8px!important;margin-bottom:13px!important}#t1 #arch tr.arch-employee-row>td{padding:11px 8px!important;border:1px solid var(--bd)!important;border-radius:11px!important;background:var(--head)!important}#t1 #arch tr.arch-employee-row>td.arch-name-cell{grid-column:1/-1!important;border:0!important;border-radius:0!important;background:transparent!important;padding:5px 3px 9px!important}#t1 .arch-person{gap:10px!important}#t1 .arch-avatar{width:43px!important;height:43px!important;flex-basis:43px!important}#t1 .arch-row-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}#t1 .arch-row-actions button{padding:9px 4px!important;font-size:10px!important}#t1 #arch tr.arch-employee-row>td.arch-value-cell{min-height:65px!important;font-size:14px!important}#t1 #arch tr.sub{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:-9px 5px 13px!important}#t1 #arch tr.sub td{padding:9px 5px!important;font-size:11px!important}#t1 #arch tr.sub td:first-child{grid-column:1/-1!important}#t1 #tot tr{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;padding:7px!important}#t1 #tot td{padding:9px 5px!important;border:1px solid var(--bd)!important;border-radius:8px!important;font-size:11px!important}#t1 #tot td:first-child{grid-column:1/-1!important;justify-content:center!important}}
 @media(max-width:350px){#t1 .arch-row-actions button{font-size:9px!important}#t1 #arch tr.arch-employee-row>td{padding:9px 5px!important}}
 </style>
 </head>
@@ -257,7 +229,7 @@ th{white-space:normal!important;line-height:1.3}
     <div class="stat"><small>المتبقي (لم يُستلم)</small><b id="sPend" class="bad">0</b></div>
   </div>
   <div class="card">
-    <div class="arch-tools"><div class="arch-tool-title"><b>إدارة الأرشيف</b><small id="archCount">كل العاملين</small></div><div class="arch-tool-actions"><button type="button" id="archExpand">＋ فتح الكل</button><button type="button" id="archCollapse" class="arch-soft">－ طي الكل</button></div><div class="arch-filters" role="group" aria-label="تصفية الأرشيف"><button type="button" class="on" data-arch-filter="all">الكل</button><button type="button" data-arch-filter="pending">غير مستلم</button><button type="button" data-arch-filter="received">مستلم</button></div></div>
+    <div class="arch-heading"><b>سجل العاملين</b><small id="archCount">عدد العاملين: 0</small></div>
     <div class="sbox"><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="🔍 ابحث (اسم، تاريخ، مبلغ، مستلم…)"><button type="button" id="qc" class="qc">×</button></div><div id="qn" class="qn"></div>
     <div class="row" style="margin-top:10px"><button id="xl" type="button" style="flex:1">📊 حفظ إكسل</button><button id="pd" type="button" style="flex:1">📄 حفظ PDF</button><button id="sh" type="button" style="flex:1">📤 مشاركة</button></div>
     <div id="xmsg"></div>
@@ -293,7 +265,7 @@ th{white-space:normal!important;line-height:1.3}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-var KEY="salary_preview_v1",S={emps:[],rows:[],co:"GCC"},recv="لا",openG={},archiveFilter="all";
+var KEY="salary_preview_v1",S={emps:[],rows:[],co:"GCC"},recv="لا",openG={};
 function $(i){return document.getElementById(i)}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.rows)S=d}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -348,10 +320,9 @@ function matchG(g,q){
   return q.split(" ").every(function(t){return !t||hay.indexOf(t)>-1});
 }
 function renderArch(){
-  var q=nk($("q").value),all=grp(),matched=all.filter(function(g){return matchG(g,q)}),gs=matched.filter(function(g){return archiveFilter==="all"||(archiveFilter==="pending"&&g.pend>0)||(archiveFilter==="received"&&g.pend===0)}),T=sums(gs),tb=$("arch");
+  var q=nk($("q").value),all=grp(),gs=all.filter(function(g){return matchG(g,q)}),T=sums(gs),tb=$("arch");
   $("qn").textContent=q?"النتائج: "+gs.length+" من "+all.length:"";$("qc").style.display=$("q").value?"block":"none";
   $("archCount").textContent="عدد العاملين: "+gs.length+" من "+all.length;
-  document.querySelectorAll("#t1 [data-arch-filter]").forEach(function(b){b.classList.toggle("on",b.dataset.archFilter===archiveFilter)});
   var sp=$("sprof");
   if(q&&gs.length===1){var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");sp.innerHTML="";av.className="av";if(ph){av.src=ph;av.alt=""}else av.textContent=g1.name.charAt(0);bb.textContent=g1.name;s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex"}else sp.style.display="none";
   tb.innerHTML="";
@@ -488,9 +459,6 @@ function setRecv(v){recv=v;$("yes").className="yes"+(v==="نعم"?" on":"");$("n
 $("yes").onclick=function(){setRecv("نعم")};$("no").onclick=function(){setRecv("لا")};
 ["sal","adv","abs","rate"].forEach(function(i){$(i).onchange=calc});
 $("q").oninput=renderArch;
-$("archExpand").onclick=function(){grp().forEach(function(g){openG[g.key]=true});renderArch()};
-$("archCollapse").onclick=function(){openG={};renderArch()};
-document.querySelectorAll("#t1 [data-arch-filter]").forEach(function(b){b.onclick=function(){archiveFilter=b.dataset.archFilter;renderArch()}});
 
 $("co").oninput=function(){S.co=$("co").value;save();$("coTag").textContent=S.co};
 $("addEmp").onclick=function(){
