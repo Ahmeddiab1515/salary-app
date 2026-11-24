@@ -943,7 +943,7 @@ var settings=document.getElementById("t3");
 if(settings)settings.appendChild(card);
 function status(t,bad){var el=document.getElementById("backupMsg");if(el){el.textContent=t;el.style.color=bad?"#b42318":""}}
 function readAsDataURL(blob){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onload=function(){resolve(fr.result)};fr.onerror=function(){reject(fr.error)};fr.readAsDataURL(blob)})}
-function openBackupDb(){return new Promise(function(resolve,reject){var q=indexedDB.open("salary_worker_pdf_v1",1);q.onsuccess=function(){resolve(q.result)};q.onerror=function(){reject(q.error)}})}
+function openBackupDb(){return new Promise(function(resolve,reject){var q=indexedDB.open("salary_worker_pdf_v1",1);q.onupgradeneeded=function(){if(!q.result.objectStoreNames.contains("pdfs"))q.result.createObjectStore("pdfs",{keyPath:"id",autoIncrement:true})};q.onsuccess=function(){resolve(q.result)};q.onerror=function(){reject(q.error)}})}
 function allPdfRecords(){return openBackupDb().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction("pdfs","readonly"),q=tx.objectStore("pdfs").getAll();q.onsuccess=function(){db.close();resolve(q.result||[])};q.onerror=function(){db.close();reject(q.error)}})})}
 function backupPdfRecords(){return allPdfRecords().then(function(items){return Promise.all(items.map(function(x){var copy={};Object.keys(x).forEach(function(k){if(k!=="blob")copy[k]=x[k]});return readAsDataURL(x.blob).then(function(data){copy.blobData=data;return copy})}))})}
 function saveBackupFile(blob,name){
@@ -965,11 +965,12 @@ document.getElementById("makeBackup").onclick=function(){
 var picker=document.getElementById("backupFile");
 document.getElementById("restoreBackup").onclick=function(){picker.click()};
 function restorePdfs(items){
- return openBackupDb().then(function(db){return new Promise(function(resolve,reject){
-  var tx=db.transaction("pdfs","readwrite"),store=tx.objectStore("pdfs");store.clear();
-  Promise.all((items||[]).map(function(x){var copy={};Object.keys(x).forEach(function(k){if(k!=="blobData")copy[k]=x[k]});if(x.blobData){return fetch(x.blobData).then(function(res){return res.blob()}).then(function(blob){copy.blob=blob;store.put(copy)})}return Promise.resolve()})).catch(function(err){try{tx.abort()}catch(e){}reject(err)});
-  tx.oncomplete=function(){db.close();resolve()};tx.onerror=function(){db.close();reject(tx.error)};tx.onabort=function(){db.close();reject(tx.error||new Error("تعذرت استعادة كشوف PDF"))};
- })});
+ return Promise.all((items||[]).map(function(x){var copy={};Object.keys(x).forEach(function(k){if(k!=="blobData")copy[k]=x[k]});if(x.blobData)return fetch(x.blobData).then(function(res){return res.blob()}).then(function(blob){copy.blob=blob;return copy});return Promise.resolve(copy)})).then(function(records){
+  return openBackupDb().then(function(db){return new Promise(function(resolve,reject){
+   var tx=db.transaction("pdfs","readwrite"),store=tx.objectStore("pdfs");store.clear();records.forEach(function(item){store.put(item)});
+   tx.oncomplete=function(){db.close();resolve()};tx.onerror=function(){db.close();reject(tx.error)};tx.onabort=function(){db.close();reject(tx.error||new Error("تعذرت استعادة كشوف PDF"))};
+  })});
+ });
 }
 picker.onchange=function(){
  var file=picker.files&&picker.files[0];if(!file)return;
