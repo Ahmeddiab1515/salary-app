@@ -778,31 +778,42 @@ window.previewXlsx=function(){
   var cfg = S.cfg = S.cfg || {};
   var card = document.createElement("div");
   card.className = "card";
-  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label for="pwCurrent">كلمة المرور الحالية</label><input id="pwCurrent" type="password" autocomplete="current-password" placeholder="اكتب كلمة المرور الحالية"><label for="pwNew">كلمة المرور الجديدة</label><input id="pwNew" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل"><label for="pwConfirm">تأكيد كلمة المرور الجديدة</label><input id="pwConfirm" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ / تغيير كلمة المرور</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button></div><p id="pwMsg" class="note" role="status"></p>';
+  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label id="pwLabel" for="pwEntry">كلمة المرور</label><input id="pwEntry" type="password" autocomplete="new-password" placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button><button type="button" class="x" id="pwBack" style="display:none">رجوع</button></div><p id="pwMsg" class="note" role="status"></p>';
   var settings = document.getElementById("t3");
   if(settings) settings.appendChild(card);
+  var pwStage="new";
+  var pwFirst="";
+  var pwEntry=document.getElementById("pwEntry"),pwSave=document.getElementById("pwSave"),pwRemove=document.getElementById("pwRemove"),pwBack=document.getElementById("pwBack"),pwLabel=document.getElementById("pwLabel");
   function msg(t){document.getElementById("pwMsg").textContent=t;}
   function bytesToHex(a){return Array.from(new Uint8Array(a)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");}
   function hexToBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a;}
   function derive(p,s){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:s,iterations:180000,hash:"SHA-256"},k,256)});}
   function check(p){if(!cfg.passHash)return Promise.resolve(true);return derive(p,hexToBytes(cfg.passSalt)).then(function(h){return bytesToHex(h)===cfg.passHash;});}
-  document.getElementById("pwSave").onclick=function(){
-    var old=document.getElementById("pwCurrent").value, n=document.getElementById("pwNew").value, confirm=document.getElementById("pwConfirm").value;
-    if(n.length<6){msg("كلمة المرور لازم تكون ٦ أحرف على الأقل.");return;}
-    if(n!==confirm){msg("تأكيد كلمة المرور غير مطابق.");return;}
-    check(old).then(function(ok){
-      if(!ok){msg("كلمة المرور الحالية غير صحيحة.");return;}
+  function resetPw(){pwStage="new";pwFirst="";pwLabel.textContent="كلمة المرور";pwEntry.type="password";pwEntry.autocomplete="new-password";pwEntry.placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل";pwEntry.value="";pwSave.textContent="حفظ";pwSave.style.display="";pwRemove.textContent="إلغاء كلمة المرور";pwRemove.style.display="";pwBack.style.display="none";}
+  pwSave.onclick=function(){
+    var v=pwEntry.value;
+    if(pwStage==="new"){
+      if(v.length<6){msg("كلمة المرور لازم تكون ٦ أحرف على الأقل.");return;}
+      pwFirst=v;pwStage="confirm";pwLabel.textContent="تأكيد كلمة المرور";pwEntry.value="";pwEntry.placeholder="اكتب كلمة المرور مرة ثانية للتأكيد";pwEntry.focus();pwSave.textContent="حفظ التأكيد";msg("اكتب كلمة المرور مرة ثانية في نفس المربع، ثم اضغط حفظ التأكيد.");return;
+    }
+    if(pwStage==="confirm"){
+      if(v!==pwFirst){pwEntry.value="";pwEntry.focus();msg("كلمة المرور غير متطابقة. حاول التأكيد مرة ثانية.");return;}
       var salt=crypto.getRandomValues(new Uint8Array(16));
-      derive(n,salt).then(function(h){cfg.passSalt=bytesToHex(salt);cfg.passHash=bytesToHex(h);save();document.getElementById("pwCurrent").value="";document.getElementById("pwNew").value="";document.getElementById("pwConfirm").value="";msg("تم حفظ كلمة المرور. ستُطلب عند فتح التطبيق مرة أخرى.");});
-    }).catch(function(){msg("تعذر إعداد الحماية على هذا المتصفح.");});
+      derive(v,salt).then(function(h){cfg.passSalt=bytesToHex(salt);cfg.passHash=bytesToHex(h);save();resetPw();msg("تم تأكيد كلمة المرور وحفظها بنجاح.");}).catch(function(){msg("تعذر إعداد الحماية على هذا المتصفح.");});
+      return;
+    }
+    if(pwStage==="remove"){
+      check(v).then(function(ok){
+        if(!ok){pwEntry.value="";pwEntry.focus();msg("كلمة المرور القديمة غير صحيحة.");return;}
+        delete cfg.passHash;delete cfg.passSalt;save();resetPw();msg("تم إلغاء كلمة المرور بنجاح.");
+      }).catch(function(){msg("تعذر إلغاء الحماية.");});
+    }
   };
-  document.getElementById("pwRemove").onclick=function(){
+  pwRemove.onclick=function(){
     if(!cfg.passHash){msg("الحماية غير مفعّلة حاليًا.");return;}
-    check(document.getElementById("pwCurrent").value).then(function(ok){
-      if(!ok){msg("كلمة المرور الحالية غير صحيحة.");return;}
-      delete cfg.passHash;delete cfg.passSalt;save();document.getElementById("pwCurrent").value="";document.getElementById("pwNew").value="";document.getElementById("pwConfirm").value="";msg("تم إلغاء كلمة المرور.");
-    }).catch(function(){msg("تعذر إلغاء الحماية.");});
+    pwStage="remove";pwLabel.textContent="كلمة المرور القديمة";pwEntry.value="";pwEntry.autocomplete="current-password";pwEntry.placeholder="أدخل كلمة المرور القديمة";pwEntry.focus();pwSave.textContent="تأكيد إلغاء كلمة المرور";pwRemove.style.display="none";pwBack.style.display="";msg("أدخل كلمة المرور القديمة في نفس المربع، ثم اضغط تأكيد إلغاء كلمة المرور.");
   };
+  pwBack.onclick=function(){resetPw();msg("تم الرجوع.");};
   if(cfg.passHash && !new URLSearchParams(location.search).has("card")){
     var gate=document.createElement("div");
     gate.id="passwordGate";
