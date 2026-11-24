@@ -349,11 +349,19 @@ function renderEmps(){
 }
 function renderAll(){empOpts();renderArch();renderEmps();$("coTag").textContent=S.co||""}
 function saveFile(name,data){
-  if(!window.claude){say("xmsg","الحفظ غير متاح هنا","bad");return}
-  window.claude.use("downloads").then(function(d){
-    if(!d){say("xmsg","الحفظ غير متاح هنا","bad");return}
-    return d.save({filename:name,data:data}).then(function(){say("xmsg","تم الحفظ ✓","ok")});
-  }).catch(function(e){say("xmsg",e&&e.code==="declined"?"تم الإلغاء":"تعذر الحفظ","bad")});
+  if(window.claude){
+    window.claude.use("downloads").then(function(d){
+      if(!d){say("xmsg","الحفظ غير متاح هنا؛ استخدم مشاركة الملف ثم اختر حفظ في الملفات","bad");return}
+      return d.save({filename:name,data:data}).then(function(){say("xmsg","تم حفظ الملف ✓","ok")});
+    }).catch(function(e){say("xmsg",e&&e.code==="declined"?"تم الإلغاء":"تعذر الحفظ","bad")});
+    return;
+  }
+  try{
+    var blob=data instanceof Blob?data:new Blob([data],{type:/\\.pdf$/i.test(name)?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url)},1500);
+    say("xmsg","تم تجهيز الملف؛ ستجده في التنزيلات، ويمكنك نقله إلى مجلد الرواتب","ok");
+  }catch(e){say("xmsg","تعذر تنزيل الملف؛ استخدم مشاركة الملف","bad")}
 }
 function fgrp(){var q=nk($("q").value);return grp().filter(function(g){return matchG(g,q)})}
 function frows(gs){var k={};gs.forEach(function(g){k[g.key]=1});return S.rows.filter(function(r){return k[nk(r.name)]})}
@@ -438,7 +446,7 @@ renderAll();calc();
 (function(){
 S.cfg=S.cfg||{lang:"ar"};S.photos=S.photos||{};
 var EN={"كشف الرواتب":"Payroll","الكشف":"Statement","الأرشيف":"Archive","الموظفين":"Employees","الإعدادات":"Settings","اسم العامل":"Worker name","التاريخ":"Date","الراتب الأساسي (درهم)":"Base salary (AED)","السلف (درهم)":"Advance (AED)","تاريخ السلفة":"Advance date","الغياب (أيام)":"Absence (days)","استلمت الراتب؟":"Salary received?","نعم":"Yes","لا":"No","المجموع بعد خصم السلف والغياب":"Total after advance & absence deductions","📥 حفظ في الأرشيف":"📥 Save to archive","عدد القيود":"Entries","إجمالي الراتب الأساسي":"Total base salary","مجموع السلف":"Total advances","مجموع الراتب بعد الخصم":"Total net salary","تم استلامه":"Received","المتبقي (لم يُستلم)":"Remaining (not received)","📊 حفظ إكسل":"📊 Save Excel","📄 حفظ PDF":"📄 Save PDF","العامل":"Worker","الراتب الأساسي":"Base salary","السلف":"Advance","الغياب":"Absence","المجموع بعد الخصم":"Net total","الحالة":"Status","الإجمالي":"Total","لا توجد قيود":"No entries","قيد":"Entry","تم الاستلام":"Received","لم يُستلم":"Not received","حذف":"Delete","إضافة موظف جديد":"Add new employee","إضافة":"Add","لا يوجد موظفين، أضف أول موظف":"No employees yet, add the first one","اسم الشركة":"Company name","البيانات بتتحفظ في المتصفح اللي بتستخدمه.":"Data is saved in the browser you use.","— اختار —":"— Select —","— بدون سلف —":"— No advance —","— بدون غياب —":"— No absence —","اكتب اسم العامل أو اختاره":"Type or pick a worker name","🔍 ابحث باسم العامل":"🔍 Search by worker name","اكتب اسم الموظف":"Enter employee name","اكتب اسم العامل":"Enter the worker name","اختار الراتب الأساسي":"Select the base salary","الأرشيف امتلأ":"Archive is full","تم الحفظ في الأرشيف ✓":"Saved to archive ✓","الموظف موجود بالفعل":"Employee already exists","تمت إضافة الموظف ✓":"Employee added ✓","الأرشيف فاضي":"Archive is empty","تم الحفظ ✓":"Saved ✓","تم الإلغاء":"Cancelled","تعذر الحفظ":"Could not save","الحفظ غير متاح هنا":"Saving is not available here","اللغة":"Language","شعار التطبيق":"App logo","رفع شعار":"Upload logo","إعادة ضبط":"Reset","ألوان التطبيق":"App colors","اللون الأساسي":"Primary color","لون الهامش (الخلفية)":"Margin (background) color","الخط":"Font","النظام":"System","📷 صورة":"📷 Photo","الشعار بيظهر جوه التطبيق، وأيقونة الشاشة الرئيسية بتتغير من إعدادات الجهاز.":"The logo shows inside the app. The home-screen icon is set by your device.","صورة العامل بتتحفظ في المتصفح، وبتظهر في تبويب الموظفين والأرشيف.":"Worker photos are saved in the browser and show in Employees and Archive."};
-EN["📤 مشاركة"]="📤 Share";EN["مشاركة الأرشيف"]="Share archive";EN["📊 مشاركة ملف الإكسل"]="📊 Share Excel file";EN["📄 مشاركة ملف PDF"]="📄 Share PDF file";EN["💬 مشاركة ملخص نصي (واتساب / ماسنجر)"]="💬 Share text summary (WhatsApp / Messenger)";EN["إلغاء"]="Cancel";EN["تمت المشاركة ✓"]="Shared ✓";EN["المشاركة المباشرة غير متاحة هنا، هنحفظ الملف وتقدر تشاركه من قايمة المشاركة في جهازك"]="Direct sharing is not available here. The file will be saved and you can share it from your device's share menu.";EN["تم نسخ الملخص، الصقه في المحادثة"]="Summary copied, paste it into the chat";
+EN["📤 مشاركة"]="📤 Share";EN["مشاركة الأرشيف"]="Share archive";EN["📊 حفظ ملف الإكسل أو مشاركته"]="📊 Share Excel file";EN["📄 حفظ ملف PDF أو مشاركته"]="📄 Share PDF file";EN["💬 مشاركة ملخص نصي (واتساب / ماسنجر)"]="💬 Share text summary (WhatsApp / Messenger)";EN["إلغاء"]="Cancel";EN["تمت المشاركة ✓"]="Shared ✓";EN["افتح الملف من التنزيلات وانقله إلى مجلد الرواتب في تطبيق الملفات"]="Direct sharing is not available here. The file will be saved and you can share it from your device's share menu.";EN["تم نسخ الملخص، الصقه في المحادثة"]="Summary copied, paste it into the chat";
 EN["خصم اليوم (درهم)"]="Daily deduction (AED)";EN["— افتراضي (الراتب ÷ 30) —"]="— Default (salary ÷ 30) —";
 EN["نص يوم"]="Half a day";EN["يوم"]="One day";
 EN["الآلة الحاسبة"]="Calculator";EN["خطأ"]="Error";
@@ -583,7 +591,7 @@ window.outFile=function(name,data){
   try{
     var file=new File([data],name,{type:mime});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:name}).then(function(){say("xmsg","تمت المشاركة ✓","ok")}).catch(function(e){if(e&&e.name==="AbortError")say("xmsg","تم الإلغاء");else viaSave()});
+      navigator.share({files:[file],title:name}).then(function(){say("xmsg","لو عايز تحفظه في مجلد الرواتب، اختار «حفظ في الملفات» ثم اختار المجلد","ok")}).catch(function(e){if(e&&e.name==="AbortError")say("xmsg","تم الإلغاء");else viaSave()});
     }else viaSave();
   }catch(e){viaSave()}
 };
