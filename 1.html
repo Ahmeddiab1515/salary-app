@@ -990,7 +990,7 @@ document.getElementById("makeBackup").onclick=function(){
  }).catch(function(e){status("تعذر إنشاء النسخة الاحتياطية: "+(e&&e.message||"خطأ غير معروف"),true)}).finally(function(){btn.disabled=false});
 };
 var picker=document.getElementById("backupFile");
-document.getElementById("restoreBackup").onclick=function(){picker.click()};
+document.getElementById("restoreBackup").onclick=function(){picker.value="";picker.click()};
 function restorePdfs(items){
  return Promise.all((items||[]).map(function(x){var copy={};Object.keys(x).forEach(function(k){if(k!=="blobData")copy[k]=x[k]});if(x.blobData)return fetch(x.blobData).then(function(res){return res.blob()}).then(function(blob){copy.blob=blob;return copy});return Promise.resolve(copy)})).then(function(records){
   return openBackupDb().then(function(db){return new Promise(function(resolve,reject){
@@ -1004,6 +1004,7 @@ picker.onchange=function(){
  status("جاري فحص ملف النسخة الاحتياطية…");
  var reader=new FileReader();
  reader.onload=function(){
+  picker.value="";
   var payload;try{payload=JSON.parse(reader.result)}catch(e){status("الملف غير صالح أو تالف.",true);return}
   if(!payload||payload.app!=="salary-app"||payload.backupVersion!==1||!payload.state||!Array.isArray(payload.state.emps)||!Array.isArray(payload.state.rows)||!Array.isArray(payload.pdfs)){status("هذا الملف ليس نسخة احتياطية صالحة من التطبيق.",true);return}
   if(!confirm("استعادة النسخة ستستبدل بيانات الرواتب والأرشيف الحالية على هذا الجهاز. هل تريد المتابعة؟")){status("تم إلغاء الاستعادة.");picker.value="";return}
@@ -1012,8 +1013,8 @@ picker.onchange=function(){
   S=next;
   restorePdfs(payload.pdfs).then(function(){if(typeof renderAll==="function")renderAll();if(typeof apply==="function")apply();status("تمت استعادة النسخة الاحتياطية بنجاح ✓");}).catch(function(e){status("تمت استعادة بيانات الرواتب، لكن تعذرت استعادة بعض كشوف PDF: "+(e&&e.message||""),true)});
  };
- reader.onerror=function(){status("تعذر قراءة الملف.",true)};
- reader.readAsText(file);picker.value="";
+ reader.onerror=function(){picker.value="";status("تعذر قراءة الملف. جرّب اختيار الملف من تطبيق «الملفات» مباشرة.",true)};
+ try{reader.readAsText(file,"UTF-8")}catch(e){picker.value="";status("تعذر فتح ملف النسخة الاحتياطية: "+(e&&e.message||"خطأ في القراءة"),true)}
 };
 })();
 </script>
