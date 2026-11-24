@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v3";
+const CACHE_NAME = "salary-app-v4";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
