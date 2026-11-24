@@ -938,7 +938,7 @@ if(wid){var worker=getWorker(wid);if(worker){var tryOpen=function(){var gate=doc
 var card=document.createElement("div");
 card.className="card";
 card.id="backupCard";
-card.innerHTML='<h2>النسخ الاحتياطي والاستعادة</h2><p class="note">احفظ نسخة كاملة من بيانات العمال والرواتب والأرشيف وكشوف PDF. بعد إنشاء الملف، اختر Google Drive أو «حفظ في الملفات» من قائمة المشاركة.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" id="makeBackup">إنشاء نسخة احتياطية</button><button type="button" class="x" id="restoreBackup">استعادة نسخة</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p id="backupMsg" class="note" role="status">النسخة الاحتياطية تُحفظ في المكان الذي تختاره، ولا تُرسل تلقائيًا إلى أي حساب.</p>';
+card.innerHTML='<h2>النسخ الاحتياطي اليدوي على Google Drive</h2><p class="note">لإنشاء نسخة، اضغط الزر واختر Google Drive من قائمة المشاركة. وللاستعادة، نزّل النسخة من Google Drive إلى «الملفات» ثم اخترها هنا. لا يتم رفع أو تنزيل أي ملف دون اختيارك.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" id="makeBackup">حفظ نسخة على Google Drive</button><button type="button" class="x" id="restoreBackup">استعادة نسخة من Drive أو الملفات</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p id="backupMsg" class="note" role="status">النسخ اليدوي: اختر Google Drive بعد فتح قائمة المشاركة، أو اختر «حفظ في الملفات».</p>';
 var settings=document.getElementById("t3");
 if(settings)settings.appendChild(card);
 function status(t,bad){var el=document.getElementById("backupMsg");if(el){el.textContent=t;el.style.color=bad?"#b42318":""}}
@@ -949,10 +949,10 @@ function backupPdfRecords(){return allPdfRecords().then(function(items){return P
 function saveBackupFile(blob,name){
  var file=new File([blob],name,{type:"application/json"});
  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-  navigator.share({files:[file],title:"نسخة احتياطية من كشف الرواتب",text:"اختر Google Drive أو حفظ في الملفات."}).then(function(){status("تم فتح قائمة المشاركة. اختر Google Drive أو «حفظ في الملفات» لإكمال الحفظ.")}).catch(function(e){if(e&&e.name==="AbortError"){status("تم إلغاء المشاركة.");return}downloadBackup(blob,name)});
+  navigator.share({files:[file],title:"نسخة احتياطية من كشف الرواتب",text:"اختر Google Drive أو حفظ في الملفات."}).then(function(){status("تم فتح قائمة المشاركة. اختر Google Drive لحفظ النسخة، أو «حفظ في الملفات».")}).catch(function(e){if(e&&e.name==="AbortError"){status("تم إلغاء المشاركة.");return}downloadBackup(blob,name)});
  }else downloadBackup(blob,name);
 }
-function downloadBackup(blob,name){var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000);status("تم تجهيز ملف النسخة الاحتياطية. افتح «الملفات» ثم «التنزيلات»، أو شاركه إلى Google Drive.");}
+function downloadBackup(blob,name){var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000);status("تم تجهيز ملف النسخة الاحتياطية. اختر Google Drive من قائمة المشاركة، أو احفظه في «الملفات».");}
 document.getElementById("makeBackup").onclick=function(){
  var btn=this;btn.disabled=true;status("جاري تجهيز بيانات التطبيق وكشوف PDF…");
  Promise.all([Promise.resolve(JSON.parse(JSON.stringify(S))),backupPdfRecords()]).then(function(parts){
