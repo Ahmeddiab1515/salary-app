@@ -349,19 +349,32 @@ function renderEmps(){
 }
 function renderAll(){empOpts();renderArch();renderEmps();$("coTag").textContent=S.co||""}
 function saveFile(name,data){
-  if(window.claude){
-    window.claude.use("downloads").then(function(d){
-      if(!d){say("xmsg","الحفظ غير متاح هنا؛ استخدم مشاركة الملف ثم اختر حفظ في الملفات","bad");return}
-      return d.save({filename:name,data:data}).then(function(){say("xmsg","تم حفظ الملف ✓","ok")});
-    }).catch(function(e){say("xmsg",e&&e.code==="declined"?"تم الإلغاء":"تعذر الحفظ","bad")});
+  function browserDownload(){
+    try{
+      var isPdf=/\\.pdf$/i.test(name);
+      var mime=isPdf?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+      var blob=data instanceof Blob?data:new Blob([data],{type:mime});
+      var url=URL.createObjectURL(blob),a=document.createElement("a");
+      a.href=url;a.download=name;a.style.display="none";
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(function(){URL.revokeObjectURL(url)},30000);
+      say("xmsg","تم تجهيز الملف للتنزيل. افتح «الملفات» ثم «التنزيلات»، وانقله إلى مجلد «الرواتب» إذا أردت.","ok");
+    }catch(e){
+      say("xmsg","تعذر تنزيل الملف من المتصفح. جرّب زر «مشاركة الأرشيف» ثم «حفظ في الملفات».","bad");
+    }
+  }
+  if(window.claude&&typeof window.claude.use==="function"){
+    try{
+      window.claude.use("downloads").then(function(d){
+        if(!d||typeof d.save!=="function"){browserDownload();return}
+        return d.save({filename:name,data:data}).then(function(){
+          say("xmsg","تم حفظ الملف ✓","ok");
+        }).catch(browserDownload);
+      }).catch(browserDownload);
+    }catch(e){browserDownload()}
     return;
   }
-  try{
-    var blob=data instanceof Blob?data:new Blob([data],{type:/\\.pdf$/i.test(name)?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-    var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url)},1500);
-    say("xmsg","تم تجهيز الملف؛ ستجده في التنزيلات، ويمكنك نقله إلى مجلد الرواتب","ok");
-  }catch(e){say("xmsg","تعذر تنزيل الملف؛ استخدم مشاركة الملف","bad")}
+  browserDownload();
 }
 function fgrp(){var q=nk($("q").value);return grp().filter(function(g){return matchG(g,q)})}
 function frows(gs){var k={};gs.forEach(function(g){k[g.key]=1});return S.rows.filter(function(r){return k[nk(r.name)]})}
