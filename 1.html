@@ -1045,5 +1045,45 @@ else setTimeout(offerRestore,800);
 })();
 </script>
 
+
+<script>
+(function(){
+  "use strict";
+  try { if(new URLSearchParams(location.search).has("card")) return; } catch(e) {}
+  function launchSplash(){
+    if(document.getElementById("salarySplashV21")) return;
+    var root=document.createElement("div");
+    root.id="salarySplashV21";
+    root.setAttribute("role","status");
+    root.setAttribute("aria-label","شاشة افتتاح تطبيق كشف الرواتب");
+    root.innerHTML='<style>'+
+      '#salarySplashV21{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;direction:rtl;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at 50% 42%,#176b50 0%,#064e3b 48%,#022c22 100%);color:#ecfdf5;opacity:1;transition:opacity .55s ease}'+
+      '#salarySplashV21 .splash-inner{width:min(100%,360px);text-align:center}'+
+      '#salarySplashV21 .splash-logo{width:118px;height:118px;margin:0 auto 24px;display:grid;place-items:center;position:relative;border:1px solid #a7f3d066;border-radius:34px;background:linear-gradient(145deg,#ffffff18,#022c2222);box-shadow:0 18px 55px #0004,inset 0 1px #ffffff30;animation:salaryLogoFloat 2.4s ease-in-out infinite;cursor:pointer}'+
+      '#salarySplashV21 .splash-logo:before,#salarySplashV21 .splash-logo:after{content:"";position:absolute;inset:-9px;border:1px solid #6ee7b755;border-radius:40px;animation:salaryLogoRing 5s linear infinite}'+
+      '#salarySplashV21 .splash-logo:after{inset:-17px;border-color:#a7f3d033;animation-direction:reverse;animation-duration:8s}'+
+      '#salarySplashV21 svg{width:72px;height:72px;filter:drop-shadow(0 0 13px #34d39988)}'+
+      '#salarySplashV21 h1{margin:0;color:#f0fdf4;font-size:27px;font-weight:800;letter-spacing:.2px}'+
+      '#salarySplashV21 .splash-sub{margin:10px 0 0;color:#bbf7d0;font-size:14px;letter-spacing:.3px}'+
+      '#salarySplashV21 .splash-loading{display:flex;justify-content:center;gap:7px;margin-top:34px}'+
+      '#salarySplashV21 .splash-loading i{width:6px;height:6px;border-radius:50%;background:#a7f3d0;animation:salaryDot 1s ease-in-out infinite}'+
+      '#salarySplashV21 .splash-loading i:nth-child(2){animation-delay:.15s}#salarySplashV21 .splash-loading i:nth-child(3){animation-delay:.3s}'+
+      '@keyframes salaryLogoFloat{0%,100%{transform:translateY(0);box-shadow:0 18px 55px #0004,inset 0 1px #ffffff30}50%{transform:translateY(-7px);box-shadow:0 24px 65px #0005,0 0 28px #34d39922,inset 0 1px #ffffff40}}'+
+      '@keyframes salaryLogoRing{to{transform:rotate(360deg)}}@keyframes salaryDot{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-5px)}}'+
+      '@media(prefers-reduced-motion:reduce){#salarySplashV21 *,#salarySplashV21 *:before,#salarySplashV21 *:after{animation:none!important;transition:none!important}}'+
+      '</style><div class="splash-inner"><button type="button" class="splash-logo" aria-label="تفاعل مع شعار التطبيق"><svg viewBox="0 0 80 80" fill="none" aria-hidden="true"><path d="M24 36V27a16 16 0 0 1 32 0v9" stroke="#a7f3d0" stroke-width="6" stroke-linecap="round"/><rect x="15" y="34" width="50" height="37" rx="10" fill="#059669" stroke="#d1fae5" stroke-width="2.5"/><path d="M40 44a6 6 0 0 0-3.3 10.9V62h6.6v-7.1A6 6 0 0 0 40 44Z" fill="#ecfdf5"/><path d="M23 40h34" stroke="#ecfdf5" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/></svg></button><h1>كشف الرواتب</h1><p class="splash-sub">إدارة الرواتب والسلف بسهولة</p><div class="splash-loading" aria-hidden="true"><i></i><i></i><i></i></div></div>';
+    document.body.appendChild(root);
+    var logo=root.querySelector(".splash-logo");
+    if(logo) logo.addEventListener("click",function(){logo.animate([{transform:"scale(1)"},{transform:"scale(1.09)"},{transform:"scale(1)"}],{duration:520,easing:"ease-out"});});
+    window.setTimeout(function(){
+      root.style.opacity="0";
+      window.setTimeout(function(){if(root.parentNode)root.parentNode.removeChild(root);},580);
+    },2400);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",launchSplash,{once:true});
+  else launchSplash();
+})();
+</script>
+
 </body>
 </html>
