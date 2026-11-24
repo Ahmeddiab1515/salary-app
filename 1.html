@@ -121,15 +121,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 #splash .sp-ico{font-size:88px;animation:sp-pop .6s ease}
 #splash .sp-t{font-size:24px;font-weight:bold}
 @keyframes sp-pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-#splash{overflow:hidden;isolation:isolate}
-#splash:before,#splash:after{content:"";position:absolute;width:190px;height:190px;border:1px solid rgba(255,255,255,.28);border-radius:50%;pointer-events:none;animation:sp-orbit 9s linear infinite}
-#splash:after{width:230px;height:230px;border-style:dashed;opacity:.45;animation-direction:reverse;animation-duration:14s}
-#splash img{position:relative;z-index:1;cursor:pointer;touch-action:manipulation;animation:sp-pop .7s ease,sp-float 2.8s ease-in-out .7s infinite;transition:filter .25s,transform .25s}
-#splash img.sp-tap{filter:brightness(1.22) drop-shadow(0 0 22px rgba(167,243,208,.9));transform:scale(1.12) rotate(3deg)}
-#splash .sp-t{position:relative;z-index:1;text-shadow:0 2px 14px rgba(0,0,0,.2)}
-@keyframes sp-orbit{to{transform:rotate(360deg)}}
-@keyframes sp-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.035)}}
-@media(prefers-reduced-motion:reduce){#splash:before,#splash:after,#splash img{animation:none!important}}
+#splash{overflow:hidden;isolation:isolate;gap:15px;background:radial-gradient(ellipse at 50% 42%,rgba(45,212,191,.28),transparent 38%),linear-gradient(145deg,#064e3b,#0f766e 58%,#042f2e)}
+#splash:before,#splash:after{content:"";position:absolute;left:50%;top:calc(50% - 32px);width:190px;height:190px;border:1px solid rgba(167,243,208,.52);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);animation:sp-orbit 8s linear infinite}
+#splash:after{width:236px;height:236px;border:1px dashed rgba(204,251,241,.5);animation-direction:reverse;animation-duration:13s}
+#splash img{position:relative;z-index:2;width:142px;height:142px;border:3px solid rgba(236,253,245,.9);border-radius:36px;cursor:pointer;touch-action:manipulation;box-shadow:0 0 0 9px rgba(255,255,255,.07),0 16px 42px rgba(0,0,0,.34),0 0 36px rgba(94,234,212,.55);animation:sp-pop .75s cubic-bezier(.2,.85,.25,1.2),sp-float 3s ease-in-out .75s infinite;transition:filter .25s,transform .25s,box-shadow .25s}
+#splash img:active{transform:scale(.94)}
+#splash img.sp-tap{filter:brightness(1.3) saturate(1.2) drop-shadow(0 0 25px #a7f3d0);transform:scale(1.12) rotate(-3deg);box-shadow:0 0 0 14px rgba(255,255,255,.13),0 0 55px rgba(167,243,208,.9)}
+#splash .sp-brand{position:relative;z-index:2;text-align:center;color:#fff;animation:sp-rise .8s ease .15s both}
+#splash .sp-brand strong{display:block;font-size:27px;letter-spacing:.5px;text-shadow:0 3px 18px rgba(0,0,0,.22)}
+#splash .sp-brand small{display:block;margin-top:5px;font-size:13px;letter-spacing:1.5px;color:rgba(236,253,245,.85)}
+#splash .sp-hint{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom,0px));z-index:2;color:rgba(236,253,245,.82);font-size:12px;animation:sp-hint 1.8s ease-in-out infinite}
+@keyframes sp-orbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes sp-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-9px) scale(1.035)}}
+@keyframes sp-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sp-hint{0%,100%{opacity:.5}50%{opacity:1}}
+#splash.sp-burst:before{animation-duration:1.2s;border-width:2px}
+#splash.sp-burst:after{animation-duration:1.8s;opacity:1}
+@media(prefers-reduced-motion:reduce){#splash:before,#splash:after,#splash img,#splash .sp-brand,#splash .sp-hint{animation:none!important}}
 #shsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .shcard{background:var(--card);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
 .shcard h2{text-align:center;margin:0 0 6px}
@@ -610,14 +618,23 @@ var d=document.getElementById("splash"),logo=(S.cfg&&S.cfg.logo)||window.APP_ICO
 if(!d){d=document.createElement("div");d.id="splash";document.body.appendChild(d)}
 if(logo){var im=d.querySelector("img");if(!im){im=document.createElement("img");im.alt="شعار التطبيق";d.appendChild(im)}im.src=logo}
 var mark=d.querySelector("img"),dismissed=false;
+if(!d.querySelector(".sp-brand")){
+ var brand=document.createElement("div");brand.className="sp-brand";
+ brand.innerHTML="<strong>حرحش</strong><small>إدارة الرواتب</small>";d.appendChild(brand);
+ var hint=document.createElement("div");hint.className="sp-hint";hint.textContent="اضغط على الشعار وشاهد التأثير";d.appendChild(hint);
+}
 if(mark){
- mark.setAttribute("role","button");mark.setAttribute("tabindex","0");mark.setAttribute("aria-label","اضغط للتفاعل مع شعار التطبيق");
- function shine(){mark.classList.remove("sp-tap");void mark.offsetWidth;mark.classList.add("sp-tap");setTimeout(function(){mark.classList.remove("sp-tap")},650)}
+ mark.setAttribute("role","button");mark.setAttribute("tabindex","0");mark.setAttribute("aria-label","اضغط لتفعيل تأثير الشعار");
+ function shine(){
+  mark.classList.remove("sp-tap");d.classList.remove("sp-burst");void mark.offsetWidth;
+  mark.classList.add("sp-tap");d.classList.add("sp-burst");
+  setTimeout(function(){mark.classList.remove("sp-tap");d.classList.remove("sp-burst")},1100);
+ }
  mark.addEventListener("click",shine);
  mark.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();shine()}});
 }
 function go(){if(dismissed)return;dismissed=true;d.classList.add("hide");setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},600)}
-function appReady(){setTimeout(go,2300)}
+function appReady(){setTimeout(go,3400)}
 if(document.readyState==="complete")appReady();
 else window.addEventListener("load",appReady,{once:true});
 })();
