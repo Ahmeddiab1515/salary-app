@@ -213,6 +213,7 @@ th{white-space:normal!important;line-height:1.3}
     <div class="stat"><small>المتبقي (لم يُستلم)</small><b id="sPend" class="bad">0</b></div>
   </div>
   <div class="card">
+    <div class="arch-tools"><div class="arch-tool-title"><b>إدارة الأرشيف</b><small id="archCount">كل العاملين</small></div><div class="arch-tool-actions"><button type="button" id="archExpand">＋ فتح الكل</button><button type="button" id="archCollapse" class="arch-soft">－ طي الكل</button></div><div class="arch-filters" role="group" aria-label="تصفية الأرشيف"><button type="button" class="on" data-arch-filter="all">الكل</button><button type="button" data-arch-filter="pending">غير مستلم</button><button type="button" data-arch-filter="received">مستلم</button></div></div>
     <div class="sbox"><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="🔍 ابحث (اسم، تاريخ، مبلغ، مستلم…)"><button type="button" id="qc" class="qc">×</button></div><div id="qn" class="qn"></div>
     <div class="row" style="margin-top:10px"><button id="xl" type="button" style="flex:1">📊 حفظ إكسل</button><button id="pd" type="button" style="flex:1">📄 حفظ PDF</button><button id="sh" type="button" style="flex:1">📤 مشاركة</button></div>
     <div id="xmsg"></div>
@@ -248,7 +249,7 @@ th{white-space:normal!important;line-height:1.3}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-var KEY="salary_preview_v1",S={emps:[],rows:[],co:"GCC"},recv="لا",openG={};
+var KEY="salary_preview_v1",S={emps:[],rows:[],co:"GCC"},recv="لا",openG={},archiveFilter="all";
 function $(i){return document.getElementById(i)}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.rows)S=d}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -303,35 +304,26 @@ function matchG(g,q){
   return q.split(" ").every(function(t){return !t||hay.indexOf(t)>-1});
 }
 function renderArch(){
-  var q=nk($("q").value),all=grp(),gs=all.filter(function(g){return matchG(g,q)}),T=sums(gs),tb=$("arch");
+  var q=nk($("q").value),all=grp(),matched=all.filter(function(g){return matchG(g,q)}),gs=matched.filter(function(g){return archiveFilter==="all"||(archiveFilter==="pending"&&g.pend>0)||(archiveFilter==="received"&&g.pend===0)}),T=sums(gs),tb=$("arch");
   $("qn").textContent=q?"النتائج: "+gs.length+" من "+all.length:"";$("qc").style.display=$("q").value?"block":"none";
+  $("archCount").textContent="عدد العاملين: "+gs.length+" من "+all.length;
+  document.querySelectorAll("#t1 [data-arch-filter]").forEach(function(b){b.classList.toggle("on",b.dataset.archFilter===archiveFilter)});
   var sp=$("sprof");
-  if(q&&gs.length===1){
-    var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");
-    sp.innerHTML="";av.className="av";if(ph){av.src=ph;av.alt=""}else av.textContent=g1.name.charAt(0);
-    bb.textContent=g1.name;s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex";
-  }else sp.style.display="none";
+  if(q&&gs.length===1){var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");sp.innerHTML="";av.className="av";if(ph){av.src=ph;av.alt=""}else av.textContent=g1.name.charAt(0);bb.textContent=g1.name;s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex"}else sp.style.display="none";
   tb.innerHTML="";
   gs.forEach(function(g){
-    var tr=document.createElement("tr"),c=td(tr,""),b=document.createElement("button");
-    b.className="nm";b.textContent=(openG[g.key]?"▾ ":"▸ ")+g.name;b.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};c.appendChild(b);
-    var s1=document.createElement("small");s1.textContent=g.n+" قيد";c.appendChild(s1);
-    var s2=document.createElement("small");s2.textContent=stGrp(g);c.appendChild(s2);
+    var tr=document.createElement("tr"),c=td(tr,""),b=document.createElement("button");b.className="nm";b.textContent=(openG[g.key]?"▾ ":"▸ ")+g.name;b.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};c.appendChild(b);
+    var s1=document.createElement("small");s1.textContent=g.n+" قيد";c.appendChild(s1);var s2=document.createElement("small");s2.textContent=stGrp(g);c.appendChild(s2);
+    var actions=document.createElement("div");actions.className="arch-row-actions";
+    var detail=document.createElement("button");detail.type="button";detail.className="arch-detail";detail.textContent=openG[g.key]?"طي التفاصيل":"عرض التفاصيل";detail.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};
+    var qr=document.createElement("button");qr.type="button";qr.className="arch-qr";qr.textContent="▦ QR العامل";qr.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(g.name);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};
+    var pdf=document.createElement("button");pdf.type="button";pdf.className="arch-pdf";pdf.textContent="📄 كشوف PDF";pdf.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(g.name);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};
+    actions.appendChild(detail);actions.appendChild(qr);actions.appendChild(pdf);c.appendChild(actions);
     [g.sal,g.adv,g.abs,g.net].forEach(function(v){td(tr,v)});tb.appendChild(tr);
-    if(openG[g.key])g.recs.forEach(function(x){
-      var r=x.r,sr=document.createElement("tr");sr.className="sub";
-      var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");
-      bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
-      p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";
-      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};
-      d.className="x";d.textContent="حذف";d.onclick=function(){S.rows.splice(x.i,1);save();renderAll()};
-      bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
-      [r.sal,r.adv,r.abs,netOf(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
-    });
+    if(openG[g.key])g.recs.forEach(function(x){var r=x.r,sr=document.createElement("tr");sr.className="sub";var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");bx.className="record-actions";p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};d.className="del-record";d.type="button";d.textContent="حذف القيد";d.onclick=function(){if(confirm("تأكيد حذف قيد "+g.name+" بتاريخ "+r.date+"؟")){S.rows.splice(x.i,1);save();renderAll()}};bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);[r.sal,r.adv,r.abs,netOf(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr)});
   });
   if(!gs.length)tb.innerHTML="<tr><td colspan='5' class='empty'>"+(q?"لا توجد نتائج":"لا توجد قيود")+"</td></tr>";
-  var V=sums(gs);
-  $("tot").innerHTML=gs.length?"<tr><td>الإجمالي</td><td>"+V.sal+"</td><td>"+V.adv+"</td><td>"+V.abs+"</td><td>"+V.net+"</td></tr>":"";
+  var V=sums(gs);$("tot").innerHTML=gs.length?"<tr><td>الإجمالي</td><td>"+V.sal+"</td><td>"+V.adv+"</td><td>"+V.abs+"</td><td>"+V.net+"</td></tr>":"";
   $("sSal").textContent=T.sal;$("sAdv").textContent=T.adv;$("sCnt").textContent=T.n;$("sNet").textContent=T.net;$("sRec").textContent=T.rec;$("sPend").textContent=T.pend;
 }
 function renderEmps(){
@@ -443,6 +435,10 @@ function setRecv(v){recv=v;$("yes").className="yes"+(v==="نعم"?" on":"");$("n
 $("yes").onclick=function(){setRecv("نعم")};$("no").onclick=function(){setRecv("لا")};
 ["sal","adv","abs","rate"].forEach(function(i){$(i).onchange=calc});
 $("q").oninput=renderArch;
+$("archExpand").onclick=function(){grp().forEach(function(g){openG[g.key]=true});renderArch()};
+$("archCollapse").onclick=function(){openG={};renderArch()};
+document.querySelectorAll("#t1 [data-arch-filter]").forEach(function(b){b.onclick=function(){archiveFilter=b.dataset.archFilter;renderArch()}});
+
 $("co").oninput=function(){S.co=$("co").value;save();$("coTag").textContent=S.co};
 $("addEmp").onclick=function(){
   var n=$("newName").value.trim();
@@ -906,7 +902,27 @@ function renderSharedCard(){
  var params=new URLSearchParams(location.search),packed=params.get("card");if(!packed)return;
  document.body.style.overflow="hidden";
  var root=document.createElement("div");root.id="sharedSalaryCard";root.style.cssText="position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#f1f5f5;color:#17212b;padding:18px;box-sizing:border-box;direction:rtl;font-family:Tahoma,Arial,sans-serif";
- root.innerHTML='<style>@media print{body{background:#fff!important}#sharedSalaryCard{position:static!important;overflow:visible!important;background:#fff!important;padding:0!important}#sharedSalaryCard .no-print{display:none!important}.share-card{box-shadow:none!important;border:0!important;margin:0!important}}.share-card{max-width:680px;margin:0 auto;background:#fff;border:1px solid #dce6e6;border-radius:18px;padding:20px;box-shadow:0 8px 28px #1231}.share-card h1{font-size:23px;color:#0f766e;margin:0 0 8px}.share-card h2{font-size:16px;color:#0f766e;margin:20px 0 8px}.share-meta{color:#64748b;font-size:12px;line-height:1.8}.share-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}.share-stat{background:#f0f7f6;border-radius:12px;padding:11px}.share-stat small{display:block;color:#64748b;font-size:11px}.share-stat b{display:block;font-size:17px;margin-top:4px}.share-entry{border-top:1px solid #e5eeee;padding:10px 0;font-size:13px;line-height:1.9;overflow-wrap:anywhere}.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px auto;max-width:680px}.share-actions button{border:0;border-radius:11px;padding:12px 16px;background:#0f766e;color:white;font-size:14px}.share-actions button.secondary{background:#e2eeee;color:#20323a}@media(max-width:380px){.share-card{padding:14px}.share-stats{gap:6px}.share-stat{padding:9px}.share-stat b{font-size:15px}}</style><div class="share-card"><div id="sharedCardContent">جاري فتح كشف العامل…</div></div><div class="share-actions no-print"><button id="sharedPrint">حفظ / طباعة PDF</button><button class="secondary" id="sharedClose">إغلاق الصفحة</button></div>';
+ root.innerHTML='<style>@media print{body{background:#fff!important}#sharedSalaryCard{position:static!important;overflow:visible!important;background:#fff!important;padding:0!important}#sharedSalaryCard .no-print{display:none!important}.share-card{box-shadow:none!important;border:0!important;margin:0!important}}.share-card{max-width:680px;margin:0 auto;background:#fff;border:1px solid #dce6e6;border-radius:18px;padding:20px;box-shadow:0 8px 28px #1231}.share-card h1{font-size:23px;color:#0f766e;margin:0 0 8px}.share-card h2{font-size:16px;color:#0f766e;margin:20px 0 8px}.share-meta{color:#64748b;font-size:12px;line-height:1.8}.share-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}.share-stat{background:#f0f7f6;border-radius:12px;padding:11px}.share-stat small{display:block;color:#64748b;font-size:11px}.share-stat b{display:block;font-size:17px;margin-top:4px}.share-entry{border-top:1px solid #e5eeee;padding:10px 0;font-size:13px;line-height:1.9;overflow-wrap:anywhere}.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px auto;max-width:680px}.share-actions button{border:0;border-radius:11px;padding:12px 16px;background:#0f766e;color:white;font-size:14px}.share-actions button.secondary{background:#e2eeee;color:#20323a}@media(max-width:380px){.share-card{padding:14px}.share-stats{gap:6px}.share-stat{padding:9px}.share-stat b{font-size:15px}}
+/* Archive-only interactive interface */
+#t1 .arch-tools{border:1px solid var(--bd);background:linear-gradient(135deg,var(--card),var(--head));border-radius:15px;padding:12px;margin-bottom:12px}
+#t1 .arch-tool-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+#t1 .arch-tool-title b{font-size:15px;color:var(--tx)}#t1 .arch-tool-title small{font-size:11px;color:var(--mut)}
+#t1 .arch-tool-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#t1 .arch-tool-actions button,#t1 .arch-filters button{padding:9px 8px;font-size:12px}
+#t1 .arch-tool-actions .arch-soft{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+#t1 .arch-filters{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+#t1 .arch-filters button{background:var(--bg);color:var(--mut);border:1px solid var(--bd)}
+#t1 .arch-filters button.on{background:var(--pri);color:var(--priTx);border-color:var(--pri)}
+#t1 .arch-row-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#t1 .arch-row-actions button{font-size:11px;padding:6px 9px;border-radius:9px}
+#t1 .arch-row-actions .arch-detail{background:var(--head);color:var(--pri);border:1px solid var(--bd)}
+#t1 .arch-row-actions .arch-pdf{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+#t1 .arch-row-actions .arch-qr{background:var(--pri);color:var(--priTx)}
+#t1 .sub .record-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+#t1 .sub .record-actions button{font-size:11px;padding:5px 8px}
+#t1 .sub .record-actions .del-record{background:transparent;color:var(--bad);border:1px solid var(--bd)}
+@media(max-width:390px){#t1 .arch-tool-title{align-items:flex-start;flex-direction:column}#t1 .arch-row-actions button{flex:1}}
+</style><div class="share-card"><div id="sharedCardContent">جاري فتح كشف العامل…</div></div><div class="share-actions no-print"><button id="sharedPrint">حفظ / طباعة PDF</button><button class="secondary" id="sharedClose">إغلاق الصفحة</button></div>';
  document.body.appendChild(root);
  function fail(msg){root.querySelector("#sharedCardContent").textContent=msg;root.querySelector(".share-actions").style.display="none"}
  function decode(){
