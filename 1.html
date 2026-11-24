@@ -312,14 +312,23 @@ function renderArch(){
   if(q&&gs.length===1){var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");sp.innerHTML="";av.className="av";if(ph){av.src=ph;av.alt=""}else av.textContent=g1.name.charAt(0);bb.textContent=g1.name;s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex"}else sp.style.display="none";
   tb.innerHTML="";
   gs.forEach(function(g){
-    var tr=document.createElement("tr"),c=td(tr,""),b=document.createElement("button");b.className="nm";b.textContent=(openG[g.key]?"▾ ":"▸ ")+g.name;b.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};c.appendChild(b);
-    var s1=document.createElement("small");s1.textContent=g.n+" قيد";c.appendChild(s1);var s2=document.createElement("small");s2.textContent=stGrp(g);c.appendChild(s2);
+    var tr=document.createElement("tr");tr.className="arch-employee-row";
+    var c=td(tr,"");c.className="arch-name-cell";
+    var person=document.createElement("div");person.className="arch-person";
+    var photo=S.photos[nk(g.name)],av=document.createElement(photo?"img":"div");av.className="arch-avatar";
+    if(photo){av.src=photo;av.alt="صورة "+g.name}else av.textContent=g.name.charAt(0)||"؟";
+    var identity=document.createElement("div");identity.className="arch-identity";
+    var b=document.createElement("button");b.className="nm";b.textContent=(openG[g.key]?"▾ ":"▸ ")+g.name;b.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};
+    var s1=document.createElement("small");s1.className="arch-count";s1.textContent=g.n+" قيد";
+    var s2=document.createElement("small");s2.className="arch-status";s2.textContent=stGrp(g);
+    identity.appendChild(b);identity.appendChild(s1);identity.appendChild(s2);person.appendChild(av);person.appendChild(identity);c.appendChild(person);
     var actions=document.createElement("div");actions.className="arch-row-actions";
     var detail=document.createElement("button");detail.type="button";detail.className="arch-detail";detail.textContent=openG[g.key]?"طي التفاصيل":"عرض التفاصيل";detail.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};
     var qr=document.createElement("button");qr.type="button";qr.className="arch-qr";qr.textContent="▦ QR العامل";qr.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(g.name);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};
     var pdf=document.createElement("button");pdf.type="button";pdf.className="arch-pdf";pdf.textContent="📄 كشوف PDF";pdf.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(g.name);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};
     actions.appendChild(detail);actions.appendChild(qr);actions.appendChild(pdf);c.appendChild(actions);
-    [g.sal,g.adv,g.abs,g.net].forEach(function(v){td(tr,v)});tb.appendChild(tr);
+    [["الراتب الأساسي",g.sal],["السلف",g.adv],["الغياب",g.abs],["المجموع بعد الخصم",g.net]].forEach(function(item){var cell=td(tr,item[1]);cell.className="arch-value-cell";cell.setAttribute("data-label",item[0])});
+    tb.appendChild(tr);
     if(openG[g.key])g.recs.forEach(function(x){var r=x.r,sr=document.createElement("tr");sr.className="sub";var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");bx.className="record-actions";p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};d.className="del-record";d.type="button";d.textContent="حذف القيد";d.onclick=function(){if(confirm("تأكيد حذف قيد "+g.name+" بتاريخ "+r.date+"؟")){S.rows.splice(x.i,1);save();renderAll()}};bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);[r.sal,r.adv,r.abs,netOf(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr)});
   });
   if(!gs.length)tb.innerHTML="<tr><td colspan='5' class='empty'>"+(q?"لا توجد نتائج":"لا توجد قيود")+"</td></tr>";
@@ -922,6 +931,42 @@ function renderSharedCard(){
 #t1 .sub .record-actions button{font-size:11px;padding:5px 8px}
 #t1 .sub .record-actions .del-record{background:transparent;color:var(--bad);border:1px solid var(--bd)}
 @media(max-width:390px){#t1 .arch-tool-title{align-items:flex-start;flex-direction:column}#t1 .arch-row-actions button{flex:1}}
+/* Consistent employee rows in the archive */
+#t1 #arch tr.arch-employee-row>td{background:var(--card);border-color:var(--bd);vertical-align:middle}
+#t1 #arch tr.arch-employee-row>td:first-child{min-width:220px;text-align:start}
+#t1 .arch-person{display:flex;align-items:center;gap:10px;min-width:0}
+#t1 .arch-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:13px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:var(--head);color:var(--pri);font-weight:800;font-size:17px}
+#t1 .arch-identity{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:3px}
+#t1 .arch-identity .nm{text-decoration:none;font-size:14px;line-height:1.4}
+#t1 .arch-identity small{display:block;color:var(--mut);font-size:11px;line-height:1.35}
+#t1 .arch-row-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+#t1 .arch-row-actions button{white-space:nowrap}
+#t1 .arch-value-cell{font-weight:700;font-variant-numeric:tabular-nums}
+#t1 #arch tr.arch-employee-row:nth-child(even)>td{background:var(--head)}
+@media(max-width:560px){
+  #t1 .wrap{overflow:visible}
+  #t1 .wrap>table{display:block;width:100%;table-layout:fixed}
+  #t1 .wrap>table>thead{display:none}
+  #t1 .wrap>table>tbody,#t1 .wrap>table>tfoot{display:block;width:100%}
+  #t1 #arch tr.arch-employee-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 11px;border:1px solid var(--bd);border-radius:15px;overflow:hidden;background:var(--card);box-shadow:var(--sh)}
+  #t1 #arch tr.arch-employee-row>td{min-width:0!important;white-space:normal!important;border:0;border-top:1px solid var(--bd);padding:9px 3px!important;text-align:center;font-size:13px!important}
+  #t1 #arch tr.arch-employee-row>td.arch-name-cell{grid-column:1/-1;display:flex;flex-direction:column;align-items:stretch;gap:9px;text-align:start;border-top:0;padding:11px!important}
+  #t1 .arch-person{gap:10px}
+  #t1 .arch-avatar{width:40px;height:40px;flex-basis:40px}
+  #t1 .arch-row-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:0;width:100%}
+  #t1 .arch-row-actions button{min-width:0;padding:8px 3px!important;font-size:10px!important;white-space:normal;line-height:1.25}
+  #t1 #arch tr.arch-employee-row>td.arch-value-cell{display:flex;flex-direction:column;justify-content:center;gap:4px;overflow-wrap:anywhere}
+  #t1 .arch-value-cell:before{content:attr(data-label);display:block;color:var(--mut);font-size:10px;font-weight:500;line-height:1.3}
+  #t1 #arch tr.sub{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin:-5px 0 10px;background:var(--head);border-radius:0 0 12px 12px;overflow:hidden}
+  #t1 #arch tr.sub td{min-width:0!important;white-space:normal!important;padding:7px 2px!important;font-size:11px!important}
+  #t1 #arch tr.sub td:first-child{grid-column:1/-1}
+  #t1 #tot tr{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+  #t1 #tot td{min-width:0!important;white-space:normal!important;padding:7px 2px!important;font-size:11px!important}
+}
+@media(max-width:360px){
+  #t1 .arch-row-actions button{font-size:9px!important}
+  #t1 #arch tr.arch-employee-row>td.arch-value-cell{font-size:12px!important}
+}
 </style><div class="share-card"><div id="sharedCardContent">جاري فتح كشف العامل…</div></div><div class="share-actions no-print"><button id="sharedPrint">حفظ / طباعة PDF</button><button class="secondary" id="sharedClose">إغلاق الصفحة</button></div>';
  document.body.appendChild(root);
  function fail(msg){root.querySelector("#sharedCardContent").textContent=msg;root.querySelector(".share-actions").style.display="none"}
