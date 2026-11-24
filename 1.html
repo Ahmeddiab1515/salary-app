@@ -181,6 +181,50 @@ th{white-space:normal!important;line-height:1.3}
 .qn{color:var(--mut);font-size:12px;margin:8px 4px 0;min-height:14px}
 .sprof{align-items:center;gap:14px}.sprof .av{width:60px;height:60px;font-size:26px;border:2px solid var(--pri)}.sprof b{font-size:18px}.sprof small{display:block;color:var(--mut);font-size:12.5px;margin-top:3px;line-height:1.4}
 </style>
+<style id="archive-layout-v15">
+/* تنسيق الأرشيف الفعلي داخل التطبيق */
+#t1 .wrap{overflow:visible!important}
+#t1 .wrap>table{display:block!important;width:100%!important;min-width:0!important;border-collapse:separate!important;border-spacing:0 10px!important;table-layout:fixed!important}
+#t1 .wrap>table>thead{display:none!important}
+#t1 .wrap>table>tbody,#t1 .wrap>table>tfoot{display:block!important;width:100%!important}
+#t1 #arch tr.arch-employee-row{display:grid!important;grid-template-columns:minmax(210px,2fr) repeat(3,minmax(78px,.75fr)) minmax(125px,1.15fr)!important;align-items:stretch!important;margin:0 0 10px!important;background:var(--card)!important;border:1px solid var(--bd)!important;border-radius:16px!important;overflow:hidden!important;box-shadow:var(--sh)!important}
+#t1 #arch tr.arch-employee-row>td{display:flex!important;min-width:0!important;align-items:center!important;justify-content:center!important;padding:13px 8px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;background:transparent!important;text-align:center!important;white-space:normal!important;font-size:13px!important;line-height:1.5!important}
+#t1 #arch tr.arch-employee-row>td.arch-name-cell{display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:center!important;gap:10px!important;text-align:start!important;border-inline-start:0!important;padding:13px!important}
+#t1 .arch-person{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}
+#t1 .arch-avatar{width:44px!important;height:44px!important;flex:0 0 44px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;border-radius:13px!important;object-fit:cover!important;background:var(--head)!important;color:var(--pri)!important;font-size:17px!important;font-weight:800!important}
+#t1 .arch-identity{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important;min-width:0!important}
+#t1 .arch-identity .nm{padding:0!important;background:transparent!important;color:var(--tx)!important;border:0!important;font-size:15px!important;font-weight:800!important;text-align:start!important;line-height:1.4!important}
+#t1 .arch-identity small{display:block!important;color:var(--mut)!important;font-size:11px!important;line-height:1.45!important;overflow-wrap:anywhere!important}
+#t1 .arch-row-actions{display:flex!important;flex-wrap:wrap!important;gap:6px!important;margin:0!important;width:100%!important}
+#t1 .arch-row-actions button{flex:1 1 0!important;min-width:0!important;padding:8px 6px!important;border-radius:9px!important;font-size:11px!important;line-height:1.3!important;white-space:normal!important}
+#t1 #arch tr.arch-employee-row>td.arch-value-cell{display:flex!important;flex-direction:column!important;justify-content:center!important;gap:4px!important;font-weight:800!important;font-variant-numeric:tabular-nums!important;overflow-wrap:anywhere!important}
+#t1 .arch-value-cell:before{content:attr(data-label)!important;display:block!important;color:var(--mut)!important;font-size:10px!important;font-weight:500!important;line-height:1.35!important}
+#t1 #arch tr.sub{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;margin:-7px 5px 12px!important;background:var(--head)!important;border:1px solid var(--bd)!important;border-radius:0 0 13px 13px!important;overflow:hidden!important}
+#t1 #arch tr.sub td{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;padding:9px 4px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;text-align:center!important;white-space:normal!important;font-size:12px!important;overflow-wrap:anywhere!important}
+#t1 #arch tr.sub td:first-child{grid-column:1/-1;flex-direction:row!important;justify-content:space-between!important;gap:8px!important;border-bottom:1px solid var(--bd)!important;font-weight:700!important}
+#t1 #arch tr.sub .record-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important;margin:0!important}
+#t1 #tot tr{display:grid!important;grid-template-columns:2fr repeat(3,.75fr) 1.15fr!important;background:var(--head)!important;border:1px solid var(--bd)!important;border-radius:12px!important;overflow:hidden!important}
+#t1 #tot td{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;padding:11px 5px!important;border:0!important;border-inline-start:1px solid var(--bd)!important;font-size:12px!important;font-weight:800!important;text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important}
+#t1 #tot td:first-child{justify-content:flex-start!important}
+@media(max-width:600px){
+ #t1 #arch tr.arch-employee-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;margin-bottom:12px!important}
+ #t1 #arch tr.arch-employee-row>td{padding:11px 8px!important;border-top:1px solid var(--bd)!important;border-inline-start:1px solid var(--bd)!important}
+ #t1 #arch tr.arch-employee-row>td.arch-name-cell{grid-column:1/-1!important;border-top:0!important;border-inline:0!important;padding:13px!important}
+ #t1 .arch-person{gap:10px!important}
+ #t1 .arch-avatar{width:42px!important;height:42px!important;flex-basis:42px!important}
+ #t1 .arch-row-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ #t1 .arch-row-actions button{padding:9px 4px!important;font-size:10px!important}
+ #t1 #arch tr.arch-employee-row>td.arch-value-cell{min-height:62px!important;font-size:13px!important}
+ #t1 #arch tr.arch-employee-row>td.arch-value-cell:nth-child(odd){border-inline-start:0!important}
+ #t1 #arch tr.sub{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin:-8px 4px 13px!important}
+ #t1 #arch tr.sub td{padding:9px 5px!important;font-size:11px!important}
+ #t1 #arch tr.sub td:first-child{grid-column:1/-1!important}
+ #t1 #tot tr{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #t1 #tot td{padding:9px 5px!important;font-size:11px!important}
+ #t1 #tot td:first-child{grid-column:1/-1!important;justify-content:center!important}
+}
+@media(max-width:350px){#t1 .arch-row-actions button{font-size:9px!important}#t1 #arch tr.arch-employee-row>td{padding:9px 5px!important}}
+</style>
 </head>
 <body>
 <div class="bar"><h1>💰 كشف الرواتب</h1><span id="coTag">GCC</span></div>
