@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v24-app-information";
+const CACHE_NAME = "salary-app-v25-arabic-app-info";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
