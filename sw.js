@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v27-remove-first-splash";
+const CACHE_NAME = "salary-app-v28-dark-password-field";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
