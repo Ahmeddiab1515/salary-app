@@ -115,7 +115,7 @@ nav button{border-radius:22px!important;padding:8px 4px!important}
 nav button.on{background:rgba(127,140,150,.16)!important}
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:linear-gradient(135deg,var(--g1),var(--g2))}
-#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;transition:opacity .5s}
+#splash{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;transition:opacity .5s}
 #splash.hide{opacity:0;pointer-events:none}
 #splash img{width:128px;height:128px;border-radius:30px;object-fit:cover;box-shadow:0 12px 32px rgba(0,0,0,.3);animation:sp-pop .6s ease}
 #splash .sp-ico{font-size:88px;animation:sp-pop .6s ease}
@@ -600,8 +600,11 @@ fill();
 var d=document.getElementById("splash"),logo=(S.cfg&&S.cfg.logo)||window.APP_ICON||window.SPLASH_LOGO||"";
 if(!d){d=document.createElement("div");d.id="splash";document.body.appendChild(d)}
 if(logo){var im=d.querySelector("img");if(!im){im=document.createElement("img");im.alt="";d.appendChild(im)}im.src=logo}
-function go(){d.classList.add("hide");setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},600)}
-setTimeout(go,1800);
+var dismissed=false;
+function go(){if(dismissed)return;dismissed=true;d.classList.add("hide");setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},600)}
+function appReady(){setTimeout(go,1800)}
+if(document.readyState==="complete")appReady();
+else window.addEventListener("load",appReady,{once:true});
 })();
 </script>
 <script>
