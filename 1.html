@@ -366,7 +366,7 @@ function saveFile(name,data){
 function fgrp(){var q=nk($("q").value);return grp().filter(function(g){return matchG(g,q)})}
 function frows(gs){var k={};gs.forEach(function(g){k[g.key]=1});return S.rows.filter(function(r){return k[nk(r.name)]})}
 function noData(){if(!fgrp().length){say("xmsg",$("q").value.trim()?"لا توجد نتائج للبحث":"الأرشيف فاضي","bad");return true}return false}
-function fname(gs,ext){var n="الراتب";if($("q").value.trim()&&gs.length===1)n+=" - "+gs[0].name.replace(/[\/\\:*?"<>|]/g,"");return n+ext}
+function fname(gs,ext){var n="الرواتب - الراتب";if($("q").value.trim()&&gs.length===1)n+=" - "+gs[0].name.replace(/[\/\\:*?"<>|]/g,"");return n+ext}
 function exportXlsx(){
   if(noData())return;
   if(typeof XLSX==="undefined"){say("xmsg","مكتبة الإكسل لم تُحمّل","bad");return}
