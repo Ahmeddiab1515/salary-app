@@ -2,99 +2,13 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#244d39">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="حساب الراتب">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>حساب الراتب والسلف</title>
-<style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#183629;background:#f3f6f3}
-*{box-sizing:border-box}body{margin:0;padding:14px 14px calc(28px + env(safe-area-inset-bottom))}
-header{background:linear-gradient(135deg,#244d39,#397354);color:white;padding:20px;border-radius:18px;margin-bottom:14px}
-header small{opacity:.8}h1{font-size:23px;margin:6px 0}h2{font-size:17px;margin:0 0 10px}
-.panel{background:white;border:1px solid #e0e9e2;border-radius:16px;padding:15px;margin:12px 0;box-shadow:0 3px 12px #193b2510}
-label{display:block;font-size:13px;color:#52685a;margin:10px 0 5px}
-input,select,textarea{width:100%;padding:12px;border:1px solid #d6e1d8;border-radius:10px;background:#fbfdfb;font:inherit;color:#183629}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.stat{background:#edf5ef;border-radius:12px;padding:12px}.stat span{font-size:12px;color:#55705e}.stat b{display:block;font-size:18px;margin-top:5px}
-button{border:0;border-radius:11px;padding:13px 15px;font:inherit;font-weight:700;cursor:pointer}
-.primary{background:#286044;color:white;width:100%;margin-top:12px}.secondary{background:#eaf2ec;color:#244d39}
-.record{border:1px solid #e0e9e2;padding:12px;border-radius:12px;margin-top:9px;font-size:13px}
-.record button{padding:7px 10px;margin-top:8px;font-size:12px}
-.hidden{display:none!important}.muted{color:#708176;font-size:12px}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0;url=./1.html">
+<title>كشف الرواتب</title>
+<link rel="canonical" href="./1.html">
+<script>location.replace("./1.html");</script>
 </head>
 <body>
-<header><small>تطبيق إدارة الحسابات</small><h1>حساب الراتب والسلف</h1><div>احسب المستحقات وسجّل كل عملية بسهولة</div></header>
-<section class="panel">
-<h2>بيانات الموظف</h2>
-<label>اسم الموظف</label><input id="name" value="أحمد" autocomplete="name">
-<label>اسم الشركة</label><input id="company" placeholder="اسم الشركة">
-<label>التاريخ</label><input id="date" type="date">
-</section>
-<section class="panel">
-<h2>تفاصيل الحساب</h2>
-<div class="grid">
-<div><label>الراتب الأساسي (د.إ)</label><input id="salary" type="number" min="0" value="6000"></div>
-<div><label>السلف (د.إ)</label><input id="advance" type="number" min="0" value="500"></div>
-<div><label>خصم الغياب (د.إ)</label><input id="absence" type="number" min="0" value="200"></div>
-<div><label>خصومات أخرى (د.إ)</label><input id="deduct" type="number" min="0" value="0"></div>
-</div>
-<div class="stat" style="margin-top:12px"><span>المجموع المستحق</span><b id="due">5,300 د.إ</b></div>
-</section>
-<section class="panel">
-<h2>استلام الراتب</h2>
-<label>حالة الاستلام</label><select id="status"><option value="none">لم أستلم</option><option value="part">استلمت جزءًا</option><option value="full">استلمت بالكامل</option></select>
-<div id="partWrap" class="hidden"><label>المبلغ المستلم (د.إ)</label><input id="part" type="number" min="0" value="0"></div>
-<div class="stats"><div class="stat"><span>المستلم</span><b id="paid">0 د.إ</b></div><div class="stat"><span>المتبقي</span><b id="left">5,300 د.إ</b></div></div>
-<label>مكان المبلغ المتبقي</label><select id="place"><option>في الشغل</option><option>معايا</option><option>مع المسؤول</option><option>في الخزنة</option><option>مكان آخر</option></select>
-<label>ملاحظات</label><textarea id="notes" rows="2" placeholder="ملاحظات اختيارية"></textarea>
-<button class="primary" id="save">حفظ في الأرشيف</button>
-<p class="muted">يتم حفظ السجلات على نفس الآيفون والمتصفح.</p>
-</section>
-<section class="panel">
-<div class="grid" style="align-items:center"><h2 style="margin:0">الأرشيف</h2><button class="secondary" id="export">تصدير نسخة احتياطية</button></div>
-<div id="records" class="muted" style="margin-top:10px">لا توجد سجلات محفوظة.</div>
-</section>
-<script>
-const $=id=>document.getElementById(id), keys=['salary','advance','absence','deduct','part'];
-const fmt=n=>Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2})+' د.إ';
-let records=[];try{records=JSON.parse(localStorage.getItem('salaryRecordsV1')||'[]')}catch(e){records=[]}
-function calc(){
- const due=Math.max(0,+$('salary').value||0-(+$('advance').value||0)-(+$('absence').value||0)-(+$('deduct').value||0));
- const status=$('status').value;$('partWrap').classList.toggle('hidden',status!=='part');
- const paid=status==='full'?due:status==='part'?Math.min(due,Math.max(0,+$('part').value||0)):0;
- $('due').textContent=fmt(due);$('paid').textContent=fmt(paid);$('left').textContent=fmt(due-paid);
- return {due,paid,left:due-paid};
-}
-keys.forEach(k=>$(k).addEventListener('input',calc));$('status').addEventListener('change',calc);
-function render(){
- const root=$('records');root.innerHTML='';
- if(!records.length){root.textContent='لا توجد سجلات محفوظة.';return}
- records.forEach((r,i)=>{
-  const d=document.createElement('div');d.className='record';
-  const strong=document.createElement('b');strong.textContent=(r.name||'بدون اسم')+' — '+r.date;
-  const p=document.createElement('p');p.textContent='الشركة: '+(r.company||'—')+' | المستحق: '+fmt(r.due)+' | المستلم: '+fmt(r.paid)+' | المتبقي: '+fmt(r.left);
-  const q=document.createElement('p');q.textContent='مكان المتبقي: '+(r.left? r.place:'لا يوجد')+(r.notes?' | '+r.notes:'');
-  const b=document.createElement('button');b.className='secondary';b.textContent='حذف';b.onclick=()=>{records.splice(i,1);persist();render()};
-  d.append(strong,p,q,b);root.append(d);
- });
-}
-function persist(){localStorage.setItem('salaryRecordsV1',JSON.stringify(records))}
-$('save').onclick=()=>{
- if(!$('name').value.trim()){alert('اكتب اسم الموظف أولاً');$('name').focus();return}
- const c=calc();records.unshift({name:$('name').value.trim(),company:$('company').value.trim(),date:$('date').value,...c,place:$('place').value,notes:$('notes').value});
- persist();render();alert('تم حفظ الحساب في الأرشيف');
-};
-$('export').onclick=()=>{
- const blob=new Blob([JSON.stringify(records,null,2)],{type:'application/json'});
- const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='نسخة-حساب-الراتب.json';a.click();URL.revokeObjectURL(url);
-};
-$('date').value=new Date().toISOString().slice(0,10);calc();render();
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script>
-</body></html>
+<p>جاري فتح التطبيق… <a href="./1.html">اضغط هنا إذا لم يتم التحويل تلقائيًا</a></p>
+</body>
+</html>
