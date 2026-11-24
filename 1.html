@@ -349,27 +349,37 @@ function renderEmps(){
 }
 function renderAll(){empOpts();renderArch();renderEmps();$("coTag").textContent=S.co||""}
 function saveFile(name,data){
+  var isPdf=String(name).toLowerCase().slice(-4)===".pdf";
+  var mime=isPdf?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  function makeBlob(){return data instanceof Blob?data:new Blob([data],{type:mime})}
   function browserDownload(){
     try{
-      var isPdf=/\\.pdf$/i.test(name);
-      var mime=isPdf?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-      var blob=data instanceof Blob?data:new Blob([data],{type:mime});
+      var blob=makeBlob();
+      var file=new File([blob],name,{type:mime});
+      if(navigator.canShare&&navigator.canShare({files:[file]})&&navigator.share){
+        navigator.share({files:[file],title:name}).then(function(){
+          say("xmsg","تم فتح المشاركة. اختار «حفظ في الملفات» لحفظ نسخة Excel أو PDF.","ok");
+        }).catch(function(e){
+          if(e&&e.name==="AbortError"){say("xmsg","تم إلغاء الحفظ");return}
+          downloadBlob(blob);
+        });
+      }else downloadBlob(blob);
+    }catch(e){say("xmsg","تعذر تجهيز الملف. جرّب «مشاركة الأرشيف» ثم «حفظ في الملفات».","bad")}
+  }
+  function downloadBlob(blob){
+    try{
       var url=URL.createObjectURL(blob),a=document.createElement("a");
       a.href=url;a.download=name;a.style.display="none";
       document.body.appendChild(a);a.click();a.remove();
-      setTimeout(function(){URL.revokeObjectURL(url)},30000);
-      say("xmsg","تم تجهيز الملف للتنزيل. افتح «الملفات» ثم «التنزيلات»، وانقله إلى مجلد «الرواتب» إذا أردت.","ok");
-    }catch(e){
-      say("xmsg","تعذر تنزيل الملف من المتصفح. جرّب زر «مشاركة الأرشيف» ثم «حفظ في الملفات».","bad");
-    }
+      setTimeout(function(){URL.revokeObjectURL(url)},60000);
+      say("xmsg","تم تجهيز ملف متوافق للتنزيل. افتح «الملفات» ثم «التنزيلات».","ok");
+    }catch(e){say("xmsg","تعذر تنزيل الملف من المتصفح. استخدم «مشاركة الأرشيف».","bad")}
   }
   if(window.claude&&typeof window.claude.use==="function"){
     try{
       window.claude.use("downloads").then(function(d){
         if(!d||typeof d.save!=="function"){browserDownload();return}
-        return d.save({filename:name,data:data}).then(function(){
-          say("xmsg","تم حفظ الملف ✓","ok");
-        }).catch(browserDownload);
+        return d.save({filename:name,data:data}).then(function(){say("xmsg","تم حفظ الملف ✓","ok")}).catch(browserDownload);
       }).catch(browserDownload);
     }catch(e){browserDownload()}
     return;
@@ -399,7 +409,9 @@ function exportXlsx(){
   w2["!cols"]=[{wch:12},{wch:20},{wch:14},{wch:12},{wch:12},{wch:10},{wch:12},{wch:16},{wch:48}];
   XLSX.utils.book_append_sheet(wb,w1,"أرشيف الرواتب");XLSX.utils.book_append_sheet(wb,w2,"تفاصيل القيود");
   wb.Workbook={Views:[{RTL:true},{RTL:true}]};
-  outFile(fname(gs,".xlsx"),XLSX.write(wb,{bookType:"xlsx",type:"array"}));
+  var xlsxData=XLSX.write(wb,{bookType:"xlsx",type:"array",compression:true});
+  if(xlsxData instanceof ArrayBuffer)xlsxData=new Uint8Array(xlsxData);
+  outFile(fname(gs,".xlsx"),xlsxData);
 }
 function pdfPage(rows,no,pages,t){
   var w=[110,44,72,60,48,80,320],h="<div style='width:794px;height:1123px;box-sizing:border-box;padding:30px;background:#fff;color:#111;direction:rtl;font-family:Tahoma,Arial,sans-serif;overflow:hidden'>";
