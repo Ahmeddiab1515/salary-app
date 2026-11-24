@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v30-logo-reset";
+const CACHE_NAME = "salary-app-v31-forced-splash-before-password";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
