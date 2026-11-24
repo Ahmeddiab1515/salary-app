@@ -569,7 +569,7 @@ function g(i){return document.getElementById(i)}
 g("lAr").onclick=function(){S.cfg.lang="ar";save();apply()};g("lEn").onclick=function(){S.cfg.lang="en";save();apply()};
 g("logoPick").onclick=function(){g("logoIn").click()};
 g("logoIn").onchange=function(){var input=this,f=input.files&&input.files[0];input.value="";if(!f)return;if(!f.type||f.type.indexOf("image/")!==0){alert("اختار صورة بصيغة مدعومة.");return}var previous=S.cfg.logo;img2url(f,128,"image/png",function(u){S.cfg.logo=u;if(!save()){if(previous)S.cfg.logo=previous;else delete S.cfg.logo;apply();alert("مساحة حفظ التطبيق غير كافية. لم يتم تغيير الشعار.");return}apply()},function(){alert("تعذر قراءة الصورة. جرّب صورة أخرى.")})};
-g("logoRst").onclick=function(){delete S.cfg.logo;save();apply()};
+g("logoRst").onclick=function(){var oldLogo=S.cfg.logo;if(window.APP_ICON)S.cfg.logo=window.APP_ICON;else delete S.cfg.logo;if(!save()){if(oldLogo)S.cfg.logo=oldLogo;else delete S.cfg.logo;alert("تعذر حفظ إعادة ضبط الشعار. لم يتم تغيير الشعار.");return}apply();var fav=document.querySelector("link[rel=icon]");if(fav)fav.href=window.APP_ICON||"./icon.svg";alert("تمت إعادة الشعار الافتراضي بنجاح ✓")};
 g("cPri").oninput=function(){S.cfg.color=this.value;save();apply()};
 g("cBg").oninput=function(){S.cfg.bg=this.value;save();apply()};
 g("cRst").onclick=function(){delete S.cfg.color;delete S.cfg.bg;save();apply()};
