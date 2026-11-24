@@ -781,6 +781,7 @@ window.previewXlsx=function(){
   card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label id="pwLabel" for="pwEntry">كلمة المرور</label><input id="pwEntry" type="password" autocomplete="new-password" placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button></div><p id="pwMsg" class="note" role="status"></p>';
   var settings = document.getElementById("t3");
   if(settings) settings.appendChild(card);
+  var pwStyle=document.createElement("style");pwStyle.textContent="#pwEntry,#gatePass,#qrPass,#qrPass2{background:#263238!important;color:#fff!important;border:1px solid #546e7a!important;color-scheme:dark}#pwEntry::placeholder,#gatePass::placeholder,#qrPass::placeholder,#qrPass2::placeholder{color:#c2cbd0!important;opacity:1}#passwordGate form{background:#17252b!important}#passwordGate h2{color:#80cbc4!important}#passwordGate form p{color:#d0d9dd!important}";document.head.appendChild(pwStyle);
   var pwStage="new";
   var pwFirst="";
   var pwEntry=document.getElementById("pwEntry"),pwSave=document.getElementById("pwSave"),pwRemove=document.getElementById("pwRemove"),pwLabel=document.getElementById("pwLabel");
