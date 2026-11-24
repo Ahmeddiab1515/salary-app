@@ -312,17 +312,39 @@ function renderArch(){
   if(q&&gs.length===1){var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");sp.innerHTML="";av.className="av";if(ph){av.src=ph;av.alt=""}else av.textContent=g1.name.charAt(0);bb.textContent=g1.name;s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex"}else sp.style.display="none";
   tb.innerHTML="";
   gs.forEach(function(g){
-    var tr=document.createElement("tr"),c=td(tr,""),b=document.createElement("button");b.className="nm";b.textContent=(openG[g.key]?"▾ ":"▸ ")+g.name;b.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};c.appendChild(b);
-    var s1=document.createElement("small");s1.textContent=g.n+" قيد";c.appendChild(s1);var s2=document.createElement("small");s2.textContent=stGrp(g);c.appendChild(s2);
-    var actions=document.createElement("div");actions.className="arch-row-actions";
-    var detail=document.createElement("button");detail.type="button";detail.className="arch-detail";detail.textContent=openG[g.key]?"طي التفاصيل":"عرض التفاصيل";detail.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};
+    var tr=document.createElement("tr"),cell=document.createElement("td"),card=document.createElement("div"),head=document.createElement("div"),identity=document.createElement("div"),avatar=document.createElement("div"),nameBox=document.createElement("div"),name=document.createElement("b"),meta=document.createElement("small"),status=document.createElement("span"),metrics=document.createElement("div"),actions=document.createElement("div");
+    tr.className="arch-card-row";cell.colSpan=5;card.className="arch-employee-card";head.className="arch-card-head";identity.className="arch-card-identity";avatar.className="arch-card-avatar";
+    var photo=S.photos[nk(g.name)];if(photo){var im=document.createElement("img");im.src=photo;im.alt="";avatar.appendChild(im)}else avatar.textContent=g.name.charAt(0)||"؟";
+    name.textContent=g.name;meta.textContent=g.n+" قيد مسجل";nameBox.appendChild(name);nameBox.appendChild(meta);identity.appendChild(avatar);identity.appendChild(nameBox);
+    status.className="arch-status"+(g.pend>0?" pending":" received");status.textContent=g.pend>0?(g.rec>0?"استلام جزئي":"لم يُستلم"):"تم الاستلام";
+    head.appendChild(identity);head.appendChild(status);card.appendChild(head);
+    metrics.className="arch-card-metrics";
+    [["الراتب الأساسي",g.sal],["السلف",g.adv],["الغياب",g.abs+" يوم"],["المجموع بعد الخصم",g.net]].forEach(function(item){var m=document.createElement("div"),lab=document.createElement("small"),val=document.createElement("b");m.className="arch-metric";lab.textContent=item[0];val.textContent=item[1];m.appendChild(lab);m.appendChild(val);metrics.appendChild(m)});
+    card.appendChild(metrics);
+    var paid=document.createElement("div");paid.className="arch-paid-line";paid.textContent="تم استلامه: "+g.rec+" درهم  •  المتبقي: "+g.pend+" درهم";card.appendChild(paid);
+    actions.className="arch-row-actions";
+    var detail=document.createElement("button");detail.type="button";detail.className="arch-detail";detail.textContent=openG[g.key]?"طي التفاصيل":"عرض تفاصيل القيود";detail.setAttribute("aria-expanded",openG[g.key]?"true":"false");detail.onclick=function(){openG[g.key]=!openG[g.key];renderArch()};
     var qr=document.createElement("button");qr.type="button";qr.className="arch-qr";qr.textContent="▦ QR العامل";qr.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(g.name);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};
     var pdf=document.createElement("button");pdf.type="button";pdf.className="arch-pdf";pdf.textContent="📄 كشوف PDF";pdf.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(g.name);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};
-    actions.appendChild(detail);actions.appendChild(qr);actions.appendChild(pdf);c.appendChild(actions);
-    [g.sal,g.adv,g.abs,g.net].forEach(function(v){td(tr,v)});tb.appendChild(tr);
-    if(openG[g.key])g.recs.forEach(function(x){var r=x.r,sr=document.createElement("tr");sr.className="sub";var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");bx.className="record-actions";p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};d.className="del-record";d.type="button";d.textContent="حذف القيد";d.onclick=function(){if(confirm("تأكيد حذف قيد "+g.name+" بتاريخ "+r.date+"؟")){S.rows.splice(x.i,1);save();renderAll()}};bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);[r.sal,r.adv,r.abs,netOf(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr)});
+    actions.appendChild(detail);actions.appendChild(qr);actions.appendChild(pdf);card.appendChild(actions);
+    if(openG[g.key]){
+      var recordsBox=document.createElement("div");recordsBox.className="arch-records";
+      var recordsTitle=document.createElement("b");recordsTitle.className="arch-records-title";recordsTitle.textContent="تفاصيل القيود";recordsBox.appendChild(recordsTitle);
+      g.recs.forEach(function(x){
+        var r=x.r,record=document.createElement("div"),recordTop=document.createElement("div"),date=document.createElement("b"),recStatus=document.createElement("span"),recordMetrics=document.createElement("div");
+        record.className="arch-record-card";recordTop.className="arch-record-head";date.textContent=r.date||"بدون تاريخ";
+        recStatus.className="arch-record-status"+(r.recv==="نعم"?" received":" pending");recStatus.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";recordTop.appendChild(date);recordTop.appendChild(recStatus);record.appendChild(recordTop);
+        recordMetrics.className="arch-record-metrics";
+        [["الراتب",r.sal],["السلفة",r.adv],["الغياب",r.abs+" يوم"],["المجموع",netOf(r)]].forEach(function(item){var m=document.createElement("div"),lab=document.createElement("small"),val=document.createElement("b");lab.textContent=item[0];val.textContent=item[1];m.appendChild(lab);m.appendChild(val);recordMetrics.appendChild(m)});
+        record.appendChild(recordMetrics);
+        var bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");bx.className="record-actions";p.type="button";p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تغيير إلى غير مستلم":"تأكيد الاستلام";p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};d.className="del-record";d.type="button";d.textContent="حذف القيد";d.onclick=function(){if(confirm("تأكيد حذف قيد "+g.name+" بتاريخ "+r.date+"؟")){S.rows.splice(x.i,1);save();renderAll()}};
+        bx.appendChild(p);bx.appendChild(d);record.appendChild(bx);recordsBox.appendChild(record);
+      });
+      card.appendChild(recordsBox);
+    }
+    cell.appendChild(card);tr.appendChild(cell);tb.appendChild(tr);
   });
-  if(!gs.length)tb.innerHTML="<tr><td colspan='5' class='empty'>"+(q?"لا توجد نتائج":"لا توجد قيود")+"</td></tr>";
+  if(!gs.length){var empty=document.createElement("tr"),ec=document.createElement("td");ec.colSpan=5;ec.className="empty";ec.textContent=q?"لا توجد نتائج":"لا توجد قيود";empty.appendChild(ec);tb.appendChild(empty)}
   var V=sums(gs);$("tot").innerHTML=gs.length?"<tr><td>الإجمالي</td><td>"+V.sal+"</td><td>"+V.adv+"</td><td>"+V.abs+"</td><td>"+V.net+"</td></tr>":"";
   $("sSal").textContent=T.sal;$("sAdv").textContent=T.adv;$("sCnt").textContent=T.n;$("sNet").textContent=T.net;$("sRec").textContent=T.rec;$("sPend").textContent=T.pend;
 }
@@ -922,6 +944,40 @@ function renderSharedCard(){
 #t1 .sub .record-actions button{font-size:11px;padding:5px 8px}
 #t1 .sub .record-actions .del-record{background:transparent;color:var(--bad);border:1px solid var(--bd)}
 @media(max-width:390px){#t1 .arch-tool-title{align-items:flex-start;flex-direction:column}#t1 .arch-row-actions button{flex:1}}
+#t1 .wrap table{border-collapse:separate;border-spacing:0 10px}
+#t1 #arch tr.arch-card-row{display:table-row;background:transparent}
+#t1 #arch tr.arch-card-row>td{display:table-cell;padding:0;border:0;background:transparent;white-space:normal}
+#t1 .arch-employee-card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:13px;box-shadow:0 3px 12px rgba(0,0,0,.045);text-align:right}
+#t1 .arch-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#t1 .arch-card-identity{display:flex;align-items:center;gap:10px;min-width:0}
+#t1 .arch-card-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:13px;background:var(--head);color:var(--pri);display:grid;place-items:center;font-weight:800;overflow:hidden}
+#t1 .arch-card-avatar img{width:100%;height:100%;object-fit:cover}
+#t1 .arch-card-identity b{display:block;font-size:15px;color:var(--tx);overflow-wrap:anywhere}
+#t1 .arch-card-identity small{display:block;font-size:11px;color:var(--mut);margin-top:3px}
+#t1 .arch-status,#t1 .arch-record-status{font-size:10px;border-radius:20px;padding:6px 9px;white-space:nowrap;font-weight:700}
+#t1 .arch-status.received,#t1 .arch-record-status.received{background:#e5f4eb;color:#176b3a}
+#t1 .arch-status.pending,#t1 .arch-record-status.pending{background:#fff1df;color:#98550b}
+#t1 .arch-card-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+#t1 .arch-metric{padding:9px;background:var(--bg);border:1px solid var(--bd);border-radius:11px;min-width:0}
+#t1 .arch-metric small{display:block;color:var(--mut);font-size:10px;line-height:1.5}
+#t1 .arch-metric b{display:block;color:var(--tx);font-size:13px;margin-top:4px;overflow-wrap:anywhere}
+#t1 .arch-paid-line{font-size:11px;color:var(--mut);padding:9px 2px 2px}
+#t1 .arch-row-actions{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:7px}
+#t1 .arch-row-actions button{min-height:36px;margin:0}
+#t1 .arch-records{margin-top:12px;padding-top:11px;border-top:1px solid var(--bd)}
+#t1 .arch-records-title{display:block;font-size:13px;margin-bottom:8px;color:var(--tx)}
+#t1 .arch-record-card{border:1px solid var(--bd);border-radius:12px;padding:10px;margin-top:8px;background:var(--bg)}
+#t1 .arch-record-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#t1 .arch-record-head>b{font-size:12px;color:var(--tx)}
+#t1 .arch-record-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px}
+#t1 .arch-record-metrics>div{display:flex;justify-content:space-between;gap:6px;font-size:11px}
+#t1 .arch-record-metrics small{color:var(--mut)}
+#t1 .arch-record-metrics b{color:var(--tx)}
+#t1 .arch-record-card .record-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+#t1 .arch-record-card .record-actions button{flex:1;min-height:34px;font-size:11px}
+#t1 #tot tr{background:var(--head)}
+@media(max-width:390px){#t1 .arch-employee-card{padding:10px}#t1 .arch-row-actions{grid-template-columns:1fr 1fr}#t1 .arch-row-actions .arch-detail{grid-column:1/-1}}
+
 </style><div class="share-card"><div id="sharedCardContent">جاري فتح كشف العامل…</div></div><div class="share-actions no-print"><button id="sharedPrint">حفظ / طباعة PDF</button><button class="secondary" id="sharedClose">إغلاق الصفحة</button></div>';
  document.body.appendChild(root);
  function fail(msg){root.querySelector("#sharedCardContent").textContent=msg;root.querySelector(".share-actions").style.display="none"}
