@@ -817,5 +817,84 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
   window.addEventListener("load", function () { navigator.serviceWorker.register("./sw.js").catch(function (err) { console.warn("تعذر تسجيل Service Worker", err); }); });
 }
 </script>
+
+<style>
+.qr-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.qr-actions button{font-size:12px;padding:8px 10px;border-radius:10px}
+.qr-overlay{position:fixed;inset:0;z-index:2147483000;background:#071b1bcc;display:flex;align-items:center;justify-content:center;padding:14px;direction:rtl}
+.qr-panel{background:#fff;color:#17212b;border-radius:18px;width:min(100%,480px);max-height:88vh;overflow:auto;padding:18px;font-family:Tahoma,Arial,sans-serif}
+.qr-panel h2{margin:0 0 12px;color:#0f766e;font-size:19px}
+.qr-panel label{display:block;margin:10px 0 5px;font-size:13px}
+.qr-panel input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd5d9;border-radius:10px;font-size:16px}
+.qr-panel button{border:0;border-radius:10px;padding:10px 13px;background:#0f766e;color:#fff;font-size:14px;margin:5px 3px;cursor:pointer}
+.qr-panel button.secondary{background:#e7eef0;color:#20323a}
+.qr-panel .qr-close{float:left;background:#edf1f2;color:#20323a}
+.qr-code{display:flex;justify-content:center;padding:14px;background:#fff}
+.qr-note{font-size:12px;color:#64748b;line-height:1.7}
+.qr-row{border-top:1px solid #e5e7eb;padding:10px 0;font-size:13px;line-height:1.8}
+</style>
+<script>
+(function(){
+"use strict";
+var DB="salary_worker_pdf_v1",STORE="pdfs",qrReady=null;
+function escQ(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function openDb(){return new Promise(function(resolve,reject){var q=indexedDB.open(DB,1);q.onupgradeneeded=function(){if(!q.result.objectStoreNames.contains(STORE))q.result.createObjectStore(STORE,{keyPath:"id",autoIncrement:true})};q.onsuccess=function(){resolve(q.result)};q.onerror=function(){reject(q.error)}})}
+function dbAdd(item){return openDb().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).add(item);tx.oncomplete=function(){db.close();resolve()};tx.onerror=function(){db.close();reject(tx.error)}})})}
+function dbAll(key){return openDb().then(function(db){return new Promise(function(resolve,reject){var q=db.transaction(STORE).objectStore(STORE).getAll();q.onsuccess=function(){db.close();resolve(q.result.filter(function(x){return x.key===key}).sort(function(a,b){return b.created-a.created}))};q.onerror=function(){db.close();reject(q.error)}})})}
+function dbGet(id){return openDb().then(function(db){return new Promise(function(resolve,reject){var q=db.transaction(STORE).objectStore(STORE).get(id);q.onsuccess=function(){db.close();resolve(q.result)};q.onerror=function(){db.close();reject(q.error)}})})}
+function ensureQr(){if(qrReady)return qrReady;qrReady=new Promise(function(resolve,reject){if(window.QRCode){resolve();return}var x=document.createElement("script");x.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";x.onload=resolve;x.onerror=reject;document.head.appendChild(x)});return qrReady}
+function overlay(title,body){var old=document.getElementById("qrOverlay");if(old)old.remove();var o=document.createElement("div");o.className="qr-overlay";o.id="qrOverlay";o.innerHTML='<div class="qr-panel"><button class="qr-close" type="button">إغلاق</button><h2>'+escQ(title)+'</h2><div id="qrPanelBody">'+body+'</div></div>';o.querySelector(".qr-close").onclick=function(){o.remove()};o.onclick=function(e){if(e.target===o)o.remove()};document.body.appendChild(o);return o}
+function empKey(name){return nk(name)}
+function getId(name){S.qrIds=S.qrIds||{};var k=empKey(name);if(!S.qrIds[k]){S.qrIds[k]="w"+Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(x){return x.toString(16).padStart(2,"0")}).join("");save()}return S.qrIds[k]}
+function getWorker(id){var ids=S.qrIds||{},key=Object.keys(ids).filter(function(k){return ids[k]===id})[0];if(!key)return null;return S.emps.filter(function(n){return empKey(n)===key})[0]||null}
+function records(name){return S.rows.filter(function(r){return empKey(r.name)===empKey(name)})}
+function totals(name){var rs=records(name),o={sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};rs.forEach(function(r){var n=netOf(r);o.sal+=r.sal;o.adv+=r.adv;o.abs+=r.abs;o.ded+=dedOf(r);o.net+=n;if(r.recv==="نعم")o.rec+=n;else o.pend+=n});Object.keys(o).forEach(function(k){o[k]=r2(o[k])});o.count=rs.length;return o}
+function bytesHex(a){return Array.from(new Uint8Array(a)).map(function(b){return b.toString(16).padStart(2,"0")}).join("")}
+function hexBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a}
+function derive(p,salt){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:180000,hash:"SHA-256"},k,256)})}
+function verify(p){var c=S.cfg||{};if(!c.passHash)return Promise.resolve(false);return derive(p,hexBytes(c.passSalt)).then(function(h){return bytesHex(h)===c.passHash})}
+function askPassword(name,done){
+ var c=S.cfg=S.cfg||{},isSet=!!c.passHash,html='<p class="qr-note">'+(isSet?'أدخل كلمة مرور التطبيق لعرض بيانات العامل.':'لا توجد كلمة مرور محفوظة بعد. أنشئ كلمة مرور من ٦ أحرف على الأقل لحماية عرض كشوف العامل.')+'</p><label>كلمة المرور</label><input id="qrPass" type="password" autocomplete="current-password" placeholder="كلمة المرور"><p id="qrErr" class="qr-note" role="alert"></p><button id="qrEnter" type="button">'+(isSet?'عرض البيانات':'حفظ كلمة المرور وفتح الحساب')+'</button>';
+ if(!isSet)html+='<label>تأكيد كلمة المرور</label><input id="qrPass2" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور">';
+ var o=overlay("حماية حساب "+name,html),go=o.querySelector("#qrEnter");
+ go.onclick=function(){var p=o.querySelector("#qrPass").value;if(p.length<6){o.querySelector("#qrErr").textContent="كلمة المرور لازم تكون ٦ أحرف على الأقل.";return}
+ if(isSet){verify(p).then(function(ok){if(!ok){o.querySelector("#qrErr").textContent="كلمة المرور غير صحيحة.";return}o.remove();done()}).catch(function(){o.querySelector("#qrErr").textContent="تعذر التحقق من كلمة المرور."})}
+ else{if(p!==o.querySelector("#qrPass2").value){o.querySelector("#qrErr").textContent="تأكيد كلمة المرور غير مطابق.";return}var salt=crypto.getRandomValues(new Uint8Array(16));derive(p,salt).then(function(h){c.passSalt=bytesHex(salt);c.passHash=bytesHex(h);save();o.remove();done()}).catch(function(){o.querySelector("#qrErr").textContent="تعذر إعداد كلمة المرور."})}
+ };
+}
+function showWorker(name){
+ var g=totals(name),rs=records(name).slice().reverse(),html='<div class="qr-note">بيانات محفوظة على هذا الجهاز فقط · '+today()+'</div>'+
+ '<div class="qr-row"><b>عدد القيود:</b> '+g.count+'<br><b>إجمالي الراتب الأساسي:</b> '+g.sal+' درهم<br><b>إجمالي السلف:</b> '+g.adv+' درهم<br><b>أيام الغياب:</b> '+g.abs+'<br><b>خصم الغياب:</b> '+g.ded+' درهم<br><b>المجموع بعد الخصم:</b> '+g.net+' درهم<br><b>المستلم:</b> '+g.rec+' درهم<br><b>المتبقي:</b> '+g.pend+' درهم</div><button id="qrMakePdf">إنشاء كشف PDF جديد</button><button class="secondary" id="qrHistory">الكشوف السابقة</button><div id="qrHistoryList"></div><h3 style="font-size:15px">تفاصيل القيود</h3>';
+ rs.forEach(function(r){html+='<div class="qr-row"><b>'+escQ(r.date)+'</b> — راتب: '+r.sal+' | سلفة: '+r.adv+' | تاريخ السلفة: '+escQ(r.advDt||"—")+' | غياب: '+r.abs+' | خصم: '+dedOf(r)+' | الصافي: '+netOf(r)+' درهم | '+escQ(r.recv)+'</div>'});
+ var o=overlay("كشف حساب العامل: "+name,html);
+ o.querySelector("#qrMakePdf").onclick=function(){makePdf(name)};
+ o.querySelector("#qrHistory").onclick=function(){history(name,o)};
+}
+function makePdf(name){
+ if(!window.html2canvas||!window.jspdf){alert("مكتبة PDF لم تُحمّل. اتصل بالإنترنت ثم حاول مرة أخرى.");return}
+ var g=totals(name),rs=records(name),stamp=new Date(),date=today(),host=document.createElement("div");
+ host.dir="rtl";host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#111;padding:34px;box-sizing:border-box;font-family:Tahoma,Arial,sans-serif";
+ var html='<h2 style="color:#0f766e">كشف حساب العامل</h2><h3>'+escQ(name)+'</h3><p>الشركة: '+escQ(S.co||"")+' | تاريخ إصدار الكشف: '+date+'</p><hr><p>عدد القيود: '+g.count+' | الراتب الأساسي: '+g.sal+' درهم | السلف: '+g.adv+' درهم | الغياب: '+g.abs+' يوم | خصم الغياب: '+g.ded+' درهم</p><h3>المجموع بعد الخصم: '+g.net+' درهم</h3><p>المستلم: '+g.rec+' درهم | المتبقي: '+g.pend+' درهم</p><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e5eeee"><th style="border:1px solid #aaa;padding:7px">التاريخ</th><th style="border:1px solid #aaa;padding:7px">الراتب</th><th style="border:1px solid #aaa;padding:7px">السلفة</th><th style="border:1px solid #aaa;padding:7px">تاريخ السلفة</th><th style="border:1px solid #aaa;padding:7px">الغياب</th><th style="border:1px solid #aaa;padding:7px">خصم الغياب</th><th style="border:1px solid #aaa;padding:7px">الصافي</th><th style="border:1px solid #aaa;padding:7px">الحالة</th></tr>';
+ rs.forEach(function(r){html+='<tr>'+[r.date,r.sal,r.adv,r.advDt||"—",r.abs,dedOf(r),netOf(r),r.recv==="نعم"?"مستلم":"غير مستلم"].map(function(v){return '<td style="border:1px solid #aaa;padding:6px;text-align:center">'+escQ(v)+'</td>'}).join("")+'</tr>'});
+ host.innerHTML=html+'</table><p style="margin-top:24px;color:#555;font-size:11px">تم إنشاء هذا الكشف من تطبيق كشف الرواتب.</p>';document.body.appendChild(host);
+ window.html2canvas(host,{scale:2,backgroundColor:"#fff"}).then(function(cv){var pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),img=cv.toDataURL("image/jpeg",.94),iw=pw,ih=cv.height*pw/cv.width,y=0;while(y<ih){if(y)pdf.addPage();pdf.addImage(img,"JPEG",0,-y,iw,ih);y+=ph}var blob=pdf.output("blob"),filename="كشف-"+name+"-"+date+"-"+stamp.getTime()+".pdf";return dbAdd({key:empKey(name),name:name,created:Date.now(),date:date,filename:filename,blob:blob}).then(function(){if(window.outFile)window.outFile(filename,blob);say("xmsg","تم إنشاء كشف PDF جديد وحفظه في أرشيف العامل على هذا الجهاز ✓","ok");})}).catch(function(){alert("تعذر إنشاء ملف PDF.")}).finally(function(){host.remove()});
+}
+function history(name,parent){
+ var target=parent.querySelector("#qrHistoryList");target.innerHTML='<p class="qr-note">جاري تحميل الكشوف المحفوظة…</p>';
+ dbAll(empKey(name)).then(function(items){target.innerHTML="";if(!items.length){target.textContent="لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.";return}
+ items.forEach(function(it){var d=document.createElement("div");d.className="qr-row";var b=document.createElement("button");b.textContent="حفظ / فتح PDF";b.onclick=function(){dbGet(it.id).then(function(x){if(!x)return;var u=URL.createObjectURL(x.blob),a=document.createElement("a");a.href=u;a.download=x.filename;a.click();setTimeout(function(){URL.revokeObjectURL(u)},60000)})};d.textContent=it.date+" — "+it.filename+" ";d.appendChild(b);target.appendChild(d)})}).catch(function(){target.textContent="تعذر قراءة أرشيف PDF."});
+}
+function showQr(name){
+ var id=getId(name),url=location.origin+location.pathname+"?worker="+encodeURIComponent(id);
+ overlay("QR Code — "+name,'<p class="qr-note">امسح الكود من كاميرا موبايلك لفتح حساب العامل على نفس الجهاز وبعد إدخال كلمة المرور.</p><div class="qr-code" id="qrCanvas"></div><p class="qr-note">الكود لا يحتوي على الراتب أو السلف؛ يحتوي على رابط ومعرّف فقط.</p><button class="secondary" id="qrPng">حفظ صورة QR</button>');
+ ensureQr().then(function(){var el=document.getElementById("qrCanvas");if(!el)return;new QRCode(el,{text:url,width:220,height:220,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});var b=document.getElementById("qrPng");if(b)b.onclick=function(){var im=el.querySelector("img"),cv=el.querySelector("canvas"),a=document.createElement("a");a.href=cv?cv.toDataURL("image/png"):im.src;a.download="QR-"+name+".png";a.click()}}).catch(function(){var el=document.getElementById("qrCanvas");if(el)el.textContent="تعذر تحميل مولد QR. تحقق من اتصال الإنترنت."});
+}
+var oldRender=renderEmps;
+renderEmps=function(){oldRender();document.querySelectorAll("#elist .emp").forEach(function(card){if(card.querySelector(".qr-actions"))return;var name=card.querySelector("b");if(!name)return;var n=name.textContent,actions=document.createElement("div");actions.className="qr-actions";var q=document.createElement("button"),p=document.createElement("button");q.type=p.type="button";q.textContent="▦ QR العامل";p.textContent="📄 كشوف PDF";q.onclick=function(){showQr(n)};p.onclick=function(){var o=overlay("أرشيف PDF — "+n,'<div id="qrHistoryList"></div>');history(n,o)};actions.appendChild(q);actions.appendChild(p);card.appendChild(actions)})};
+var params=new URLSearchParams(location.search),wid=params.get("worker");
+if(wid){var worker=getWorker(wid);if(worker){var tryOpen=function(){var gate=document.getElementById("passwordGate");if(gate){setTimeout(tryOpen,250);return}askPassword(worker,function(){showWorker(worker)})};setTimeout(tryOpen,100)}else{setTimeout(function(){alert("لم يتم العثور على العامل في بيانات هذا المتصفح. افتح التطبيق من نفس الموبايل الذي يحتوي على بيانات الرواتب.")},700)}}
+})();
+</script>
+
 </body>
 </html>
