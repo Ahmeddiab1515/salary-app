@@ -863,9 +863,23 @@ function askPassword(name,done){
  };
 }
 function showWorker(name){
- var g=totals(name),rs=records(name).slice().reverse(),html='<div class="qr-note">بيانات محفوظة على هذا الجهاز فقط · '+today()+'</div>'+
- '<div class="qr-row"><b>عدد القيود:</b> '+g.count+'<br><b>إجمالي الراتب الأساسي:</b> '+g.sal+' درهم<br><b>إجمالي السلف:</b> '+g.adv+' درهم<br><b>أيام الغياب:</b> '+g.abs+'<br><b>خصم الغياب:</b> '+g.ded+' درهم<br><b>المجموع بعد الخصم:</b> '+g.net+' درهم<br><b>المستلم:</b> '+g.rec+' درهم<br><b>المتبقي:</b> '+g.pend+' درهم</div><button id="qrMakePdf">إنشاء كشف PDF جديد</button><button class="secondary" id="qrHistory">الكشوف السابقة</button><div id="qrHistoryList"></div><h3 style="font-size:15px">تفاصيل القيود</h3>';
- rs.forEach(function(r){html+='<div class="qr-row"><b>'+escQ(r.date)+'</b> — راتب: '+r.sal+' | سلفة: '+r.adv+' | تاريخ السلفة: '+escQ(r.advDt||"—")+' | غياب: '+r.abs+' | خصم: '+dedOf(r)+' | الصافي: '+netOf(r)+' درهم | '+escQ(r.recv)+'</div>'});
+ var g=totals(name),rs=records(name).slice().reverse();
+ var stats=[
+  ["الراتب الأساسي",g.sal+" درهم"],
+  ["إجمالي السلف",g.adv+" درهم"],
+  ["أيام الغياب",g.abs+" يوم"],
+  ["خصم الغياب",g.ded+" درهم"],
+  ["المجموع بعد الخصم",g.net+" درهم"],
+  ["المستلم",g.rec+" درهم"],
+  ["المتبقي",g.pend+" درهم"],
+  ["عدد القيود",g.count]
+ ];
+ var html='<div class="qr-note">كشف حساب الموظف · '+today()+'</div>'+
+ '<div style="background:#eff7f5;border:1px solid #d8e9e5;border-radius:14px;padding:12px;margin:10px 0 14px;text-align:center"><div style="font-size:12px;color:#64748b">اسم الموظف</div><div style="font-size:20px;font-weight:700;color:#0f766e;margin-top:4px">'+escQ(name)+'</div><div style="font-size:12px;color:#64748b;margin-top:4px">الشركة: '+escQ(S.co||"—")+'</div></div>'+
+ '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0">'+
+ stats.map(function(x,i){return '<div style="background:'+(i===4?'#e4f2ee':'#f5f7f7')+';border:1px solid #e1e9e8;border-radius:11px;padding:11px;min-width:0"><div style="font-size:11px;color:#64748b">'+x[0]+'</div><div style="font-size:16px;font-weight:700;color:'+(i===4?'#0f766e':'#24343a')+';margin-top:5px;overflow-wrap:anywhere">'+escQ(x[1])+'</div></div>'}).join("")+
+ '</div><button id="qrMakePdf">إنشاء كشف PDF جديد</button><button class="secondary" id="qrHistory">الكشوف السابقة</button><div id="qrHistoryList"></div><h3 style="font-size:15px;margin-top:18px">تفاصيل القيود</h3>';
+ rs.forEach(function(r){html+='<div class="qr-row"><b>'+escQ(r.date)+'</b><br>الراتب: '+r.sal+' درهم | السلفة: '+r.adv+' درهم<br>تاريخ السلفة: '+escQ(r.advDt||"—")+' | الغياب: '+r.abs+' يوم<br>خصم الغياب: '+dedOf(r)+' درهم | الصافي: '+netOf(r)+' درهم<br>الحالة: '+escQ(r.recv==="نعم"?"مستلم":"غير مستلم")+'</div>'});
  var o=overlay("كشف حساب العامل: "+name,html);
  o.querySelector("#qrMakePdf").onclick=function(){makePdf(name)};
  o.querySelector("#qrHistory").onclick=function(){history(name,o)};
