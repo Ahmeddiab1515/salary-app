@@ -549,7 +549,8 @@ var appInfo=document.createElement("div");
 appInfo.id="appInfoCard";
 appInfo.className="card";
 appInfo.style.cssText="padding:16px;margin:18px 0 24px;border-top:3px solid var(--pri);";
-appInfo.innerHTML='<h2 style="margin-bottom:12px">معلومات التطبيق</h2>'
+appInfo.innerHTML='<button type="button" id="appInfoToggle" aria-expanded="false" aria-controls="appInfoDetails" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:transparent;border:0;color:inherit;padding:4px 0;font:inherit;text-align:right;cursor:pointer"><span style="display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="font-size:22px">ℹ️</span><strong style="font-size:16px">معلومات التطبيق</strong></span><span id="appInfoArrow" aria-hidden="true" style="font-size:18px">⌄</span></button>'
++'<div id="appInfoDetails" hidden style="font-size:14px;line-height:1.95;padding-top:12px;border-top:1px solid var(--line,rgba(128,128,128,.25));margin-top:10px">'
 +'<div style="font-size:14px;line-height:1.95">'
 +'<p><strong>اسم التطبيق:</strong> حرحش لإدارة الرواتب</p>'
 +'<p><strong>وصف التطبيق:</strong> أداة بسيطة لتنظيم سجلات رواتب الموظفين ومتابعة مستحقاتهم المالية.</p>'
@@ -561,7 +562,10 @@ appInfo.innerHTML='<h2 style="margin-bottom:12px">معلومات التطبيق<
 +'<p><strong>التخصيص:</strong> اختيار لغة التطبيق وتغيير الألوان والشعار ونوع الخط.</p>'
 +'<p><strong>النسخ الاحتياطي والاستعادة:</strong> إنشاء نسخة احتياطية واستخدامها لاستعادة بيانات التطبيق.</p>'
 +'<p><strong>حفظ البيانات:</strong> تُحفظ بيانات التطبيق في المتصفح على هذا الجهاز. احتفظ بنسخة احتياطية عند الانتقال إلى جهاز أو متصفح آخر.</p>'
-+'</div><p class="note" style="text-align:center;margin:14px 0 0;font-size:11px">تصميم وتطوير: أحمد حرحش</p>';
++'</div><p class="note" style="text-align:center;margin:14px 0 0;font-size:11px">تصميم وتطوير: أحمد حرحش</p>'
++'</div>';
+var appInfoToggle=document.getElementById("appInfoToggle");
+if(appInfoToggle)appInfoToggle.onclick=function(){var details=document.getElementById("appInfoDetails"),arrow=document.getElementById("appInfoArrow"),open=details.hidden;details.hidden=!open;appInfoToggle.setAttribute("aria-expanded",String(open));if(arrow)arrow.textContent=open?"⌃":"⌄"};
 sec.appendChild(appInfo);
 
 var nb=document.createElement("button");nb.type="button";nb.dataset.t="3";nb.innerHTML="<b>⚙️</b>الإعدادات";nb.onclick=function(){showTab(3)};document.querySelector("nav").appendChild(nb);
