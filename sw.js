@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v34-strict-splash-lock";
+const CACHE_NAME = "salary-app-v35-no-blue-password-transition";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
