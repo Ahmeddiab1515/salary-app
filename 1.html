@@ -932,5 +932,63 @@ if(wid){var worker=getWorker(wid);if(worker){var tryOpen=function(){var gate=doc
 })();
 </script>
 
+<script>
+(function(){
+"use strict";
+var card=document.createElement("div");
+card.className="card";
+card.id="backupCard";
+card.innerHTML='<h2>النسخ الاحتياطي والاستعادة</h2><p class="note">احفظ نسخة كاملة من بيانات العمال والرواتب والأرشيف وكشوف PDF. بعد إنشاء الملف، اختر Google Drive أو «حفظ في الملفات» من قائمة المشاركة.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" id="makeBackup">إنشاء نسخة احتياطية</button><button type="button" class="x" id="restoreBackup">استعادة نسخة</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p id="backupMsg" class="note" role="status">النسخة الاحتياطية تُحفظ في المكان الذي تختاره، ولا تُرسل تلقائيًا إلى أي حساب.</p>';
+var settings=document.getElementById("t3");
+if(settings)settings.appendChild(card);
+function status(t,bad){var el=document.getElementById("backupMsg");if(el){el.textContent=t;el.style.color=bad?"#b42318":""}}
+function readAsDataURL(blob){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onload=function(){resolve(fr.result)};fr.onerror=function(){reject(fr.error)};fr.readAsDataURL(blob)})}
+function openBackupDb(){return new Promise(function(resolve,reject){var q=indexedDB.open("salary_worker_pdf_v1",1);q.onsuccess=function(){resolve(q.result)};q.onerror=function(){reject(q.error)}})}
+function allPdfRecords(){return openBackupDb().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction("pdfs","readonly"),q=tx.objectStore("pdfs").getAll();q.onsuccess=function(){db.close();resolve(q.result||[])};q.onerror=function(){db.close();reject(q.error)}})})}
+function backupPdfRecords(){return allPdfRecords().then(function(items){return Promise.all(items.map(function(x){var copy={};Object.keys(x).forEach(function(k){if(k!=="blob")copy[k]=x[k]});return readAsDataURL(x.blob).then(function(data){copy.blobData=data;return copy})}))})}
+function saveBackupFile(blob,name){
+ var file=new File([blob],name,{type:"application/json"});
+ if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+  navigator.share({files:[file],title:"نسخة احتياطية من كشف الرواتب",text:"اختر Google Drive أو حفظ في الملفات."}).then(function(){status("تم فتح قائمة المشاركة. اختر Google Drive أو «حفظ في الملفات» لإكمال الحفظ.")}).catch(function(e){if(e&&e.name==="AbortError"){status("تم إلغاء المشاركة.");return}downloadBackup(blob,name)});
+ }else downloadBackup(blob,name);
+}
+function downloadBackup(blob,name){var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},60000);status("تم تجهيز ملف النسخة الاحتياطية. افتح «الملفات» ثم «التنزيلات»، أو شاركه إلى Google Drive.");}
+document.getElementById("makeBackup").onclick=function(){
+ var btn=this;btn.disabled=true;status("جاري تجهيز بيانات التطبيق وكشوف PDF…");
+ Promise.all([Promise.resolve(JSON.parse(JSON.stringify(S))),backupPdfRecords()]).then(function(parts){
+  var payload={app:"salary-app",backupVersion:1,createdAt:new Date().toISOString(),state:parts[0],pdfs:parts[1]};
+  var blob=new Blob([JSON.stringify(payload)],{type:"application/json"});
+  var date=new Date().toISOString().slice(0,10),name="salary-app-backup-"+date+".json";
+  saveBackupFile(blob,name);
+ }).catch(function(e){status("تعذر إنشاء النسخة الاحتياطية: "+(e&&e.message||"خطأ غير معروف"),true)}).finally(function(){btn.disabled=false});
+};
+var picker=document.getElementById("backupFile");
+document.getElementById("restoreBackup").onclick=function(){picker.click()};
+function restorePdfs(items){
+ return openBackupDb().then(function(db){return new Promise(function(resolve,reject){
+  var tx=db.transaction("pdfs","readwrite"),store=tx.objectStore("pdfs");store.clear();
+  Promise.all((items||[]).map(function(x){var copy={};Object.keys(x).forEach(function(k){if(k!=="blobData")copy[k]=x[k]});if(x.blobData){return fetch(x.blobData).then(function(res){return res.blob()}).then(function(blob){copy.blob=blob;store.put(copy)})}return Promise.resolve()})).catch(function(err){try{tx.abort()}catch(e){}reject(err)});
+  tx.oncomplete=function(){db.close();resolve()};tx.onerror=function(){db.close();reject(tx.error)};tx.onabort=function(){db.close();reject(tx.error||new Error("تعذرت استعادة كشوف PDF"))};
+ })});
+}
+picker.onchange=function(){
+ var file=picker.files&&picker.files[0];if(!file)return;
+ status("جاري فحص ملف النسخة الاحتياطية…");
+ var reader=new FileReader();
+ reader.onload=function(){
+  var payload;try{payload=JSON.parse(reader.result)}catch(e){status("الملف غير صالح أو تالف.",true);return}
+  if(!payload||payload.app!=="salary-app"||payload.backupVersion!==1||!payload.state||!Array.isArray(payload.state.emps)||!Array.isArray(payload.state.rows)||!Array.isArray(payload.pdfs)){status("هذا الملف ليس نسخة احتياطية صالحة من التطبيق.",true);return}
+  if(!confirm("استعادة النسخة ستستبدل بيانات الرواتب والأرشيف الحالية على هذا الجهاز. هل تريد المتابعة؟")){status("تم إلغاء الاستعادة.");picker.value="";return}
+  var next=payload.state;
+  try{localStorage.setItem(KEY,JSON.stringify(next))}catch(e){status("تعذر حفظ البيانات. قد تكون مساحة التخزين غير كافية.",true);return}
+  S=next;
+  restorePdfs(payload.pdfs).then(function(){if(typeof renderAll==="function")renderAll();if(typeof apply==="function")apply();status("تمت استعادة النسخة الاحتياطية بنجاح ✓");}).catch(function(e){status("تمت استعادة بيانات الرواتب، لكن تعذرت استعادة بعض كشوف PDF: "+(e&&e.message||""),true)});
+ };
+ reader.onerror=function(){status("تعذر قراءة الملف.",true)};
+ reader.readAsText(file);picker.value="";
+};
+})();
+</script>
+
 </body>
 </html>
