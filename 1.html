@@ -592,11 +592,11 @@ function toArabic(s){
 var EN_AR={};Object.keys(EN).forEach(function(k){EN_AR[EN[k]]=k});
 var PAT_AR=[
  [/^Filtered by search: (.+)$/,"مصفّى حسب البحث: $1"],
- [/^Results: (\\d+) of (\\d+)$/,"النتائج: $1 من $2"],
- [/^(\\d+) entries$/,"$1 قيد"],
+ [/^Results: (\d+) of (\d+)$/,"النتائج: $1 من $2"],
+ [/^(\d+) entries$/,"$1 قيد"],
  [/^Salary received — Advance: (.+) — Amount: (.+) AED$/,"تم استلام الراتب — السلف: $1 — المبلغ: $2 درهم"],
  [/^Salary not received — Advance: (.+) — Remaining amount: (.+) AED$/,"لم يتم استلام الراتب — السلف: $1 — المبلغ المتبقي: $2 درهم"],
- [/^Received: (.+) AED — Not received \\(remaining\\): (.+) AED — Advance: (.+)$/,"تم استلام: $1 درهم — لم يُستلم (المتبقي): $2 درهم — السلف: $3"],
+ [/^Received: (.+) AED — Not received \(remaining\): (.+) AED — Advance: (.+)$/,"تم استلام: $1 درهم — لم يُستلم (المتبقي): $2 درهم — السلف: $3"],
  [/^Added to the existing name: (.+) ✓$/,"تمت الإضافة على نفس الاسم: $1 ✓"],
  [/^(.+) AED$/,"$1 درهم"]
 ];
