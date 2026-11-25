@@ -95,7 +95,7 @@ nav button{border-radius:0;font-weight:bold;padding:10px 4px}
 nav button b{font-size:22px;transition:transform .15s}
 nav button.on{color:var(--pri)}
 nav button.on b{transform:translateY(-2px) scale(1.15)}
-.emp{padding:12px 0}
+.emp{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;margin:10px 0;border:1px solid var(--bd);border-radius:16px;background:var(--card);box-shadow:var(--sh)}.emp-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;min-width:0}.emp-name{display:block;width:100%;padding:8px 10px;text-align:right;background:transparent;color:var(--tx);font-weight:bold;font-size:16px;border:0}.emp-name:active{transform:scale(.99)}.emp-summary{display:block;color:var(--mut);font-size:12px;padding:0 10px}.emp-details{flex-basis:100%;width:100%;padding:12px;margin-top:4px;border-top:1px solid var(--bd);background:var(--head);border-radius:12px}.emp-detail-row{display:flex;justify-content:space-between;gap:12px;padding:7px 2px;border-bottom:1px solid var(--bd);font-size:13px}.emp-detail-row:last-child{border-bottom:0}.emp-record{padding:10px 0;border-bottom:1px dashed var(--bd)}.emp-record:last-child{border-bottom:0}.emp-record b{display:block;margin-bottom:6px}.emp>div{min-width:0}.emp .av{margin-inline-end:2px}.emp .up{margin-inline-end:0!important}.emp .qr-actions{flex-basis:100%;width:100%}
 .av{width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--head);color:var(--pri);display:inline-flex;align-items:center;justify-content:center;font-weight:bold;flex:none}
 .av.sm{width:26px;height:26px;font-size:12px;vertical-align:middle;margin-inline-end:6px}
 .av.big{width:64px;height:64px;border-radius:16px}
@@ -393,13 +393,40 @@ function renderEmps(){
   var l=$("elist"),all=grp();l.innerHTML="";
   if(!S.emps.length){l.innerHTML="<div class='empty'>لا يوجد موظفين، أضف أول موظف</div>";return}
   S.emps.forEach(function(n,i){
-    var g=all.filter(function(x){return x.key===nk(n)})[0]||{n:0,net:0,pend:0};
+    var g=all.filter(function(x){return x.key===nk(n)})[0]||{n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,recs:[]};
     var d=document.createElement("div");d.className="emp";
-    var a=document.createElement("div"),b=document.createElement("b"),s=document.createElement("small");
-    b.textContent=n;s.textContent=g.n+" قيد | المجموع "+g.net+" | غير مستلم "+g.pend;a.appendChild(b);a.appendChild(s);
-    var x=document.createElement("button");x.className="x";x.textContent="حذف";
-    x.onclick=function(){S.emps.splice(i,1);save();renderAll()};
-    d.appendChild(a);d.appendChild(x);var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(n);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);d.appendChild(qa);l.appendChild(d);
+    var head=document.createElement("div");head.className="emp-top";
+    var info=document.createElement("div");info.style.flex="1";info.style.minWidth="0";
+    var b=document.createElement("button");b.type="button";b.className="emp-name";b.textContent=(openG["emp:"+nk(n)]?"▾ ":"▸ ")+n;
+    var s=document.createElement("small");s.className="emp-summary";s.textContent=g.n+" قيد | المستحق "+g.net+" درهم | غير مستلم "+g.pend+" درهم";
+    info.appendChild(b);info.appendChild(s);
+    var x=document.createElement("button");x.className="x";x.type="button";x.textContent="حذف";
+    x.onclick=function(){if(!confirm("هل تريد حذف الموظف من القائمة؟ لن يتم حذف كشوفه المحفوظة."))return;S.emps.splice(i,1);save();renderAll()};
+    head.appendChild(info);head.appendChild(x);d.appendChild(head);
+    var details=document.createElement("div");details.className="emp-details";details.hidden=!openG["emp:"+nk(n)];
+    function detail(label,value){var row=document.createElement("div");row.className="emp-detail-row";var k=document.createElement("span"),v=document.createElement("b");k.textContent=label;v.textContent=value;row.appendChild(k);row.appendChild(v);details.appendChild(row)}
+    if(!g.n){var empty=document.createElement("div");empty.className="empty";empty.textContent="لا توجد كشوف مسجلة لهذا الموظف حتى الآن.";details.appendChild(empty)}
+    else{
+      detail("عدد الكشوف",g.n);
+      detail("الراتب الأساسي",g.sal+" درهم");
+      detail("إجمالي السلف",g.adv+" درهم");
+      detail("أيام الغياب",g.abs);
+      detail("خصم الغياب",g.ded+" درهم");
+      detail("المجموع بعد الخصم",g.net+" درهم");
+      detail("تم استلامه",g.rec+" درهم");
+      detail("المتبقي غير المستلم",g.pend+" درهم");
+      var sep=document.createElement("h3");sep.textContent="تفاصيل الكشوف";sep.style.margin="14px 0 6px";details.appendChild(sep);
+      g.recs.forEach(function(item){
+        var r=item.r,rec=document.createElement("div");rec.className="emp-record";
+        var title=document.createElement("b");title.textContent="تاريخ الكشف: "+r.date;rec.appendChild(title);
+        var line=document.createElement("div");line.textContent="الراتب الأساسي: "+r.sal+" درهم | السلف: "+r.adv+" درهم | الغياب: "+r.abs+" يوم";rec.appendChild(line);
+        var result=document.createElement("div");result.textContent="المجموع: "+netOf(r)+" درهم | "+(r.recv==="نعم"?"تم الاستلام":"لم يتم الاستلام");rec.appendChild(result);
+        details.appendChild(rec);
+      });
+    }
+    b.onclick=function(){openG["emp:"+nk(n)]=!openG["emp:"+nk(n)];renderEmps()};
+    d.appendChild(details);
+    var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(n);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);d.appendChild(qa);l.appendChild(d);
   });
 }
 function renderAll(){empOpts();renderArch();renderEmps();$("coTag").textContent=S.co||""}
