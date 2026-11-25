@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v40-remove-font-card-20261125";
+const CACHE_NAME = "salary-app-v41-language-font-button-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
