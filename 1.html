@@ -640,7 +640,7 @@ sec.innerHTML='<div class="card"><button type="button" id="langFontToggle" style
 +'<div class="card"><h2>ألوان التطبيق</h2><label>اللون الأساسي</label><div class="sw" id="sw"></div><input id="cPri" type="color"><label>لون الهامش (الخلفية)</label><input id="cBg" type="color"><div style="margin-top:12px"><button type="button" id="cRst" class="x">إعادة ضبط</button></div></div>'
 +'<p class="note" style="text-align:center">صورة العامل بتتحفظ في المتصفح، وبتظهر في تبويب الموظفين والأرشيف.</p>';
 document.querySelector("main").appendChild(sec);
-var nb=document.createElement("button");nb.type="button";nb.dataset.t="3";nb.innerHTML="⚙️ الإعدادات";nb.onclick=function(){showTab(3)};document.querySelector("nav").appendChild(nb);
+var nb=document.createElement("button");nb.type="button";nb.dataset.t="3";nb.innerHTML="<b>⚙️</b>الإعدادات";nb.onclick=function(){showTab(3)};document.querySelector("nav").appendChild(nb);
 FONTS.forEach(function(f){var o=document.createElement("option");o.value=f[1];o.textContent=f[0];document.getElementById("fSel").appendChild(o)});
 SW.forEach(function(c){var b=document.createElement("button");b.type="button";b.style.background=c;b.onclick=function(){S.cfg.color=c;save();apply()};document.getElementById("sw").appendChild(b)});
 function g(i){return document.getElementById(i)}
