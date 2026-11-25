@@ -123,12 +123,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @keyframes sp-pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 #splash{overflow:hidden;isolation:isolate;gap:16px;background:radial-gradient(ellipse at 50% 43%,rgba(52,211,153,.13),transparent 42%),linear-gradient(145deg,#064e3b,#0f766e 58%,#042f2e)}
 #splash:before{content:"";position:absolute;left:50%;top:calc(50% - 34px);width:220px;height:220px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(110,231,183,.2),rgba(16,185,129,.07) 48%,transparent 72%);filter:blur(5px);pointer-events:none}
-#splash img{position:relative;z-index:2;width:136px;height:136px;border:2px solid rgba(236,253,245,.78);border-radius:34px;box-shadow:0 12px 34px rgba(0,0,0,.26),0 0 28px rgba(52,211,153,.2);animation:sp-fade .9s ease-out both}
+#splash:after{content:"";position:absolute;left:50%;top:calc(50% - 33px);width:174px;height:174px;border:2px solid rgba(110,231,183,.34);border-left-color:rgba(236,253,245,.82);border-bottom-color:rgba(110,231,183,.12);border-radius:50%;box-shadow:0 0 16px rgba(52,211,153,.12);transform:translate(-50%,-50%);transform-origin:center;animation:sp-ring-turn 3.2s linear infinite;z-index:1;pointer-events:none}
+#splash img{position:relative;z-index:2;width:136px;height:136px;border:2px solid rgba(236,253,245,.78);border-radius:34px;box-shadow:0 12px 34px rgba(0,0,0,.26),0 0 28px rgba(52,211,153,.2);animation:sp-logo-enter .95s cubic-bezier(.2,.75,.25,1) both}
 #splash .sp-brand{position:relative;z-index:2;text-align:center;color:#fff;animation:sp-fade .9s ease-out .18s both}
 #splash .sp-brand strong{display:block;font-size:27px;letter-spacing:.5px;text-shadow:0 2px 14px rgba(0,0,0,.18)}
 #splash .sp-brand small{display:block;margin-top:5px;font-size:13px;letter-spacing:1.3px;color:rgba(236,253,245,.82)}
+@keyframes sp-logo-enter{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}
+@keyframes sp-ring-turn{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes sp-fade{from{opacity:0}to{opacity:1}}
-@media(prefers-reduced-motion:reduce){#splash img,#splash .sp-brand{animation:none!important;opacity:1}}
+@media(prefers-reduced-motion:reduce){#splash:after{animation:none!important}#splash img,#splash .sp-brand{animation:none!important;opacity:1}}
 #shsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .shcard{background:var(--card);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
 .shcard h2{text-align:center;margin:0 0 6px}
