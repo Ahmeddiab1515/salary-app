@@ -620,6 +620,17 @@ Object.assign(EN,{
 "مجموع الراتب بعد خصم السلف والغياب":"Total salary after advances and absence deductions",
 "مجموع الراتب المستلم":"Total salary received",
 "مجموع الراتب المتبقي (لم يُستلم)":"Total remaining salary (not received)",
+"الشركة":"Company",
+"تاريخ إصدار الكشف":"Statement issue date",
+"تاريخ التقرير":"Report date",
+"بحث":"Search",
+"صفحة":"Page",
+"من":"of",
+"عدد العمال":"Employees",
+"إجمالي الراتب الأساسي":"Total base salary",
+"النسخ اليدوي: اختر Google Drive بعد فتح قائمة المشاركة، أو اختر «حفظ في الملفات».":"Manual backup: choose Google Drive from the share menu, or choose “Save to Files”.",
+"نص يوم":"Half day"
+,
 "مشاركة ملف الإكسل":"Share Excel file",
 "مشاركة ملف PDF":"Share PDF file",
 "💾 حفظ":"💾 Save",
@@ -729,6 +740,8 @@ PAT.push(
  [/^(.+) أيام$/,"$1 days"],
  [/^النتائج: (\d+) من (\d+)$/,"Results: $1 of $2"]
 );
+PAT.push([/^يوم$/,"day"]);
+PAT_AR.push([/^day$/,"يوم"]);
 PAT_AR.push(
  [/^Statement dated (.+)$/,"كشف بتاريخ $1"],
  [/^(.+) day\(s\)$/,"$1 يوم"],
