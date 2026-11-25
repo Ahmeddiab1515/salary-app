@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v58-full-bilingual-audit-20261125";
+const CACHE_NAME = "salary-app-v59-bilingual-roundtrip-fix-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
