@@ -609,13 +609,24 @@ Object.assign(EN,{
 "لا توجد نتائج للبحث":"No results for this search",
 "من":"of"
 });
+Object.assign(EN,{
+"لا توجد كشوف مسجلة لهذا الموظف حتى الآن.":"No payroll records have been saved for this employee yet.","الرواتب - الراتب":"Payroll - Salary","اكتب كلمة مرور من ٦ أحرف على الأقل":"Enter a password of at least 6 characters","حفظ":"Save","إلغاء كلمة المرور":"Remove password","اكتب كلمة المرور مرة ثانية للتأكيد":"Re-enter the password to confirm","اكتب كلمة المرور مرة ثانية في نفس المربع، ثم اضغط حفظ التأكيد.":"Re-enter the password in the same field, then tap Save confirmation.","المتبقي":"Remaining","مستلم":"Received","غير مستلم":"Not received","الراتب الأساسي:":"Base salary:","عدد القيود:":"Number of entries:","السلف:":"Advances:","تاريخ إصدار الكشف:":"Statement issue date:","تاريخ إصدار الباركود:":"QR issue date:","خصم الغياب:":"Absence deduction:","المجموع بعد الخصم:":"Net total:","درهم":"AED","الموظفين":"Employees","الإعدادات":"Settings","اللغة":"Language","اسم العامل":"Worker name","اسم الموظف":"Employee name","التاريخ":"Date","الغياب":"Absence","السلفة":"Advance","الحالة":"Status","مجموع السلف":"Total advances","الراتب الأساسي":"Base salary","مجموع الراتب بعد الخصم":"Total net salary","تم استلامه":"Received","المتبقي (لم يُستلم)":"Remaining (not received)"
+});
 var PAT=[[/^كشف حساب الموظف · (.+)$/,"Employee statement · $1"],[/^كشف حساب العامل: (.+)$/,"Employee statement: $1"],[/^حماية حساب (.+)$/,"Protect account $1"],[/^مصفّى حسب البحث: (.+)$/,"Filtered by search: $1"],[/^النتائج: (\d+) من (\d+)$/,"Results: $1 of $2"],[/^(\d+) قيد$/,"$1 entries"],[/^تم استلام الراتب — السلف: (.+) — المبلغ: (.+) درهم$/,"Salary received — Advance: $1 — Amount: $2 AED"],[/^لم يتم استلام الراتب — السلف: (.+) — المبلغ المتبقي: (.+) درهم$/,"Salary not received — Advance: $1 — Remaining amount: $2 AED"],[/^تم استلام: (.+) درهم — لم يُستلم \(المتبقي\): (.+) درهم — السلف: (.+)$/,"Received: $1 AED — Not received (remaining): $2 AED — Advance: $3"],[/^(\d+) قيد \| المجموع (.+) \| غير مستلم (.+)$/,"$1 entries | Total $2 | Unreceived $3"],[/^تمت الإضافة على نفس الاسم: (.+) ✓$/,"Added to the existing name: $1 ✓"],[/^(.+) \(خصم الغياب\)$/,"$1 (absence deduction)"],[/^(.+) درهم$/,"$1 AED"]];
-function tr(s){if(EN[s]!==undefined)return EN[s];for(var i=0;i<PAT.length;i++)if(PAT[i][0].test(s))return s.replace(PAT[i][0],PAT[i][1]);return s}
+function tr(s){
+  if(EN[s]!==undefined)return EN[s];
+  for(var i=0;i<PAT.length;i++)if(PAT[i][0].test(s))return s.replace(PAT[i][0],PAT[i][1]);
+  var out=s,keys=Object.keys(EN).filter(function(k){return k.length>=4&&/[\u0600-\u06FF]/.test(k)}).sort(function(a,b){return b.length-a.length});
+  keys.forEach(function(k){if(out.indexOf(k)>-1)out=out.split(k).join(EN[k])});
+  return out;
+}
 var mo,timer;
 function toArabic(s){
   if(EN_AR[s]!==undefined)return EN_AR[s];
   for(var i=0;i<PAT_AR.length;i++)if(PAT_AR[i][0].test(s))return s.replace(PAT_AR[i][0],PAT_AR[i][1]);
-  return s;
+  var out=s,keys=Object.keys(EN_AR).filter(function(k){return k.length>=4}).sort(function(a,b){return b.length-a.length});
+  keys.forEach(function(k){if(out.indexOf(k)>-1)out=out.split(k).join(EN_AR[k])});
+  return out;
 }
 var EN_AR={};Object.keys(EN).forEach(function(k){EN_AR[EN[k]]=k});
 var PAT_AR=[[/^Employee statement · (.+)$/,"كشف حساب الموظف · $1"],[/^Employee statement: (.+)$/,"كشف حساب العامل: $1"],[/^Protect account (.+)$/,"حماية حساب $1"],
