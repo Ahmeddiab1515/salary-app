@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v52-employee-qr-script-repaired-20261125";
+const CACHE_NAME = "salary-app-v53-full-bilingual-ui-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
