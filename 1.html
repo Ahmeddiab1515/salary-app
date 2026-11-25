@@ -651,7 +651,7 @@ if(!d.querySelector(".sp-brand")){
  brand.innerHTML="<strong>حرحش</strong><small>إدارة الرواتب</small>";d.appendChild(brand);
 }
 function go(){if(dismissed)return;dismissed=true;d.classList.add("hide");setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);window.dispatchEvent(new Event("salarySplashFinished"))},650)}
-function appReady(){setTimeout(go,8000)}
+function appReady(){setTimeout(go,5000)}
 if(document.readyState==="complete")appReady();
 else window.addEventListener("load",appReady,{once:true});
 })();
