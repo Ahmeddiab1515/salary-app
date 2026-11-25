@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v30-no-white-flash-20261125";
+const CACHE_NAME = "salary-app-v31-rotating-splash-ring-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
