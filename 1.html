@@ -607,7 +607,7 @@ Object.assign(EN,{
 "الإجمالي":"Total",
 "لا يوجد موظفين، أضف أول موظف":"No employees yet. Add the first employee.",
 "لا توجد نتائج للبحث":"No results for this search",
-"من":"of"
+"إدارة الرواتب":"Payroll Management"
 });
 Object.assign(EN,{
 "لا توجد كشوف مسجلة لهذا الموظف حتى الآن.":"No payroll records have been saved for this employee yet.","الرواتب - الراتب":"Payroll - Salary","اكتب كلمة مرور من ٦ أحرف على الأقل":"Enter a password of at least 6 characters","حفظ":"Save","إلغاء كلمة المرور":"Remove password","اكتب كلمة المرور مرة ثانية للتأكيد":"Re-enter the password to confirm","اكتب كلمة المرور مرة ثانية في نفس المربع، ثم اضغط حفظ التأكيد.":"Re-enter the password in the same field, then tap Save confirmation.","المتبقي":"Remaining","مستلم":"Received","غير مستلم":"Not received","الراتب الأساسي:":"Base salary:","عدد القيود:":"Number of entries:","السلف:":"Advances:","تاريخ إصدار الكشف:":"Statement issue date:","تاريخ إصدار الباركود:":"QR issue date:","خصم الغياب:":"Absence deduction:","المجموع بعد الخصم:":"Net total:","درهم":"AED","الموظفين":"Employees","الإعدادات":"Settings","اللغة":"Language","اسم العامل":"Worker name","اسم الموظف":"Employee name","التاريخ":"Date","الغياب":"Absence","السلفة":"Advance","الحالة":"Status","مجموع السلف":"Total advances","الراتب الأساسي":"Base salary","مجموع الراتب بعد الخصم":"Total net salary","تم استلامه":"Received","المتبقي (لم يُستلم)":"Remaining (not received)"
@@ -639,6 +639,18 @@ var PAT_AR=[[/^Employee statement · (.+)$/,"كشف حساب الموظف · $1"
  [/^Added to the existing name: (.+) ✓$/,"تمت الإضافة على نفس الاسم: $1 ✓"],
  [/^(.+) AED$/,"$1 درهم"]
 ];
+PAT.push(
+ [/^كشف بتاريخ (.+)$/,"Statement dated $1"],
+ [/^(.+) يوم$/,"$1 day(s)"],
+ [/^(.+) أيام$/,"$1 days"],
+ [/^النتائج: (\\d+) من (\\d+)$/,"Results: $1 of $2"]
+);
+PAT_AR.push(
+ [/^Statement dated (.+)$/,"كشف بتاريخ $1"],
+ [/^(.+) day\\(s\\)$/,"$1 يوم"],
+ [/^(.+) days$/,"$1 أيام"],
+ [/^Results: (\\d+) of (\\d+)$/,"النتائج: $1 من $2"]
+);
 function pass(){
   if(mo)mo.disconnect();
   var en=S.cfg.lang==="en",w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null),n;
