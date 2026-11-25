@@ -593,7 +593,7 @@ var sec=document.createElement("section");sec.className="tab";sec.id="t3";
 sec.innerHTML='<div class="card"><h2>اللغة</h2><div class="seg"><button type="button" id="lAr">العربية</button><button type="button" id="lEn">English</button></div></div>'
 +'<div class="card"><h2>شعار التطبيق</h2><div class="row" style="align-items:center"><img id="logoPrev" class="av big" alt=""><label class="up">رفع شعار<input id="logoIn" type="file" accept="image/*" hidden></label><button type="button" id="logoRst" class="x">إعادة ضبط</button></div><p class="note">الشعار بيظهر جوه التطبيق، وأيقونة الشاشة الرئيسية بتتغير من إعدادات الجهاز.</p></div>'
 +'<div class="card"><h2>ألوان التطبيق</h2><label>اللون الأساسي</label><div class="sw" id="sw"></div><input id="cPri" type="color"><label>لون الهامش (الخلفية)</label><input id="cBg" type="color"><div style="margin-top:12px"><button type="button" id="cRst" class="x">إعادة ضبط</button></div></div>'
-+'<div class="card"><h2>الخط</h2><select id="fSel"></select></div><p class="note" style="text-align:center">صورة العامل بتتحفظ في المتصفح، وبتظهر في تبويب الموظفين والأرشيف.</p>';
++'<select id="fSel" hidden></select><p class="note" style="text-align:center">صورة العامل بتتحفظ في المتصفح، وبتظهر في تبويب الموظفين والأرشيف.</p>';
 document.querySelector("main").appendChild(sec);
 var nb=document.createElement("button");nb.type="button";nb.dataset.t="3";nb.innerHTML="الإعدادات";nb.onclick=function(){showTab(3)};document.querySelector("nav").appendChild(nb);
 FONTS.forEach(function(f){var o=document.createElement("option");o.value=f[1];o.textContent=f[0];document.getElementById("fSel").appendChild(o)});
