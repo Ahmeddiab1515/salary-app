@@ -612,6 +612,42 @@ Object.assign(EN,{
 Object.assign(EN,{
 "لا توجد كشوف مسجلة لهذا الموظف حتى الآن.":"No payroll records have been saved for this employee yet.","الرواتب - الراتب":"Payroll - Salary","اكتب كلمة مرور من ٦ أحرف على الأقل":"Enter a password of at least 6 characters","حفظ":"Save","إلغاء كلمة المرور":"Remove password","اكتب كلمة المرور مرة ثانية للتأكيد":"Re-enter the password to confirm","اكتب كلمة المرور مرة ثانية في نفس المربع، ثم اضغط حفظ التأكيد.":"Re-enter the password in the same field, then tap Save confirmation.","المتبقي":"Remaining","مستلم":"Received","غير مستلم":"Not received","الراتب الأساسي:":"Base salary:","عدد القيود:":"Number of entries:","السلف:":"Advances:","تاريخ إصدار الكشف:":"Statement issue date:","تاريخ إصدار الباركود:":"QR issue date:","خصم الغياب:":"Absence deduction:","المجموع بعد الخصم:":"Net total:","درهم":"AED","الموظفين":"Employees","الإعدادات":"Settings","اللغة":"Language","اسم العامل":"Worker name","اسم الموظف":"Employee name","التاريخ":"Date","الغياب":"Absence","السلفة":"Advance","الحالة":"Status","مجموع السلف":"Total advances","الراتب الأساسي":"Base salary","مجموع الراتب بعد الخصم":"Total net salary","تم استلامه":"Received","المتبقي (لم يُستلم)":"Remaining (not received)"
 });
+
+Object.assign(EN,{
+"أرشيف الرواتب":"Payroll archive",
+"مجموع الراتب بعد خصم السلف والغياب":"Total salary after advances and absence deductions",
+"مجموع الراتب المستلم":"Total salary received",
+"مجموع الراتب المتبقي (لم يُستلم)":"Total remaining salary (not received)",
+"مشاركة ملف الإكسل":"Share Excel file",
+"مشاركة ملف PDF":"Share PDF file",
+"💾 حفظ":"💾 Save",
+"شعار حرحش HARHASH":"HARHASH logo",
+"جاري تحميل الكشوف المحفوظة…":"Loading saved statements…",
+"لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.":"No saved PDF statements for this employee yet.",
+"تعذر قراءة أرشيف PDF.":"Could not read the PDF archive.",
+"حفظ / فتح PDF":"Save / Open PDF",
+"إنشاء كشف PDF جديد":"Create new PDF statement",
+"الكشوف السابقة":"Previous statements",
+"تفاصيل القيود":"Entry details",
+"اسم الموظف":"Employee name",
+"كشف حساب العامل":"Worker statement",
+"بيانات التطبيق":"App data",
+"استعادة نسخة من Drive أو الملفات":"Restore backup from Drive or Files",
+"النسخ الاحتياطي اليدوي على Google Drive":"Manual backup to Google Drive",
+"حفظ نسخة على Google Drive":"Save backup to Google Drive",
+"اختيار النسخة واستعادتها":"Choose and restore backup",
+"هل لديك نسخة احتياطية؟":"Do you have a backup?",
+"ليس الآن":"Not now",
+"معلومات التطبيق":"App information",
+"وظائف التطبيق":"App features",
+"نوع التطبيق":"App type",
+"رقم النسخة":"Version",
+"تاريخ التحديث":"Last updated",
+"العملة":"Currency",
+"إغلاق الصفحة":"Close page",
+"جاري فتح كشف العامل…":"Opening worker statement…"
+});
+
 var PAT=[[/^كشف حساب الموظف · (.+)$/,"Employee statement · $1"],[/^كشف حساب العامل: (.+)$/,"Employee statement: $1"],[/^حماية حساب (.+)$/,"Protect account $1"],[/^مصفّى حسب البحث: (.+)$/,"Filtered by search: $1"],[/^النتائج: (\d+) من (\d+)$/,"Results: $1 of $2"],[/^(\d+) قيد$/,"$1 entries"],[/^تم استلام الراتب — السلف: (.+) — المبلغ: (.+) درهم$/,"Salary received — Advance: $1 — Amount: $2 AED"],[/^لم يتم استلام الراتب — السلف: (.+) — المبلغ المتبقي: (.+) درهم$/,"Salary not received — Advance: $1 — Remaining amount: $2 AED"],[/^تم استلام: (.+) درهم — لم يُستلم \(المتبقي\): (.+) درهم — السلف: (.+)$/,"Received: $1 AED — Not received (remaining): $2 AED — Advance: $3"],[/^(\d+) قيد \| المجموع (.+) \| غير مستلم (.+)$/,"$1 entries | Total $2 | Unreceived $3"],[/^تمت الإضافة على نفس الاسم: (.+) ✓$/,"Added to the existing name: $1 ✓"],[/^(.+) \(خصم الغياب\)$/,"$1 (absence deduction)"],[/^([\d,.-]+) درهم$/,"$1 AED"]];
 function tr(s){
   if(EN[s]!==undefined)return EN[s];
@@ -658,8 +694,8 @@ function pass(){
     var p=n.parentNode.nodeName;if(p==="SCRIPT"||p==="STYLE")continue;
     if(n.__base===undefined)n.__base=n.nodeValue;
     var base=n.__base.trim(),translated;
-    if(en)translated=/[\\u0600-\\u06FF]/.test(base)?tr(base):base;
-    else translated=/[\\u0600-\\u06FF]/.test(base)?base:toArabic(base);
+    if(en)translated=/[\u0600-\u06FF]/.test(base)?tr(base):base;
+    else translated=/[\u0600-\u06FF]/.test(base)?base:toArabic(base);
     if(translated!==base)n.nodeValue=n.__base.replace(base,translated);
     else if(n.nodeValue!==n.__base)n.nodeValue=n.__base;
   }
@@ -668,8 +704,8 @@ function pass(){
       if(!e.hasAttribute(a))return;
       var key="__base_"+a;if(e[key]===undefined)e[key]=e.getAttribute(a);
       var base=e[key],v=base.trim(),translated;
-      if(en)translated=/[\\u0600-\\u06FF]/.test(v)?tr(v):v;
-      else translated=/[\\u0600-\\u06FF]/.test(v)?v:toArabic(v);
+      if(en)translated=/[\u0600-\u06FF]/.test(v)?tr(v):v;
+      else translated=/[\u0600-\u06FF]/.test(v)?v:toArabic(v);
       e.setAttribute(a,base.replace(v,translated));
     });
   });
@@ -679,7 +715,7 @@ function pass(){
   if(mo)mo.observe(document.body,{childList:true,subtree:true,characterData:true});
 }
 mo=new MutationObserver(function(){clearTimeout(timer);timer=setTimeout(pass,30)});
-function hx(c){return [1,3,5].map(function(i){return parseInt(c.substr(i,2),16)})}
+ hx(c){return [1,3,5].map(function(i){return parseInt(c.substr(i,2),16)})}
 function mix(c,t,f){var a=hx(c);return "rgb("+a.map(function(v){return Math.round(v+(t-v)*f)}).join(",")+")"}
 function lum(c){var a=hx(c);return (0.299*a[0]+0.587*a[1]+0.114*a[2])/255}
 function img2url(file,max,mime,cb){
