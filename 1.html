@@ -953,6 +953,15 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
 .qr-code{display:flex;justify-content:center;padding:14px;background:#fff}
 .qr-note{font-size:12px;color:#64748b;line-height:1.7}
 .qr-row{border-top:1px solid #e5e7eb;padding:10px 0;font-size:13px;line-height:1.8}
+/* ترتيب بيانات كشف الموظف في صفوف واضحة ومتتابعة */
+.emp-details{display:block;flex:0 0 100%;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.emp-records{display:flex;flex-direction:column;gap:12px;width:100%}
+.emp-record{width:100%;box-sizing:border-box}
+.emp-record-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;width:100%}
+.emp-record-cell{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;min-height:38px;padding:8px 10px;box-sizing:border-box}
+.emp-record-label{flex:1;text-align:right}
+.emp-record-value{flex:0 1 auto;text-align:left;max-width:58%;overflow-wrap:anywhere}
+@media(max-width:380px){.emp-record-cell{padding:8px;gap:8px}.emp-record-value{max-width:55%;font-size:12px}}
 </style>
 <script>
 (function(){
@@ -1043,15 +1052,6 @@ function renderSharedCard(){
  document.body.style.overflow="hidden";
  var root=document.createElement("div");root.id="sharedSalaryCard";root.style.cssText="position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#f1f5f5;color:#17212b;padding:18px;box-sizing:border-box;direction:rtl;font-family:Tahoma,Arial,sans-serif";
  root.innerHTML='<style>@media print{body{background:#fff!important}#sharedSalaryCard{position:static!important;overflow:visible!important;background:#fff!important;padding:0!important}#sharedSalaryCard .no-print{display:none!important}.share-card{box-shadow:none!important;border:0!important;margin:0!important}}.share-card{max-width:680px;margin:0 auto;background:#fff;border:1px solid #dce6e6;border-radius:18px;padding:20px;box-shadow:0 8px 28px #1231}.share-card h1{font-size:23px;color:#0f766e;margin:0 0 8px}.share-card h2{font-size:16px;color:#0f766e;margin:20px 0 8px}.share-meta{color:#64748b;font-size:12px;line-height:1.8}.share-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}.share-stat{background:#f0f7f6;border-radius:12px;padding:11px}.share-stat small{display:block;color:#64748b;font-size:11px}.share-stat b{display:block;font-size:17px;margin-top:4px}.share-entry{border-top:1px solid #e5eeee;padding:10px 0;font-size:13px;line-height:1.9;overflow-wrap:anywhere}.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px auto;max-width:680px}.share-actions button{border:0;border-radius:11px;padding:12px 16px;background:#0f766e;color:white;font-size:14px}.share-actions button.secondary{background:#e2eeee;color:#20323a}@media(max-width:380px){.share-card{padding:14px}.share-stats{gap:6px}.share-stat{padding:9px}.share-stat b{font-size:15px}}
-/* ترتيب بيانات كشف الموظف في صفوف واضحة ومتتابعة */
-.emp-details{display:block;flex:0 0 100%;width:100%;max-width:100%;min-width:0;box-sizing:border-box}
-.emp-records{display:flex;flex-direction:column;gap:12px;width:100%}
-.emp-record{width:100%;box-sizing:border-box}
-.emp-record-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;width:100%}
-.emp-record-cell{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;min-height:38px;padding:8px 10px;box-sizing:border-box}
-.emp-record-label{flex:1;text-align:right}
-.emp-record-value{flex:0 1 auto;text-align:left;max-width:58%;overflow-wrap:anywhere}
-@media(max-width:380px){.emp-record-cell{padding:8px;gap:8px}.emp-record-value{max-width:55%;font-size:12px}}
 </style><div class="share-card"><div id="sharedCardContent">جاري فتح كشف العامل…</div></div><div class="share-actions no-print"><button id="sharedPrint">حفظ / طباعة PDF</button><button class="secondary" id="sharedClose">إغلاق الصفحة</button></div>';
  document.body.appendChild(root);
  function fail(msg){root.querySelector("#sharedCardContent").textContent=msg;root.querySelector(".share-actions").style.display="none"}
