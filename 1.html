@@ -148,6 +148,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   75%{transform:translateY(-.5px) skewX(-.5deg)}
 }
 @media(prefers-reduced-motion:reduce){#splash:after{animation:none!important}#splash img,#splash .sp-brand,#splash .sp-brand strong{animation:none!important;opacity:1;background-position:50% 50%}}
+/* شاشة البداية: الاسم بدل صورة الشعار */
+#splash img{display:none!important}
+#splash:before{top:50%!important}
+#splash:after{top:50%!important;width:206px;height:206px}
+#splash .sp-brand{min-width:220px;min-height:206px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+#splash .sp-brand strong{font-size:36px;letter-spacing:1px}
+#splash .sp-brand small{font-size:13px}
 #shsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .shcard{background:var(--card);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
 .shcard h2{text-align:center;margin:0 0 6px}
@@ -624,11 +631,9 @@ fill();
 </script>
 <script>
 (function(){
-var d=document.getElementById("splash"),logo=(S.cfg&&S.cfg.logo)||window.APP_ICON||window.SPLASH_LOGO||"";
+var d=document.getElementById("splash"),dismissed=false;
 if(!d){d=document.createElement("div");d.id="splash";document.body.appendChild(d)}
-if(logo){var im=d.querySelector("img");if(!im){im=document.createElement("img");im.alt="شعار التطبيق";d.appendChild(im)}im.src=logo}
-var mark=d.querySelector("img"),dismissed=false;
-if(mark){mark.removeAttribute("role");mark.removeAttribute("tabindex");mark.removeAttribute("aria-label")}
+d.querySelectorAll("img").forEach(function(im){im.remove()});
 if(!d.querySelector(".sp-brand")){
  var brand=document.createElement("div");brand.className="sp-brand";
  brand.innerHTML="<strong>حرحش</strong><small>إدارة الرواتب</small>";d.appendChild(brand);
