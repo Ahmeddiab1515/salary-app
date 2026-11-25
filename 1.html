@@ -648,6 +648,50 @@ Object.assign(EN,{
 "جاري فتح كشف العامل…":"Opening worker statement…"
 });
 
+
+Object.assign(EN,{
+"خصم الغياب (درهم)":"Absence deduction (AED)",
+"المجموع بعد الخصم (درهم)":"Total after deductions (AED)",
+"📤 مشاركة":"📤 Share",
+"📊 حفظ ملف الإكسل أو مشاركته":"📊 Save or share Excel file",
+"📄 حفظ ملف PDF أو مشاركته":"📄 Save or share PDF file",
+"💬 مشاركة ملخص نصي (واتساب / ماسنجر)":"💬 Share text summary (WhatsApp / Messenger)",
+"📊 مشاركة ملف الإكسل":"📊 Share Excel file",
+"📄 مشاركة ملف PDF":"📄 Share PDF file",
+"المتبقي ":"Remaining ",
+"مجموع السلف: ":"Sum of advances: ",
+"مجموع الراتب بعد الخصم: ":"Total after deductions: ",
+"المستلم: ":"Received amount: ",
+"المتبقي (لم يُستلم): ":"Remaining (not received): ",
+"عدد القيود":"Entries",
+"القيود":"Records",
+"مجموع السلف":"Sum of advances",
+"إجمالي السلف":"Total advances",
+"تم استلامه":"Received",
+"تم الاستلام":"Receipt confirmed",
+"المستلم":"Received amount",
+"مستلم":"Paid",
+"مستلم تم استلام":"Marked as received",
+"السلف":"Advances",
+"السلفة":"Advance",
+"الإجمالي":"Grand total",
+"المجموع":"Total",
+"لم يُستلم":"Not received",
+"لم يتم الاستلام":"Not yet received",
+"غير مستلم":"Unpaid",
+"— اختار —":"— Choose —",
+"اختار —":"Choose —",
+"— بدون سلف —":"— No advances —",
+"بدون سلف —":"No advances —",
+"— بدون غياب —":"— No absence —",
+"بدون غياب —":"No absence —",
+"المتبقي غير المستلم":"Outstanding balance",
+"لم يستلم المتبقي":"Remaining unpaid",
+"تم استلام:":"Received:",
+"مجموع الراتب المستلم":"Total salary received",
+"مجموع الراتب المتبقي (لم يُستلم)":"Total remaining salary (not received)"
+});
+
 var PAT=[[/^كشف حساب الموظف · (.+)$/,"Employee statement · $1"],[/^كشف حساب العامل: (.+)$/,"Employee statement: $1"],[/^حماية حساب (.+)$/,"Protect account $1"],[/^مصفّى حسب البحث: (.+)$/,"Filtered by search: $1"],[/^النتائج: (\d+) من (\d+)$/,"Results: $1 of $2"],[/^(\d+) قيد$/,"$1 entries"],[/^تم استلام الراتب — السلف: (.+) — المبلغ: (.+) درهم$/,"Salary received — Advance: $1 — Amount: $2 AED"],[/^لم يتم استلام الراتب — السلف: (.+) — المبلغ المتبقي: (.+) درهم$/,"Salary not received — Advance: $1 — Remaining amount: $2 AED"],[/^تم استلام: (.+) درهم — لم يُستلم \(المتبقي\): (.+) درهم — السلف: (.+)$/,"Received: $1 AED — Not received (remaining): $2 AED — Advance: $3"],[/^(\d+) قيد \| المجموع (.+) \| غير مستلم (.+)$/,"$1 entries | Total $2 | Unreceived $3"],[/^تمت الإضافة على نفس الاسم: (.+) ✓$/,"Added to the existing name: $1 ✓"],[/^(.+) \(خصم الغياب\)$/,"$1 (absence deduction)"],[/^([\d,.-]+) درهم$/,"$1 AED"]];
 function tr(s){
   if(EN[s]!==undefined)return EN[s];
@@ -712,6 +756,13 @@ function pass(){
   document.documentElement.lang=en?"en":"ar";
   document.documentElement.dir=en?"ltr":"rtl";
   document.body.dir=en?"ltr":"rtl";
+  document.querySelectorAll('[dir="rtl"],[dir="ltr"]').forEach(function(e){
+    if(e!==document.documentElement&&e!==document.body)e.setAttribute("dir",en?"ltr":"rtl");
+  });
+  document.querySelectorAll("[style]").forEach(function(e){
+    if(e.style.direction==="rtl"||e.style.direction==="ltr")e.style.direction=en?"ltr":"rtl";
+    if(e.style.textAlign==="right"||e.style.textAlign==="left")e.style.textAlign=en?"left":"right";
+  });
   if(mo)mo.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label","alt","value"]});
 }
 mo=new MutationObserver(function(records){records.forEach(function(r){if(r.type==="characterData"&&r.target&&r.target.nodeType===3){r.target.__base=r.target.nodeValue}else if(r.type==="attributes"&&r.target){r.target["__base_"+r.attributeName]=r.target.getAttribute(r.attributeName)}});clearTimeout(timer);timer=setTimeout(pass,30)});
