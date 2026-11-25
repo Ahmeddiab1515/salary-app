@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v43-name-only-employees-20261125";
+const CACHE_NAME = "salary-app-v44-organized-employee-details-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
