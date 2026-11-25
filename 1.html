@@ -153,7 +153,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 #splash img{display:block!important;position:relative;z-index:2;width:190px;height:190px;object-fit:contain;border:0;border-radius:0;box-shadow:none;filter:invert(1);mix-blend-mode:screen}
 #splash .sp-brand{min-width:0;min-height:0;gap:0}
 #splash .sp-brand strong{display:none!important}
-#splash .sp-brand small{margin-top:2px}
+#splash .sp-brand{position:static}
+#splash .sp-brand small{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);margin:0;text-align:center;width:100%;font-size:13px;letter-spacing:1.3px;color:rgba(236,253,245,.82)}
 /* حركة هادئة للشعار الأصلي فقط — بدون تغيير صورته أو ألوانه */
 @keyframes splashLogoFloat{
   0%,100%{transform:translateY(0) scale(1)}
