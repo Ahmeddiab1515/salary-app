@@ -154,6 +154,18 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 #splash .sp-brand{min-width:0;min-height:0;gap:0}
 #splash .sp-brand strong{display:none!important}
 #splash .sp-brand small{margin-top:2px}
+/* حركة هادئة للشعار الأصلي فقط — بدون تغيير صورته أو ألوانه */
+@keyframes splashLogoFloat{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-9px) scale(1.035)}
+}
+#splash img{
+  animation:splashLogoFloat 2.8s ease-in-out infinite;
+  transform-origin:center;
+}
+@media (prefers-reduced-motion:reduce){
+  #splash img{animation:none}
+}
 #shsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .shcard{background:var(--card);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
 .shcard h2{text-align:center;margin:0 0 6px}
