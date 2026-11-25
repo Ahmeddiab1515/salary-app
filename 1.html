@@ -1107,5 +1107,34 @@ else setTimeout(offerRestore,800);
 })();
 </script>
 
+
+<script>
+(function(){
+"use strict";
+var settings=document.getElementById("t3");
+if(!settings||document.getElementById("appInfoCard"))return;
+var card=document.createElement("div");
+card.className="card";
+card.id="appInfoCard";
+card.innerHTML='<h2>معلومات التطبيق</h2><button type="button" id="openAppInfo" style="width:100%;min-height:46px">ℹ️ معلومات التطبيق</button>';
+settings.appendChild(card);
+function closeInfo(){var modal=document.getElementById("appInfoModal");if(modal)modal.remove()}
+document.getElementById("openAppInfo").onclick=function(){
+ if(document.getElementById("appInfoModal"))return;
+ var modal=document.createElement("div");
+ modal.id="appInfoModal";
+ modal.setAttribute("role","dialog");
+ modal.setAttribute("aria-modal","true");
+ modal.setAttribute("aria-labelledby","appInfoTitle");
+ modal.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl";
+ modal.innerHTML='<div style="width:100%;max-width:380px;background:var(--card,#fff);color:var(--text,#17332f);border-radius:18px;padding:22px;box-shadow:0 14px 44px rgba(0,0,0,.28);text-align:center"><div style="font-size:30px;margin-bottom:8px">ℹ️</div><h2 id="appInfoTitle" style="margin:0 0 12px">معلومات التطبيق</h2><div style="font-size:18px;font-weight:700;margin-bottom:8px">حرحش — إدارة الرواتب</div><p style="line-height:1.9;margin:0 0 18px">تطبيق لتنظيم رواتب العاملين وتسجيل السلف والغياب، ومتابعة المستحقات والأرشيف وحفظ البيانات.</p><button type="button" id="closeAppInfo" style="width:100%;min-height:44px">إغلاق</button></div>';
+ modal.addEventListener("click",function(e){if(e.target===modal)closeInfo()});
+ document.body.appendChild(modal);
+ document.getElementById("closeAppInfo").onclick=closeInfo;
+};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeInfo()});
+})();
+</script>
+
 </body>
 </html>
