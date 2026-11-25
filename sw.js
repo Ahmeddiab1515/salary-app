@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v56-ar-en-language-detection-fix-20261125";
+const CACHE_NAME = "salary-app-v57-full-bilingual-interface-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
