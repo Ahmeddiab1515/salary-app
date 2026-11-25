@@ -322,7 +322,7 @@ function grp(){
   S.rows.forEach(function(r,i){
     var k=nk(r.name),g=m[k];
     if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,recs:[]};o.push(g)}
-    var n=netOf(r);g.n++;g.sal=r.sal;g.adv+=r.adv;g.abs+=r.abs;g.ded+=dedOf(r);g.net+=n;if(r.recv==="نعم")g.rec+=n;else g.pend+=n;g.recs.push({r:r,i:i});
+    var n=netOf(r);g.n++;g.sal+=r.sal;g.adv+=r.adv;g.abs+=r.abs;g.ded+=dedOf(r);g.net+=n;if(r.recv==="نعم")g.rec+=n;else g.pend+=n;g.recs.push({r:r,i:i});
   });
   o.forEach(function(g){["sal","adv","abs","ded","net","rec","pend"].forEach(function(k){g[k]=r2(g[k])})});
   return o;
@@ -1182,7 +1182,7 @@ function empKey(name){return nk(name)}
 function getId(name){S.qrIds=S.qrIds||{};var k=empKey(name);if(!S.qrIds[k]){S.qrIds[k]="w"+Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(x){return x.toString(16).padStart(2,"0")}).join("");save()}return S.qrIds[k]}
 function getWorker(id){var ids=S.qrIds||{},key=Object.keys(ids).filter(function(k){return ids[k]===id})[0];if(!key)return null;return S.emps.filter(function(n){return empKey(n)===key})[0]||null}
 function records(name){return S.rows.filter(function(r){return empKey(r.name)===empKey(name)})}
-function totals(name){var rs=records(name),o={sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};rs.forEach(function(r){var n=netOf(r);o.sal=r.sal;o.adv+=r.adv;o.abs+=r.abs;o.ded+=dedOf(r);o.net+=n;if(r.recv==="نعم")o.rec+=n;else o.pend+=n});Object.keys(o).forEach(function(k){o[k]=r2(o[k])});o.count=rs.length;return o}
+function totals(name){var rs=records(name),o={sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};rs.forEach(function(r){var n=netOf(r);o.sal+=r.sal;o.adv+=r.adv;o.abs+=r.abs;o.ded+=dedOf(r);o.net+=n;if(r.recv==="نعم")o.rec+=n;else o.pend+=n});Object.keys(o).forEach(function(k){o[k]=r2(o[k])});o.count=rs.length;return o}
 function bytesHex(a){return Array.from(new Uint8Array(a)).map(function(b){return b.toString(16).padStart(2,"0")}).join("")}
 function hexBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a}
 function derive(p,salt){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:180000,hash:"SHA-256"},k,256)})}
