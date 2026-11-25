@@ -398,11 +398,10 @@ function renderEmps(){
     var head=document.createElement("div");head.className="emp-top";
     var info=document.createElement("div");info.style.flex="1";info.style.minWidth="0";
     var b=document.createElement("button");b.type="button";b.className="emp-name";b.textContent=(openG["emp:"+nk(n)]?"▾ ":"▸ ")+n;
-    var s=document.createElement("small");s.className="emp-summary";s.textContent=g.n+" قيد | المستحق "+g.net+" درهم | غير مستلم "+g.pend+" درهم";
-    info.appendChild(b);info.appendChild(s);
+    info.appendChild(b);
     var x=document.createElement("button");x.className="x";x.type="button";x.textContent="حذف";
     x.onclick=function(){if(!confirm("هل تريد حذف الموظف من القائمة؟ لن يتم حذف كشوفه المحفوظة."))return;S.emps.splice(i,1);save();renderAll()};
-    head.appendChild(info);head.appendChild(x);d.appendChild(head);
+    head.appendChild(info);d.appendChild(head);
     var details=document.createElement("div");details.className="emp-details";details.hidden=!openG["emp:"+nk(n)];
     function detail(label,value){var row=document.createElement("div");row.className="emp-detail-row";var k=document.createElement("span"),v=document.createElement("b");k.textContent=label;v.textContent=value;row.appendChild(k);row.appendChild(v);details.appendChild(row)}
     if(!g.n){var empty=document.createElement("div");empty.className="empty";empty.textContent="لا توجد كشوف مسجلة لهذا الموظف حتى الآن.";details.appendChild(empty)}
@@ -425,8 +424,8 @@ function renderEmps(){
       });
     }
     b.onclick=function(){openG["emp:"+nk(n)]=!openG["emp:"+nk(n)];renderEmps()};
-    d.appendChild(details);
-    var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(n);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);d.appendChild(qa);l.appendChild(d);
+    details.appendChild(x);
+    var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){if(window.salaryShowQr)window.salaryShowQr(n);else alert("ميزة QR لم تجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);details.appendChild(qa);d.appendChild(details);l.appendChild(d);
   });
 }
 function renderAll(){empOpts();renderArch();renderEmps();$("coTag").textContent=S.co||""}
