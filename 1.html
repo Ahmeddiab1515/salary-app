@@ -862,6 +862,10 @@ window.previewXlsx=function(){
     pwStage="remove";pwLabel.textContent="كلمة المرور القديمة";pwEntry.value="";pwEntry.autocomplete="current-password";pwEntry.placeholder="أدخل كلمة المرور القديمة";pwEntry.focus();pwSave.textContent="تأكيد إلغاء كلمة المرور";pwRemove.style.display="none";msg("أدخل كلمة المرور القديمة في نفس المربع، ثم اضغط تأكيد إلغاء كلمة المرور.");
   };
   if(cfg.passHash && !new URLSearchParams(location.search).has("card")){
+    var privacyCurtain=document.createElement("div");
+    privacyCurtain.id="appPrivacyCurtain";
+    privacyCurtain.style.cssText="position:fixed;inset:0;z-index:2147483646;background:linear-gradient(135deg,var(--g1),var(--g2));";
+    document.body.appendChild(privacyCurtain);
     var gate=document.createElement("div");
     gate.id="passwordGate";
     gate.style.cssText="position:fixed;inset:0;z-index:2147483647;background:linear-gradient(135deg,var(--g1),var(--g2));display:none;align-items:center;justify-content:center;padding:22px;direction:rtl;font-family:Tahoma,Arial,sans-serif";
@@ -869,7 +873,7 @@ window.previewXlsx=function(){
     document.body.appendChild(gate);
     window.addEventListener("salarySplashFinished",function(){gate.style.display="flex";},{once:true});
     var lockMark=document.getElementById("lockMark");if(lockMark)lockMark.onclick=function(){lockMark.classList.remove("is-active");void lockMark.offsetWidth;lockMark.classList.add("is-active");setTimeout(function(){lockMark.classList.remove("is-active")},1600)};
-    document.getElementById("gateForm").onsubmit=function(e){e.preventDefault();var p=document.getElementById("gatePass").value;check(p).then(function(ok){if(ok){gate.remove();}else{document.getElementById("gateMsg").textContent="كلمة المرور غير صحيحة.";document.getElementById("gatePass").value="";document.getElementById("gatePass").focus();}}).catch(function(){document.getElementById("gateMsg").textContent="تعذر التحقق من كلمة المرور على هذا المتصفح.";});};
+    document.getElementById("gateForm").onsubmit=function(e){e.preventDefault();var p=document.getElementById("gatePass").value;check(p).then(function(ok){if(ok){gate.remove();privacyCurtain.remove();}else{document.getElementById("gateMsg").textContent="كلمة المرور غير صحيحة.";document.getElementById("gatePass").value="";document.getElementById("gatePass").focus();}}).catch(function(){document.getElementById("gateMsg").textContent="تعذر التحقق من كلمة المرور على هذا المتصفح.";});};
     setTimeout(function(){var p=document.getElementById("gatePass");if(p)p.focus();},100);
   }
 })();
