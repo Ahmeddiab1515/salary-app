@@ -118,9 +118,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 #splash{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;transition:none}
 #splash.hide{opacity:0;pointer-events:none}
 #splash img{width:128px;height:128px;border-radius:30px;object-fit:cover;box-shadow:0 12px 32px rgba(0,0,0,.3)}
-#splash .sp-ico{font-size:88px;animation:sp-pop .6s ease}
+
 #splash .sp-t{font-size:24px;font-weight:bold}
-@keyframes sp-pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
 #splash{overflow:hidden;isolation:isolate;gap:16px;background:radial-gradient(ellipse at 50% 43%,rgba(52,211,153,.13),transparent 42%),linear-gradient(145deg,#064e3b,#0f766e 58%,#042f2e)}
 #splash:before{content:"";position:absolute;left:50%;top:calc(50% - 34px);width:220px;height:220px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(110,231,183,.2),rgba(16,185,129,.07) 48%,transparent 72%);filter:blur(5px);pointer-events:none}
 #splash:after{content:"";position:absolute;left:50%;top:calc(50% - 33px);width:174px;height:174px;border:2px solid rgba(110,231,183,.34);border-left-color:rgba(236,253,245,.82);border-bottom-color:rgba(110,231,183,.12);border-radius:50%;box-shadow:0 0 16px rgba(52,211,153,.12);transform:translate(-50%,-50%);transform-origin:center;z-index:1;pointer-events:none}
@@ -128,9 +128,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 #splash .sp-brand{position:relative;z-index:2;text-align:center;color:#fff}
 #splash .sp-brand strong{display:block;font-size:27px;letter-spacing:.5px;text-shadow:0 2px 14px rgba(0,0,0,.18)}
 #splash .sp-brand small{display:block;margin-top:5px;font-size:13px;letter-spacing:1.3px;color:rgba(236,253,245,.82)}
-@keyframes sp-logo-enter{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}
-@keyframes sp-ring-turn{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
-@keyframes sp-fade{from{opacity:0}to{opacity:1}}
+
+
+
 #splash .sp-brand strong{
   background:linear-gradient(112deg,#fff 0%,#d1fae5 22%,#fff 43%,#a7f3d0 56%,#fff 76%,#d1fae5 100%);
   background-size:230% 100%;
@@ -140,13 +140,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   -webkit-text-fill-color:transparent;
   filter:drop-shadow(0 2px 10px rgba(167,243,208,.22));
 }
-@keyframes sp-water-title{
-  0%,100%{background-position:0% 50%;transform:translateY(0) skewX(0deg)}
-  25%{transform:translateY(-1px) skewX(-1deg)}
-  50%{background-position:100% 50%;transform:translateY(1px) skewX(1deg)}
-  75%{transform:translateY(-.5px) skewX(-.5deg)}
-}
-@media(prefers-reduced-motion:reduce){#splash:after{animation:none!important}#splash img,#splash .sp-brand,#splash .sp-brand strong{animation:none!important;opacity:1;background-position:50% 50%}}
+
+
 /* شاشة البداية: الاسم بدل صورة الشعار */
 #splash img{display:none!important}
 #splash:before{top:50%!important}
