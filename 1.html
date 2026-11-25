@@ -624,7 +624,7 @@ var mo,timer;
 function toArabic(s){
   if(EN_AR[s]!==undefined)return EN_AR[s];
   for(var i=0;i<PAT_AR.length;i++)if(PAT_AR[i][0].test(s))return s.replace(PAT_AR[i][0],PAT_AR[i][1]);
-  var out=s,keys=Object.keys(EN_AR).filter(function(k){return k.length>=4}).sort(function(a,b){return b.length-a.length});
+  var out=s,keys=Object.keys(EN_AR).filter(function(k){return k.length>=4||k==="AED"}).sort(function(a,b){return b.length-a.length});
   keys.forEach(function(k){if(out.indexOf(k)>-1)out=out.split(k).join(EN_AR[k])});
   return out;
 }
