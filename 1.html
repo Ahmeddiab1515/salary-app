@@ -131,6 +131,22 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @keyframes sp-logo-enter{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:scale(1)}}
 @keyframes sp-ring-turn{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes sp-fade{from{opacity:0}to{opacity:1}}
+#splash .sp-brand strong{
+  background:linear-gradient(112deg,#fff 0%,#d1fae5 22%,#fff 43%,#a7f3d0 56%,#fff 76%,#d1fae5 100%);
+  background-size:230% 100%;
+  background-position:0% 50%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:sp-water-title 4.6s ease-in-out infinite;
+  filter:drop-shadow(0 2px 10px rgba(167,243,208,.22));
+}
+@keyframes sp-water-title{
+  0%,100%{background-position:0% 50%;transform:translateY(0) skewX(0deg)}
+  25%{transform:translateY(-1px) skewX(-1deg)}
+  50%{background-position:100% 50%;transform:translateY(1px) skewX(1deg)}
+  75%{transform:translateY(-.5px) skewX(-.5deg)}
+}
 @media(prefers-reduced-motion:reduce){#splash:after{animation:none!important}#splash img,#splash .sp-brand{animation:none!important;opacity:1}}
 #shsheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .shcard{background:var(--card);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
