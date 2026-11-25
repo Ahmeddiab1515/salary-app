@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v63-revert-employee-details-visibility-20261125";
+const CACHE_NAME = "salary-app-v64-revert-employee-tiles-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
