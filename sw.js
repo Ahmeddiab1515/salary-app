@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v23-splash-8-seconds-before-password-20261125";
+const CACHE_NAME = "salary-app-v24-hide-app-until-password-20261125";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
