@@ -1602,6 +1602,7 @@ function applyCurrencyText(root){
  var walker=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT),nodes=[];
  while(walker.nextNode())nodes.push(walker.currentNode);
  nodes.forEach(function(n){
+  if(n.parentElement&&n.parentElement.closest("#currencyCard"))return;
   var v=n.nodeValue,old=v;
   v=v.replace(/الدرهم الإماراتي/g,selected().ar)
      .replace(/UAE dirham/g,selected().en)
@@ -1623,12 +1624,12 @@ if(settings&&!document.getElementById("currencyCard")){
 var obs=new MutationObserver(function(records){
  records.forEach(function(rec){
   if(rec.type==="characterData"){
-   var n=rec.target,v=n.nodeValue;
+   var n=rec.target;if(n.parentElement&&n.parentElement.closest("#currencyCard"))return;var v=n.nodeValue;
    var next=v.replace(/الدرهم الإماراتي/g,selected().ar).replace(/UAE dirham/g,selected().en).replace(/درهم/g,unit()).replace(/AED/g,unit());
    if(next!==v)n.nodeValue=next;
   }else rec.addedNodes&&rec.addedNodes.forEach(function(n){
    if(n.nodeType===Node.TEXT_NODE){var v=n.nodeValue,next=v.replace(/الدرهم الإماراتي/g,selected().ar).replace(/UAE dirham/g,selected().en).replace(/درهم/g,unit()).replace(/AED/g,unit());if(next!==v)n.nodeValue=next}
-   else if(n.nodeType===Node.ELEMENT_NODE)applyCurrencyText(n);
+   else if(n.nodeType===Node.ELEMENT_NODE&&n.id!=="currencyCard")applyCurrencyText(n);
   });
  });
 });
