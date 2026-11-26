@@ -1312,7 +1312,11 @@ function packEncryptedCard(data,password){
   });
  });
 }
-function showQr(name){
+function qrPhotoThumb(name){
+  var src=(S.photos||{})[empKey(name)];if(!src)return Promise.resolve("");
+  return new Promise(function(resolve){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas"),size=64;c.width=size;c.height=size;var ctx=c.getContext("2d"),side=Math.min(im.width,im.height),sx=(im.width-side)/2,sy=(im.height-side)/2;ctx.drawImage(im,sx,sy,side,side,0,0,size,size);resolve(c.toDataURL("image/jpeg",.42))}catch(e){resolve("")}};im.onerror=function(){resolve("")};im.src=src});
+ }
+ function showQr(name){
  var rs=records(name),g=totals(name);
  var data={v:1,n:name,c:S.co||"",d:today(),t:Object.assign({},g,{sal:rs.length?(Number(rs[rs.length-1].sal)||0):0}),r:rs.map(function(r){return [r.date,Number(salaryForRow(r))||0,Number(r.adv)||0,r.advDt||"",Number(r.abs)||0,Number(dedOf(r))||0,Number(netForRow(r))||0,g.allReceived?"نعم":"لا"]})};
  var html='<p class="qr-note">أنشئ كلمة مرور لهذا الباركود. أعطِ كلمة المرور للعامل بطريقة منفصلة عن صورة الباركود.</p><label>كلمة مرور الباركود</label><input id="qrNewPass" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل"><label>تأكيد كلمة المرور</label><input id="qrNewPass2" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور"><p id="qrCreateErr" class="qr-note" role="alert"></p><button id="qrCreate" type="button">إنشاء باركود محمي</button><div id="qrProtectedResult" hidden><div class="qr-code" id="qrCanvas"></div><p class="qr-note">البيانات داخل الباركود مشفّرة. بعد أي تعديل على بيانات العامل، أنشئ باركودًا جديدًا.</p><p class="qr-note">احتفظ بكلمة المرور وأرسلها للعامل بشكل منفصل عن صورة الباركود.</p><button class="secondary" id="qrPng" type="button">حفظ صورة QR</button></div>';
@@ -1323,7 +1327,7 @@ function showQr(name){
   if(p!==p2){err.textContent="تأكيد كلمة المرور غير مطابق.";return}
   if(!window.crypto||!crypto.subtle){err.textContent="هذا المتصفح لا يدعم التشفير الآمن. افتح التطبيق من رابط HTTPS حديث.";return}
   btn.disabled=true;btn.textContent="جاري تشفير البيانات…";err.textContent="";
-  packEncryptedCard(data,p).then(function(payload){
+  qrPhotoThumb(name).then(function(photo){return packEncryptedCard(Object.assign({},data,{p:photo}),p)}).then(function(payload){
    var url=location.origin+location.pathname+"?card="+encodeURIComponent(payload);
    if(new TextEncoder().encode(url).length>2700)throw new Error("حجم بيانات العامل أكبر من سعة باركود واحد. قلّل عدد القيود أو استخدم كشفًا مختصرًا.");
    return ensureQr().then(function(){
@@ -1361,7 +1365,7 @@ function renderSharedCard(){
   }).then(function(json){var d=JSON.parse(json);if(!d||d.v!==1||!d.n||!Array.isArray(d.r))throw new Error("بيانات الباركود غير مكتملة.");return d});
  }
  function display(d){
-  var t=d.t||{},html='<h1>كشف حساب العامل</h1><div style="font-size:18px;font-weight:bold">'+escQ(d.n)+'</div><div class="share-meta">الشركة: '+escQ(d.c||"—")+'<br>تاريخ إصدار الباركود: '+escQ(d.d||"—")+'<br>عدد القيود: '+d.r.length+'</div><div class="share-stats">'+[
+  var t=d.t||{},html='<h1>كشف حساب العامل</h1>'+(d.p?'<div style="text-align:center;margin:10px 0"><img src="'+escQ(d.p)+'" alt="صورة العامل" style="width:88px;height:88px;object-fit:cover;border-radius:50%;border:2px solid #dce6e6"></div>':'')+'<div style="font-size:18px;font-weight:bold">'+escQ(d.n)+'</div><div class="share-meta">الشركة: '+escQ(d.c||"—")+'<br>تاريخ إصدار الباركود: '+escQ(d.d||"—")+'<br>عدد القيود: '+d.r.length+'</div><div class="share-stats">'+[
    ["الراتب الأساسي",t.sal],["إجمالي السلف",t.adv],["أيام الغياب",t.abs],["خصم الغياب",t.ded],["المجموع بعد الخصم",t.net],["المستلم",t.rec],["المتبقي",t.pend]
   ].map(function(x){return '<div class="share-stat"><small>'+x[0]+'</small><b>'+escQ(x[1]==null?0:x[1])+(x[0]==="أيام الغياب"?"":" درهم")+'</b></div>'}).join("")+'</div><h2>تفاصيل القيود</h2>';
   d.r.forEach(function(r){html+='<div class="share-entry"><b>'+escQ(r[0]||"—")+'</b><br>الراتب: '+escQ(r[1])+' درهم · السلفة: '+escQ(r[2])+' درهم · تاريخ السلفة: '+escQ(r[3]||"—")+'<br>الغياب: '+escQ(r[4])+' · خصم الغياب: '+escQ(r[5])+' درهم · الصافي: '+escQ(r[6])+' درهم · الحالة: '+escQ(r[7]||"—")+'</div>'});
