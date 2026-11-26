@@ -1,5 +1,5 @@
-const CACHE_NAME = "salary-app-v67-offline-dependencies-20261126";
-const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest", "./icon.svg"];
+const CACHE_NAME = "salary-app-v68-local-qr-offline-20261127";
+const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest", "./icon.svg", "./qrcode.min.js"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
