@@ -406,7 +406,11 @@ function renderEmps(){
     var head=document.createElement("div");head.className="emp-top";
     var info=document.createElement("div");info.style.flex="1";info.style.minWidth="0";
     var b=document.createElement("button");b.type="button";b.className="emp-name";b.setAttribute("aria-expanded",String(!!openG["emp:"+nk(n)]));b.textContent=(openG["emp:"+nk(n)]?"▾ ":"▸ ")+n;
-    info.appendChild(b);head.appendChild(info);d.appendChild(head);
+    info.appendChild(b);head.appendChild(info);
+    var delEmp=document.createElement("button");delEmp.type="button";delEmp.className="x";delEmp.textContent="حذف";
+    delEmp.setAttribute("aria-label","حذف الموظف "+n);
+    delEmp.onclick=function(e){e.stopPropagation();if(!confirm("هل تريد حذف الموظف من القائمة؟ لن يتم حذف كشوفه المحفوظة."))return;S.emps.splice(i,1);save();renderAll()};
+    head.appendChild(delEmp);d.appendChild(head);
     var details=document.createElement("div");details.className="emp-details";details.hidden=!openG["emp:"+nk(n)];
     function section(title){var h=document.createElement("h3");h.className="emp-section-title";h.textContent=title;details.appendChild(h)}
     function stat(label,value,extra){var card=document.createElement("div");card.className="emp-stat"+(extra?" "+extra:"");var k=document.createElement("span"),v=document.createElement("b");k.textContent=label;v.textContent=value;k.className="emp-stat-label";v.className="emp-stat-value";card.appendChild(k);card.appendChild(v);return card}
@@ -447,9 +451,6 @@ function renderEmps(){
       details.appendChild(records);
     }
     var actions=document.createElement("div");actions.className="emp-detail-actions";
-    var x=document.createElement("button");x.className="x";x.type="button";x.textContent="حذف الموظف من القائمة";
-    x.onclick=function(){if(!confirm("هل تريد حذف الموظف من القائمة؟ لن يتم حذف كشوفه المحفوظة."))return;S.emps.splice(i,1);save();renderAll()};
-    actions.appendChild(x);
     var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){var tries=0;function openQrWhenReady(){if(typeof window.salaryShowQr==="function"){window.salaryShowQr(n);return}if(tries++<30){setTimeout(openQrWhenReady,100);return}alert("تعذر تشغيل ميزة QR في هذه الصفحة. أغلق التطبيق وافتح الرابط من جديد، وإذا استمرت المشكلة أرسل لي هذه الرسالة.");}openQrWhenReady()};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);actions.appendChild(qa);details.appendChild(actions);
     function toggleEmployee(){openG["emp:"+nk(n)]=!openG["emp:"+nk(n)];renderEmps()}b.onclick=toggleEmployee;head.onclick=function(e){if(e.target.closest("button"))return;toggleEmployee()};
     d.appendChild(details);l.appendChild(d);
