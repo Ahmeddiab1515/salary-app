@@ -1584,5 +1584,57 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape")closeInfo()}
 #elist .emp-photo-actions .up{padding:8px 12px!important}
 #elist .emp-photo-actions .x{padding:8px 12px!important}
 </style>
+
+<script id="currency-setting-only">
+(function(){
+"use strict";
+if(typeof S==="undefined")return;
+S.cfg=S.cfg||{};
+var choices={
+ AED:{symbol:"د.إ",ar:"الدرهم الإماراتي",en:"UAE dirham"},
+ USD:{symbol:"$",ar:"الدولار الأمريكي",en:"US dollar"},
+ EGP:{symbol:"ج.م",ar:"الجنيه المصري",en:"Egyptian pound"},
+ CNY:{symbol:"¥",ar:"اليوان الصيني",en:"Chinese yuan"}
+};
+function selected(){return choices[S.cfg.currency]||choices.AED}
+function unit(){return selected().symbol}
+function applyCurrencyText(root){
+ var walker=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT),nodes=[];
+ while(walker.nextNode())nodes.push(walker.currentNode);
+ nodes.forEach(function(n){
+  var v=n.nodeValue,old=v;
+  v=v.replace(/الدرهم الإماراتي/g,selected().ar)
+     .replace(/UAE dirham/g,selected().en)
+     .replace(/درهم/g,unit())
+     .replace(/AED/g,unit());
+  if(v!==old)n.nodeValue=v;
+ });
+}
+var settings=document.getElementById("t3");
+if(settings&&!document.getElementById("currencyCard")){
+ var card=document.createElement("div");
+ card.className="card";card.id="currencyCard";
+ card.innerHTML='<h2>العملة</h2><label for="currencySelect">اختار العملة</label><select id="currencySelect" style="width:100%;min-height:46px"><option value="AED">الدرهم الإماراتي (د.إ)</option><option value="USD">الدولار الأمريكي ($)</option><option value="EGP">الجنيه المصري (ج.م)</option><option value="CNY">اليوان الصيني (¥)</option></select><p class="note">تغيير رمز واسم العملة فقط، بدون تحويل أو تغيير أي مبلغ.</p>';
+ settings.insertBefore(card,settings.firstChild);
+ var sel=document.getElementById("currencySelect");
+ sel.value=choices[S.cfg.currency]?S.cfg.currency:"AED";
+ sel.onchange=function(){S.cfg.currency=sel.value;save();applyCurrencyText(document.body)};
+}
+var obs=new MutationObserver(function(records){
+ records.forEach(function(rec){
+  if(rec.type==="characterData"){
+   var n=rec.target,v=n.nodeValue;
+   var next=v.replace(/الدرهم الإماراتي/g,selected().ar).replace(/UAE dirham/g,selected().en).replace(/درهم/g,unit()).replace(/AED/g,unit());
+   if(next!==v)n.nodeValue=next;
+  }else rec.addedNodes&&rec.addedNodes.forEach(function(n){
+   if(n.nodeType===Node.TEXT_NODE){var v=n.nodeValue,next=v.replace(/الدرهم الإماراتي/g,selected().ar).replace(/UAE dirham/g,selected().en).replace(/درهم/g,unit()).replace(/AED/g,unit());if(next!==v)n.nodeValue=next}
+   else if(n.nodeType===Node.ELEMENT_NODE)applyCurrencyText(n);
+  });
+ });
+});
+obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+applyCurrencyText(document.body);
+})();
+</script>
 </body>
 </html>
