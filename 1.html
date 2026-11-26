@@ -322,7 +322,7 @@ function grp(){
   S.rows.forEach(function(r,i){
     var k=nk(r.name),g=m[k];
     if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,recs:[]};o.push(g)}
-    var n=netOf(r);g.n++;g.sal+=r.sal;g.adv+=r.adv;g.abs+=r.abs;g.ded+=dedOf(r);g.net+=n;if(r.recv==="نعم")g.rec+=n;else g.pend+=n;g.recs.push({r:r,i:i});
+    var n=netOf(r);if(g.n===0)g.sal=r.sal;g.n++;g.adv+=r.adv;g.abs+=r.abs;g.ded+=dedOf(r);g.net+=n;if(r.recv==="نعم")g.rec+=n;else g.pend+=n;g.recs.push({r:r,i:i});
   });
   o.forEach(function(g){["sal","adv","abs","ded","net","rec","pend"].forEach(function(k){g[k]=r2(g[k])})});
   return o;
