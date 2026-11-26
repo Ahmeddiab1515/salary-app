@@ -321,14 +321,22 @@ function grp(){
   var m={},o=[];
   S.rows.forEach(function(r,i){
     var k=nk(r.name),g=m[k];
-    if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,recs:[]};o.push(g)}
-    var n=netOf(r);if(g.n===0)g.sal=r.sal;g.n++;g.adv+=r.adv;g.abs+=r.abs;g.ded+=dedOf(r);g.net+=n;if(r.recv==="نعم")g.rec+=n;else g.pend+=n;g.recs.push({r:r,i:i});
+    if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,allReceived:false,recs:[]};o.push(g)}
+    if(g.n===0)g.sal=Number(r.sal)||0;
+    g.n++;g.adv+=Number(r.adv)||0;g.abs+=Number(r.abs)||0;g.ded+=dedOf(r);g.recs.push({r:r,i:i});
   });
-  o.forEach(function(g){["sal","adv","abs","ded","net","rec","pend"].forEach(function(k){g[k]=r2(g[k])})});
+  o.forEach(function(g){
+    g.sal=r2(g.sal);g.adv=r2(g.adv);g.abs=r2(g.abs);g.ded=r2(g.ded);
+    g.net=r2(g.sal-g.adv-g.ded);
+    g.allReceived=g.recs.length>0&&g.recs.every(function(x){return x.r.recv==="نعم"});
+    g.rec=g.allReceived?g.net:0;g.pend=g.allReceived?0:g.net;
+  });
   return o;
 }
 function sums(gs){var o={n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};gs.forEach(function(g){for(var k in o)o[k]+=g[k]});for(var k in o)o[k]=r2(o[k]);return o}
-function stRec(r){var n=netOf(r);return r.recv==="نعم"?"تم استلام الراتب — السلف: "+r.adv+" — المبلغ: "+n+" درهم":"لم يتم استلام الراتب — السلف: "+r.adv+" — المبلغ المتبقي: "+n+" درهم"}
+function salaryForRow(r){var rs=records(r.name);return rs.length&&rs[0]===r?(Number(r.sal)||0):0}
+function netForRow(r){return r2(salaryForRow(r)-(Number(r.adv)||0)-dedOf(r))}
+function stRec(r){var g=grp().filter(function(x){return x.key===nk(r.name)})[0],n=netForRow(r);return g&&g.allReceived?"تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم":"لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
 function stGrp(g){
   if(!g.pend)return "تم استلام الراتب — السلف: "+g.adv+" — المبلغ: "+g.net+" درهم";
   if(!g.rec)return "لم يتم استلام الراتب — السلف: "+g.adv+" — المبلغ المتبقي: "+g.net+" درهم";
@@ -378,10 +386,10 @@ function renderArch(){
       var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
       p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";
-      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};
+      p.onclick=function(){var received=g.recs.length>0&&g.recs.every(function(x){return x.r.recv==="نعم"});g.recs.forEach(function(x){x.r.recv=received?"لا":"نعم"});save();renderAll()};
       d.className="x";d.textContent="حذف";d.onclick=function(){S.rows.splice(x.i,1);save();renderAll()};
       bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
-      [r.sal,r.adv,r.abs,netOf(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
+      [salaryForRow(r),r.adv,r.abs,netForRow(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
     });
   });
   if(!gs.length)tb.innerHTML="<tr><td colspan='5' class='empty'>"+(q?"لا توجد نتائج":"لا توجد قيود")+"</td></tr>";
@@ -504,7 +512,7 @@ function exportXlsx(){
   a1.push([tx("مجموع الراتب المستلم"),"","","","","","",t.rec]);
   a1.push([tx("مجموع الراتب المتبقي (لم يُستلم)"),"","","","","","",t.pend]);
   var a2=[[tx("التاريخ"),tx("العامل"),tx("الراتب الأساسي"),tx("السلف"),tx("تاريخ السلفة"),tx("الغياب"),tx("خصم الغياب"),tx("المجموع بعد الخصم"),tx("الحالة")]];
-  frows(gs).forEach(function(r,i){var k=i+2;a2.push([r.date,canon(r.name),r.sal,r.adv,r.advDt||"",r.abs,(r.rate>0?dedOf(r):{t:"n",f:"ROUND(C"+k+"/30*F"+k+",2)",v:dedOf(r)}),{t:"n",f:"C"+k+"-D"+k+"-G"+k,v:netOf(r)},tx(stRec(r))])});
+  frows(gs).forEach(function(r,i){var k=i+2;a2.push([r.date,canon(r.name),salaryForRow(r),r.adv,r.advDt||"",r.abs,(r.rate>0?dedOf(r):{t:"n",f:"ROUND(C"+k+"/30*F"+k+",2)",v:dedOf(r)}),{t:"n",f:"C"+k+"-D"+k+"-G"+k,v:netOf(r)},tx(stRec(r))])});
   var w1=XLSX.utils.aoa_to_sheet(a1),w2=XLSX.utils.aoa_to_sheet(a2),wb=XLSX.utils.book_new();
   w1["!cols"]=[{wch:24},{wch:10},{wch:16},{wch:14},{wch:12},{wch:14},{wch:18},{wch:60}];
   w2["!cols"]=[{wch:12},{wch:20},{wch:14},{wch:12},{wch:12},{wch:10},{wch:12},{wch:16},{wch:48}];
@@ -1182,7 +1190,7 @@ function empKey(name){return nk(name)}
 function getId(name){S.qrIds=S.qrIds||{};var k=empKey(name);if(!S.qrIds[k]){S.qrIds[k]="w"+Array.from(crypto.getRandomValues(new Uint8Array(16))).map(function(x){return x.toString(16).padStart(2,"0")}).join("");save()}return S.qrIds[k]}
 function getWorker(id){var ids=S.qrIds||{},key=Object.keys(ids).filter(function(k){return ids[k]===id})[0];if(!key)return null;return S.emps.filter(function(n){return empKey(n)===key})[0]||null}
 function records(name){return S.rows.filter(function(r){return empKey(r.name)===empKey(name)})}
-function totals(name){var rs=records(name),o={sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};rs.forEach(function(r){var n=netOf(r);o.sal+=r.sal;o.adv+=r.adv;o.abs+=r.abs;o.ded+=dedOf(r);o.net+=n;if(r.recv==="نعم")o.rec+=n;else o.pend+=n});Object.keys(o).forEach(function(k){o[k]=r2(o[k])});o.count=rs.length;return o}
+function totals(name){var g=grp().filter(function(x){return x.key===empKey(name)})[0];if(!g)return {sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,count:0};return {sal:g.sal,adv:g.adv,abs:g.abs,ded:g.ded,net:g.net,rec:g.rec,pend:g.pend,count:g.n}}
 function bytesHex(a){return Array.from(new Uint8Array(a)).map(function(b){return b.toString(16).padStart(2,"0")}).join("")}
 function hexBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a}
 function derive(p,salt){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:180000,hash:"SHA-256"},k,256)})}
@@ -1225,7 +1233,7 @@ function makePdf(name){
  host.dir=en?"ltr":"rtl";
  host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#111;padding:34px;box-sizing:border-box;font-family:Tahoma,Arial,sans-serif";
  var html='<h2 style="color:#0f766e">'+tx("كشف حساب العامل")+'</h2><h3>'+escQ(name)+'</h3><p>'+tx("الشركة")+': '+escQ(S.co||"")+' | '+tx("تاريخ إصدار الكشف")+': '+date+'</p><hr><p>'+tx("عدد القيود")+': '+g.count+' | '+tx("الراتب الأساسي")+': '+g.sal+' '+tx("درهم")+' | '+tx("السلف")+': '+g.adv+' '+tx("درهم")+' | '+tx("الغياب")+': '+g.abs+' '+tx("يوم")+' | '+tx("خصم الغياب")+': '+g.ded+' '+tx("درهم")+'</p><h3>'+tx("المجموع بعد الخصم")+': '+g.net+' '+tx("درهم")+'</h3><p>'+tx("المستلم")+': '+g.rec+' '+tx("درهم")+' | '+tx("المتبقي")+': '+g.pend+' '+tx("درهم")+'</p><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e5eeee"><th style="border:1px solid #aaa;padding:7px">'+tx("التاريخ")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الراتب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("السلفة")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("تاريخ السلفة")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الغياب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("خصم الغياب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الصافي")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الحالة")+'</th></tr>';
- rs.forEach(function(r){html+='<tr>'+[r.date,r.sal,r.adv,r.advDt||"—",r.abs,dedOf(r),netOf(r),tx(r.recv==="نعم"?"مستلم":"غير مستلم")].map(function(v){return '<td style="border:1px solid #aaa;padding:6px;text-align:center">'+escQ(v)+'</td>'}).join("")+'</tr>'});
+ rs.forEach(function(r){html+='<tr>'+[r.date,salaryForRow(r),r.adv,r.advDt||"—",r.abs,dedOf(r),netForRow(r),tx((grp().filter(function(x){return x.key===empKey(name)})[0]||{}).allReceived?"تم الاستلام بعد الخصم":"لم يُستلم")].map(function(v){return '<td style="border:1px solid #aaa;padding:6px;text-align:center">'+escQ(v)+'</td>'}).join("")+'</tr>'});
  host.innerHTML=html+'</table><p style="margin-top:24px;color:#555;font-size:11px">'+tx("تم إنشاء هذا الكشف من تطبيق كشف الرواتب.")+'</p>';
  document.body.appendChild(host);
  window.html2canvas(host,{scale:2,backgroundColor:"#fff"}).then(function(cv){
@@ -1268,7 +1276,7 @@ function packEncryptedCard(data,password){
 }
 function showQr(name){
  var rs=records(name),g=totals(name);
- var data={v:1,n:name,c:S.co||"",d:today(),t:g,r:rs.map(function(r){return [r.date,Number(r.sal)||0,Number(r.adv)||0,r.advDt||"",Number(r.abs)||0,Number(dedOf(r))||0,Number(netOf(r))||0,r.recv||""]})};
+ var data={v:1,n:name,c:S.co||"",d:today(),t:g,r:rs.map(function(r){return [r.date,Number(salaryForRow(r))||0,Number(r.adv)||0,r.advDt||"",Number(r.abs)||0,Number(dedOf(r))||0,Number(netForRow(r))||0,g.allReceived?"نعم":"لا"]})};
  var html='<p class="qr-note">أنشئ كلمة مرور لهذا الباركود. أعطِ كلمة المرور للعامل بطريقة منفصلة عن صورة الباركود.</p><label>كلمة مرور الباركود</label><input id="qrNewPass" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل"><label>تأكيد كلمة المرور</label><input id="qrNewPass2" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور"><p id="qrCreateErr" class="qr-note" role="alert"></p><button id="qrCreate" type="button">إنشاء باركود محمي</button><div id="qrProtectedResult" hidden><div class="qr-code" id="qrCanvas"></div><p class="qr-note">البيانات داخل الباركود مشفّرة. بعد أي تعديل على بيانات العامل، أنشئ باركودًا جديدًا.</p><p class="qr-note">احتفظ بكلمة المرور وأرسلها للعامل بشكل منفصل عن صورة الباركود.</p><button class="secondary" id="qrPng" type="button">حفظ صورة QR</button></div>';
  var o=overlay("QR Code محمي — "+name,html);
  o.querySelector("#qrCreate").onclick=function(){
