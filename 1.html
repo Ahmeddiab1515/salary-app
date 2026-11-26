@@ -385,7 +385,7 @@ function renderArch(){
       var r=x.r,sr=document.createElement("tr");sr.className="sub";
       var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
-      p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";
+      p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم التسليم":"لم يتم التسليم";
       p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();if(r.recv==="نعم"){var employeeRows=S.rows.filter(function(row){return nk(row.name)===nk(r.name)}),allReceived=employeeRows.length>0&&employeeRows.every(function(row){return row.recv==="نعم"}),totalDue=employeeRows.reduce(function(sum,row){return sum+netForRow(row)},0),validAmounts=employeeRows.every(function(row){return netForRow(row)>=0});if(allReceived&&validAmounts&&totalDue>0&&Math.abs(totalDue-r2(totalDue))<0.001&&confirm("الموظف "+r.name+" استلم راتبه بالكامل، ولا توجد عليه أي مبالغ متبقية. هل تريد حذف بيانات الرواتب الخاصة به؟\n\nنعم: حذف قيود الرواتب والسلف والغياب فقط، مع الاحتفاظ باسم الموظف وصورته.\nلا: الاحتفاظ بكل البيانات كما هي.")){S.rows=S.rows.filter(function(row){return nk(row.name)!==nk(r.name)});save()}}renderAll()};
       d.className="x";d.textContent="حذف";d.onclick=function(){S.rows.splice(x.i,1);save();renderAll()};
       bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
