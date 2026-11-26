@@ -1,5 +1,5 @@
-const CACHE_NAME = "salary-app-v66-qr-script-syntax-fix-20261125";;
-const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest"];
+const CACHE_NAME = "salary-app-v67-offline-dependencies-20261126";
+const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -25,11 +25,9 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
 
-  // Always try the latest HTML first. Cache it without query parameters so
-  // each worker's ?card=... QR link reuses the same app shell.
-  if (request.mode === "navigate") {
+  // Keep the app shell available offline after the first successful visit.
+  if (request.mode === "navigate" && url.origin === self.location.origin) {
     const cacheKey = new Request(url.origin + url.pathname, { method: "GET" });
     event.respondWith(
       fetch(request).then(response => {
@@ -45,13 +43,18 @@ self.addEventListener("fetch", event => {
     return;
   }
 
+  // Cache same-origin files and external libraries/fonts after they load online.
+  // This lets cached Excel/PDF/QR libraries remain available offline on later visits.
   event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-      }
-      return response;
-    }))
+    caches.match(request).then(cached => {
+      if (cached) return cached;
+      return fetch(request).then(response => {
+        if (response && (response.ok || response.type === "opaque")) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+        }
+        return response;
+      });
+    })
   );
 });
