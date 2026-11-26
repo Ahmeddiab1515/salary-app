@@ -1036,7 +1036,19 @@ function fmt(n){return String(Math.round(n*1e8)/1e8)}
 function open(){
   var d=document.createElement("div");d.className="cl";d.id="clsheet";
   var c=document.createElement("div");c.className="clc";
-  var h=document.createElement("div");h.className="clh";var tt=document.createElement("b");tt.textContent="الآلة الحاسبة";var x=document.createElement("button");x.type="button";x.textContent="\u00d7";h.appendChild(tt);h.appendChild(x);
+  var h=document.createElement("div");h.className="clh";var tt=document.createElement("b");tt.textContent="الآلة الحاسبة";
+  var tools=document.createElement("div");tools.style.cssText="display:flex;align-items:center;gap:5px";
+  var dec=document.createElement("button"),inc=document.createElement("button"),x=document.createElement("button");
+  dec.type=inc.type=x.type="button";dec.textContent="−";inc.textContent="+";x.textContent="\u00d7";
+  dec.setAttribute("aria-label","تصغير الآلة الحاسبة");inc.setAttribute("aria-label","تكبير الآلة الحاسبة");
+  dec.title="تصغير";inc.title="تكبير";
+  [dec,inc].forEach(function(b){b.style.cssText="min-width:34px;height:34px;padding:0 8px!important;border:1px solid var(--bd)!important;border-radius:10px!important;font-size:20px!important;line-height:1"});
+  tools.appendChild(dec);tools.appendChild(inc);h.appendChild(tt);h.appendChild(tools);h.appendChild(x);
+  var calcScale=1;
+  function applyCalcScale(){c.style.transform="scale("+calcScale+")";c.style.transformOrigin="bottom center"}
+  dec.onclick=function(){calcScale=Math.max(.75,Math.round((calcScale-.1)*10)/10);applyCalcScale()};
+  inc.onclick=function(){calcScale=Math.min(1.25,Math.round((calcScale+.1)*10)/10);applyCalcScale()};
+  applyCalcScale();
   var disp=document.createElement("div");disp.className="cld";var sm=document.createElement("small"),big=document.createElement("div");big.textContent="0";disp.appendChild(sm);disp.appendChild(big);
   var k=document.createElement("div");k.className="clk";
   function show(){big.textContent=ex===""?"0":ex}
