@@ -527,23 +527,24 @@ function showExcelPreview(wb,name){
   };
   showSheet(0);
 }
+function archiveBaseSalary(g){return g.recs&&g.recs.length?salaryForRow(g.recs[g.recs.length-1].r):0}
 function exportXlsx(){
   if(noData())return;
   if(typeof XLSX==="undefined"){say("xmsg","مكتبة الإكسل لم تُحمّل","bad");return}
   var tx=window.appTranslate||function(v){return v},en=S.cfg&&S.cfg.lang==="en";
-  var gs=fgrp(),t=sums(gs),n=gs.length,L=n+1;
-  var a1=[[tx("العامل"),tx("عدد القيود"),tx("الراتب الأساسي (درهم)"),tx("السلف (درهم)"),tx("الغياب (أيام)"),tx("خصم الغياب (درهم)"),tx("المجموع بعد الخصم (درهم)"),tx("الحالة")]];
-  gs.forEach(function(g){a1.push([g.name,g.n,g.sal,g.adv,g.abs,g.ded,g.net,tx(stGrp(g))])});
+  var gs=fgrp(),t=sums(gs),n=gs.length,L=n+1,baseTotal=gs.reduce(function(a,g){return a+archiveBaseSalary(g)},0);
+  var a1=[[tx("العامل"),tx("عدد القيود"),tx("الراتب الأساسي (درهم)"),tx("السلف (درهم)"),tx("الغياب (أيام)"),tx("خصم الغياب (درهم)"),tx("إجمالي المستحقات بعد الخصم (درهم)"),tx("المبلغ المستلم (درهم)"),tx("المتبقي غير المستلم (درهم)"),tx("الحالة")]];
+  gs.forEach(function(g){a1.push([g.name,g.n,archiveBaseSalary(g),g.adv,g.abs,g.ded,g.net,g.rec,g.pend,tx(stGrp(g))])});
   function S_(c,v){return {t:"n",f:"SUM("+c+"2:"+c+L+")",v:v}}
-  a1.push([tx("الإجمالي"),S_("B",t.n),S_("C",t.sal),S_("D",t.adv),S_("E",t.abs),S_("F",t.ded),S_("G",t.net),""]);
-  a1.push([tx("مجموع السلف"),"","","","","","",{t:"n",f:"SUM(D2:D"+L+")",v:t.adv}]);
-  a1.push([tx("مجموع الراتب بعد خصم السلف والغياب"),"","","","","","",{t:"n",f:"SUM(G2:G"+L+")",v:t.net}]);
-  a1.push([tx("مجموع الراتب المستلم"),"","","","","","",t.rec]);
-  a1.push([tx("مجموع الراتب المتبقي (لم يُستلم)"),"","","","","","",t.pend]);
+  a1.push([tx("الإجمالي"),S_("B",t.n),S_("C",baseTotal),S_("D",t.adv),S_("E",t.abs),S_("F",t.ded),S_("G",t.net),S_("H",t.rec),S_("I",t.pend),""]);
+  a1.push([tx("مجموع السلف"),"","","","","","","",{t:"n",f:"SUM(D2:D"+L+")",v:t.adv},""]);
+  a1.push([tx("إجمالي المستحقات بعد الخصم"),"","","","","","","",{t:"n",f:"SUM(G2:G"+L+")",v:t.net},""]);
+  a1.push([tx("مجموع الراتب المستلم"),"","","","","","","",{t:"n",f:"SUM(H2:H"+L+")",v:t.rec},""]);
+  a1.push([tx("مجموع الراتب المتبقي (لم يُستلم)"),"","","","","","","",{t:"n",f:"SUM(I2:I"+L+")",v:t.pend},""]);
   var a2=[[tx("التاريخ"),tx("العامل"),tx("الراتب الأساسي"),tx("السلف"),tx("تاريخ السلفة"),tx("الغياب"),tx("خصم الغياب"),tx("المجموع بعد الخصم"),tx("الحالة")]];
   frows(gs).forEach(function(r,i){var k=i+2;a2.push([r.date,canon(r.name),salaryForRow(r),r.adv,r.advDt||"",r.abs,(r.rate>0?dedOf(r):{t:"n",f:"ROUND(C"+k+"/30*F"+k+",2)",v:dedOf(r)}),{t:"n",f:"C"+k+"-D"+k+"-G"+k,v:netOf(r)},tx(stRec(r))])});
   var w1=XLSX.utils.aoa_to_sheet(a1),w2=XLSX.utils.aoa_to_sheet(a2),wb=XLSX.utils.book_new();
-  w1["!cols"]=[{wch:24},{wch:10},{wch:16},{wch:14},{wch:12},{wch:14},{wch:18},{wch:60}];
+  w1["!cols"]=[{wch:24},{wch:10},{wch:16},{wch:14},{wch:12},{wch:14},{wch:22},{wch:18},{wch:22},{wch:48}];
   w2["!cols"]=[{wch:12},{wch:20},{wch:14},{wch:12},{wch:12},{wch:10},{wch:12},{wch:16},{wch:48}];
   XLSX.utils.book_append_sheet(wb,w1,tx("أرشيف الرواتب"));XLSX.utils.book_append_sheet(wb,w2,tx("تفاصيل القيود"));
   wb.Workbook={Views:[{RTL:!en},{RTL:!en}]};
@@ -1087,11 +1088,11 @@ function closePv(){var d=document.getElementById("pvx");if(d)d.parentNode.remove
 window.previewXlsx=function(){
   if(noData())return;
   closePv();
-  var gs=fgrp(),t=sums(gs),E="";
+  var gs=fgrp(),t=sums(gs),E="",baseTotal=gs.reduce(function(a,g){return a+archiveBaseSalary(g)},0);
   function lab(a,v,n){var r=[a];for(var i=1;i<n-1;i++)r.push("");r.push(v);return r}
-  var h1=["العامل","عدد القيود","الراتب الأساسي (درهم)","السلف (درهم)","الغياب (أيام)","خصم الغياب (درهم)","المجموع بعد الخصم (درهم)","الحالة"];
-  var r1=gs.map(function(g){return [g.name,g.n,g.sal,g.adv,g.abs,g.ded,g.net,stGrp(g)]});
-  var t1=[["الإجمالي",t.n,t.sal,t.adv,t.abs,t.ded,t.net,E],lab("مجموع السلف",t.adv,8),lab("مجموع الراتب بعد خصم السلف والغياب",t.net,8),lab("مجموع الراتب المستلم",t.rec,8),lab("مجموع الراتب المتبقي (لم يُستلم)",t.pend,8)];
+  var h1=["العامل","عدد القيود","الراتب الأساسي (درهم)","السلف (درهم)","الغياب (أيام)","خصم الغياب (درهم)","إجمالي المستحقات بعد الخصم (درهم)","المبلغ المستلم (درهم)","المتبقي غير المستلم (درهم)","الحالة"];
+  var r1=gs.map(function(g){return [g.name,g.n,archiveBaseSalary(g),g.adv,g.abs,g.ded,g.net,g.rec,g.pend,stGrp(g)]});
+  var t1=[["الإجمالي",t.n,baseTotal,t.adv,t.abs,t.ded,t.net,t.rec,t.pend,E],lab("مجموع السلف",t.adv,10),lab("إجمالي المستحقات بعد الخصم",t.net,10),lab("مجموع الراتب المستلم",t.rec,10),lab("مجموع الراتب المتبقي (لم يُستلم)",t.pend,10)];
   var h2=["التاريخ","العامل","الراتب الأساسي","السلف","تاريخ السلفة","الغياب","خصم الغياب","المجموع بعد الخصم","الحالة"];
   var r2=frows(gs).map(function(r){return [r.date,canon(r.name),r.sal,r.adv,r.advDt||"",r.abs,dedOf(r),netOf(r),stRec(r)]});
   var d=document.createElement("div");d.className="pv";d.id="pvx";
