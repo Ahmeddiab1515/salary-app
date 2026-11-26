@@ -1221,7 +1221,7 @@ function showWorker(name){
  '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0">'+
  stats.map(function(x,i){return '<div style="background:'+(i===4?'#e4f2ee':'#f5f7f7')+';border:1px solid #e1e9e8;border-radius:11px;padding:11px;min-width:0"><div style="font-size:11px;color:#64748b">'+x[0]+'</div><div style="font-size:16px;font-weight:700;color:'+(i===4?'#0f766e':'#24343a')+';margin-top:5px;overflow-wrap:anywhere">'+escQ(x[1])+'</div></div>'}).join("")+
  '</div><button id="qrMakePdf">إنشاء كشف PDF جديد</button><button class="secondary" id="qrHistory">الكشوف السابقة</button><div id="qrHistoryList"></div><h3 style="font-size:15px;margin-top:18px">تفاصيل القيود</h3>';
- rs.forEach(function(r){html+='<div class="qr-row"><b>'+escQ(r.date)+'</b><br>الراتب: '+r.sal+' درهم | السلفة: '+r.adv+' درهم<br>تاريخ السلفة: '+escQ(r.advDt||"—")+' | الغياب: '+r.abs+' يوم<br>خصم الغياب: '+dedOf(r)+' درهم | الصافي: '+netOf(r)+' درهم<br>الحالة: '+escQ(r.recv==="نعم"?"مستلم":"غير مستلم")+'</div>'});
+ rs.forEach(function(r){html+='<div class="qr-row"><b>'+escQ(r.date)+'</b><br>الراتب المحتسب: '+salaryForRow(r)+' درهم | السلفة: '+r.adv+' درهم<br>تاريخ السلفة: '+escQ(r.advDt||"—")+' | الغياب: '+r.abs+' يوم<br>خصم الغياب: '+dedOf(r)+' درهم | الصافي المحتسب: '+netForRow(r)+' درهم<br>الحالة: '+escQ(g.rec===g.net&&g.net!==0?"تم استلام الراتب بعد الخصم":"لم يُستلم")+'</div>'});
  var o=overlay("كشف حساب العامل: "+name,html);
  o.querySelector("#qrMakePdf").onclick=function(){makePdf(name)};
  o.querySelector("#qrHistory").onclick=function(){history(name,o)};
