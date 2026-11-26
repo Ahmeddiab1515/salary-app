@@ -720,7 +720,7 @@ Object.assign(EN,{
 "جاري تحميل الكشوف المحفوظة…":"Loading saved statements…",
 "لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.":"No saved PDF statements for this employee yet.",
 "تعذر قراءة أرشيف PDF.":"Could not read the PDF archive.",
-"حفظ / فتح PDF":"Save / Open PDF",
+"عرض PDF":"Preview PDF",
 "إنشاء كشف PDF جديد":"Create new PDF statement",
 "الكشوف السابقة":"Previous statements",
 "تفاصيل القيود":"Entry details",
@@ -1335,7 +1335,7 @@ function makePdf(name){
 function history(name,parent){
  var target=parent.querySelector("#qrHistoryList");target.innerHTML='<p class="qr-note">جاري تحميل الكشوف المحفوظة…</p>';
  dbAll(empKey(name)).then(function(items){target.innerHTML="";if(!items.length){target.textContent="لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.";return}
- items.forEach(function(it){var d=document.createElement("div");d.className="qr-row";var b=document.createElement("button");b.textContent="حفظ / فتح PDF";b.onclick=function(){dbGet(it.id).then(function(x){if(!x)return;var u=URL.createObjectURL(x.blob),a=document.createElement("a");a.href=u;a.download=x.filename;a.click();setTimeout(function(){URL.revokeObjectURL(u)},60000)})};d.textContent=it.date+" — "+it.filename+" ";d.appendChild(b);target.appendChild(d)})}).catch(function(){target.textContent="تعذر قراءة أرشيف PDF."});
+ items.forEach(function(it){var d=document.createElement("div");d.className="qr-row";var b=document.createElement("button");b.textContent="عرض PDF";b.onclick=function(){var preview=window.open("about:blank","_blank");dbGet(it.id).then(function(x){if(!x){if(preview)preview.close();return}var u=URL.createObjectURL(x.blob);if(preview){preview.location.href=u;setTimeout(function(){URL.revokeObjectURL(u)},300000)}else{var a=document.createElement("a");a.href=u;a.download=x.filename;a.click();setTimeout(function(){URL.revokeObjectURL(u)},60000)}}).catch(function(){if(preview)preview.close();alert("تعذر فتح ملف PDF.")})};d.textContent=it.date+" — "+it.filename+" ";d.appendChild(b);target.appendChild(d)})}).catch(function(){target.textContent="تعذر قراءة أرشيف PDF."});
 }
 function bytesToB64Url(bytes){var bin="";for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function b64UrlToBytes(str){var b=str.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";var bin=atob(b),out=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out}
