@@ -609,12 +609,13 @@ function pdfPage(rows,no,pages,t){
 function exportPdf(){
   if(noData())return;
   if(!window.html2canvas||!window.jspdf){say("xmsg","مكتبة الـPDF لم تُحمّل","bad");return}
-  say("xmsg","جاري تجهيز الـPDF…");
+  var preview=window.open("about:blank","_blank");
+  say("xmsg","جاري تجهيز معاينة الـPDF…");
   var gs=fgrp(),per=17,pages=Math.ceil(gs.length/per),t=sums(gs),i=0,host=document.createElement("div");
   t.cnt=gs.length;host.style.cssText="position:fixed;left:-10000px;top:0";document.body.appendChild(host);
   var pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
   function next(){
-    if(i>=pages){document.body.removeChild(host);outFile(fname(gs,".pdf"),pdf.output("arraybuffer"));return}
+    if(i>=pages){document.body.removeChild(host);var blob=pdf.output("blob"),url=URL.createObjectURL(blob);if(preview){preview.location.href=url;say("xmsg","تم تجهيز معاينة PDF. راجع الملف في النافذة الجديدة، ثم استخدم زر المشاركة أو الحفظ في المتصفح لحفظه.","ok");setTimeout(function(){URL.revokeObjectURL(url)},300000)}else{URL.revokeObjectURL(url);outFile(fname(gs,".pdf"),pdf.output("arraybuffer"))}return}
     host.innerHTML=pdfPage(gs.slice(i*per,(i+1)*per),i+1,pages,t);
     window.html2canvas(host.firstChild,{scale:2,backgroundColor:"#ffffff"}).then(function(cv){
       if(i)pdf.addPage();pdf.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,pw,ph);i++;next();
