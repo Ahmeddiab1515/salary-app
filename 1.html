@@ -334,6 +334,7 @@ function grp(){
   return o;
 }
 function sums(gs){var o={n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};gs.forEach(function(g){for(var k in o)o[k]+=g[k]});for(var k in o)o[k]=r2(o[k]);return o}
+function records(name){return S.rows.filter(function(r){return nk(r.name)===nk(name)})}
 function salaryForRow(r){var rs=records(r.name);return rs.length&&rs[0]===r?(Number(r.sal)||0):0}
 function netForRow(r){return r2(salaryForRow(r)-(Number(r.adv)||0)-dedOf(r))}
 function stRec(r){var g=grp().filter(function(x){return x.key===nk(r.name)})[0],n=netForRow(r);return g&&g.allReceived?"تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم":"لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
@@ -548,7 +549,7 @@ function exportPdf(){
   }
   next();
 }
-$("xl").onclick=function(){previewXlsx()};$("pd").onclick=exportPdf;
+$("xl").onclick=exportXlsx;$("pd").onclick=exportPdf;
 function setRecv(v){recv=v;$("yes").className="yes"+(v==="نعم"?" on":"");$("no").className="no"+(v==="لا"?" on":"")}
 $("yes").onclick=function(){setRecv("نعم")};$("no").onclick=function(){setRecv("لا")};
 ["sal","adv","abs","rate"].forEach(function(i){$(i).onchange=calc});
