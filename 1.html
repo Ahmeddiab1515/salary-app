@@ -322,7 +322,7 @@ function grp(){
   S.rows.forEach(function(r,i){
     var k=nk(r.name),g=m[k],salary=Number(r.sal)||0,advance=Number(r.adv)||0,absence=Number(r.abs)||0,deduction=dedOf(r),net=netForRow(r);
     if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,allReceived:false,recs:[]};o.push(g)}
-    g.n++;g.sal+=salary;g.adv+=advance;g.abs+=absence;g.ded+=deduction;g.net+=net;
+    g.n++;g.sal=salary;g.adv+=advance;g.abs+=absence;g.ded+=deduction;g.net+=net;
     if(r.recv==="نعم")g.rec+=net;else g.pend+=net;
     g.recs.push({r:r,i:i});
   });
