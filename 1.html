@@ -360,20 +360,53 @@ function calc(){
   $("calc").textContent=s+" − "+a+" − "+ded+" (خصم الغياب)";
   return net;
 }
-function confirmEmployeeClear(name,onYes){
+function confirmEmployeeClear(name,amount,onYes){
   var old=document.getElementById("employeeDeliveryModal");if(old)old.remove();
   var modal=document.createElement("div");modal.id="employeeDeliveryModal";modal.setAttribute("role","dialog");modal.setAttribute("aria-modal","true");
   modal.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl;box-sizing:border-box";
   var panel=document.createElement("div");panel.style.cssText="width:100%;max-width:360px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:18px;padding:22px 18px;box-shadow:var(--sh);text-align:center;box-sizing:border-box";
   var photo=av(name);photo.style.cssText="width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--pri);margin:0 auto 12px;display:flex";
-  var title=document.createElement("div");title.textContent="تم تسليم الموظف المبلغ كامل";title.style.cssText="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:8px";
+  var amountText=Number(amount||0).toLocaleString("en-US");
+  var title=document.createElement("div");title.textContent="تم تسليم المبلغ "+amountText+" درهم";title.style.cssText="font-size:18px;font-weight:800;line-height:1.6;margin-bottom:8px";
   var employee=document.createElement("div");employee.textContent=name;employee.style.cssText="font-weight:700;margin-bottom:12px";
-  var question=document.createElement("div");question.textContent="هل تريد حذف بيانات الرواتب الخاصة به؟";question.style.cssText="font-size:14px;color:var(--mut);margin-bottom:18px";
-  var actions=document.createElement("div");actions.style.cssText="display:flex;gap:9px";
-  var yes=document.createElement("button");yes.type="button";yes.textContent="حذف البيانات";yes.style.cssText="flex:1;padding:12px 8px;border:0;border-radius:10px;background:var(--bad);color:#fff;font-weight:700";
+  var question=document.createElement("div");question.textContent="هل تريد حذف بيانات الرواتب الخاصة به؟";question.style.cssText="font-size:14px;color:var(--mut);margin:14px 0 12px";
+  var actions=document.createElement("div");actions.style.cssText="display:flex;gap:9px;margin-top:10px";
+  var saveImage=document.createElement("button");saveImage.type="button";saveImage.textContent="حفظ الصورة في الملفات";saveImage.style.cssText="width:100%;padding:12px 8px;border:1px solid var(--pri);border-radius:10px;background:var(--pri);color:#fff;font-weight:700;margin:4px 0 8px";
+  saveImage.onclick=async function(){
+    saveImage.disabled=true;saveImage.textContent="جاري تجهيز الصورة...";
+    try{
+      var canvas=document.createElement("canvas");canvas.width=900;canvas.height=620;
+      var ctx=canvas.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,900,620);
+      ctx.fillStyle="#17212b";ctx.textAlign="center";ctx.direction="rtl";
+      var src=S.photos[nk(name)];
+      if(src){
+        var img=new Image();img.src=src;
+        await new Promise(function(resolve,reject){img.onload=resolve;img.onerror=reject});
+        ctx.save();ctx.beginPath();ctx.arc(450,155,86,0,Math.PI*2);ctx.clip();ctx.drawImage(img,364,69,172,172);ctx.restore();
+      }else{
+        ctx.fillStyle="#e8edf2";ctx.beginPath();ctx.arc(450,155,86,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle="#263746";ctx.font="bold 78px Arial";ctx.fillText((name.trim()[0]||"?"),450,182);
+      }
+      ctx.fillStyle="#17212b";ctx.font="bold 42px Arial";ctx.fillText("إثبات تسليم مبلغ",450,330);
+      ctx.font="bold 48px Arial";ctx.fillText(amountText+" درهم",450,415);
+      ctx.font="bold 34px Arial";ctx.fillText(name,450,490);
+      ctx.font="26px Arial";ctx.fillStyle="#66717d";ctx.fillText(new Date().toLocaleDateString("ar-EG"),450,550);
+      var blob=await new Promise(function(resolve){canvas.toBlob(resolve,"image/png")});
+      if(!blob)throw new Error("تعذر إنشاء الصورة");
+      var file=new File([blob],"إثبات-تسليم-"+name+".png",{type:"image/png"});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:"إثبات تسليم المبلغ"});
+      }else{
+        var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="إثبات-تسليم-"+name+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1500);
+        alert("تم تجهيز صورة الإثبات. إذا لم تُحفظ تلقائيًا، افتح الصورة واختر مشاركة ثم حفظ في الملفات.");
+      }
+    }catch(e){if(e.name!=="AbortError")alert("تعذر حفظ الصورة. جرّب مرة أخرى أو استخدم مشاركة ثم حفظ في الملفات.");}
+    finally{saveImage.disabled=false;saveImage.textContent="حفظ الصورة في الملفات";}
+  };
+  var yes=document.createElement("button");yes.type="button";yes.textContent="حذف بيانات الراتب";yes.style.cssText="flex:1;padding:12px 8px;border:0;border-radius:10px;background:var(--bad);color:#fff;font-weight:700";
   var no=document.createElement("button");no.type="button";no.textContent="الاحتفاظ بالبيانات";no.style.cssText="flex:1;padding:12px 8px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font-weight:700";
   yes.onclick=function(){modal.remove();onYes()};no.onclick=function(){modal.remove()};modal.onclick=function(e){if(e.target===modal)modal.remove()};
-  actions.appendChild(yes);actions.appendChild(no);panel.appendChild(photo);panel.appendChild(title);panel.appendChild(employee);panel.appendChild(question);panel.appendChild(actions);modal.appendChild(panel);document.body.appendChild(modal);
+  panel.appendChild(photo);panel.appendChild(title);panel.appendChild(employee);panel.appendChild(saveImage);panel.appendChild(question);actions.appendChild(yes);actions.appendChild(no);panel.appendChild(actions);modal.appendChild(panel);document.body.appendChild(modal);
 }
 function matchG(g,q){
   if(!q)return true;
@@ -401,7 +434,7 @@ function renderArch(){
       var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
       p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم التسليم":"لم يتم التسليم";
-      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();if(r.recv==="نعم"){var employeeRows=S.rows.filter(function(row){return nk(row.name)===nk(r.name)}),allReceived=employeeRows.length>0&&employeeRows.every(function(row){return row.recv==="نعم"}),totalDue=employeeRows.reduce(function(sum,row){return sum+netForRow(row)},0),validAmounts=employeeRows.every(function(row){return netForRow(row)>=0});if(allReceived&&validAmounts&&totalDue>0&&Math.abs(totalDue-r2(totalDue))<0.001){confirmEmployeeClear(r.name,function(){S.rows=S.rows.filter(function(row){return nk(row.name)!==nk(r.name)});save();renderAll()})}}renderAll()};
+      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();if(r.recv==="نعم"){var employeeRows=S.rows.filter(function(row){return nk(row.name)===nk(r.name)}),allReceived=employeeRows.length>0&&employeeRows.every(function(row){return row.recv==="نعم"}),totalDue=employeeRows.reduce(function(sum,row){return sum+netForRow(row)},0),validAmounts=employeeRows.every(function(row){return netForRow(row)>=0});if(allReceived&&validAmounts&&totalDue>0&&Math.abs(totalDue-r2(totalDue))<0.001){confirmEmployeeClear(r.name,totalDue,function(){S.rows=S.rows.filter(function(row){return nk(row.name)!==nk(r.name)});save();renderAll()})}}renderAll()};
       d.className="x";d.textContent="حذف";d.onclick=function(){S.rows.splice(x.i,1);save();renderAll()};
       bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
       [salaryForRow(r),r.adv,r.abs,netForRow(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
