@@ -320,16 +320,15 @@ function td(tr,v){var c=document.createElement("td");c.textContent=v;tr.appendCh
 function grp(){
   var m={},o=[];
   S.rows.forEach(function(r,i){
-    var k=nk(r.name),g=m[k];
+    var k=nk(r.name),g=m[k],salary=Number(r.sal)||0,advance=Number(r.adv)||0,absence=Number(r.abs)||0,deduction=dedOf(r),net=netForRow(r);
     if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,allReceived:false,recs:[]};o.push(g)}
-    if(g.n===0)g.sal=Number(r.sal)||0;
-    g.n++;g.adv+=Number(r.adv)||0;g.abs+=Number(r.abs)||0;g.ded+=dedOf(r);g.recs.push({r:r,i:i});
+    g.n++;g.sal+=salary;g.adv+=advance;g.abs+=absence;g.ded+=deduction;g.net+=net;
+    if(r.recv==="نعم")g.rec+=net;else g.pend+=net;
+    g.recs.push({r:r,i:i});
   });
   o.forEach(function(g){
-    g.sal=r2(g.sal);g.adv=r2(g.adv);g.abs=r2(g.abs);g.ded=r2(g.ded);
-    g.net=r2(g.sal-g.adv-g.ded);
+    ["sal","adv","abs","ded","net","rec","pend"].forEach(function(k){g[k]=r2(g[k])});
     g.allReceived=g.recs.length>0&&g.recs.every(function(x){return x.r.recv==="نعم"});
-    g.rec=g.allReceived?g.net:0;g.pend=g.allReceived?0:g.net;
   });
   return o;
 }
@@ -337,10 +336,10 @@ function sums(gs){var o={n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};gs.forE
 function records(name){return S.rows.filter(function(r){return nk(r.name)===nk(name)})}
 function salaryForRow(r){return Number(r.sal)||0}
 function netForRow(r){return r2(salaryForRow(r)-(Number(r.adv)||0)-dedOf(r))}
-function stRec(r){var g=grp().filter(function(x){return x.key===nk(r.name)})[0],n=netForRow(r);return g&&g.allReceived?"تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم":"لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
+function stRec(r){var n=netForRow(r);return r.recv==="نعم"?"تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم":"لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
 function stGrp(g){
   if(!g.pend)return "تم استلام الراتب — السلف: "+g.adv+" — المبلغ: "+g.net+" درهم";
-  if(!g.rec)return "لم يتم استلام الراتب — السلف: "+g.adv+" — المبلغ المتبقي: "+g.net+" درهم";
+  if(!g.rec)return "لم يتم استلام الراتب — السلف: "+g.adv+" — المبلغ المتبقي: "+g.pend+" درهم";
   return "تم استلام: "+g.rec+" درهم — لم يُستلم (المتبقي): "+g.pend+" درهم — السلف: "+g.adv;
 }
 function showTab(n){
@@ -387,7 +386,7 @@ function renderArch(){
       var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
       p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم الاستلام":"لم يُستلم";
-      p.onclick=function(){var received=g.recs.length>0&&g.recs.every(function(x){return x.r.recv==="نعم"});g.recs.forEach(function(x){x.r.recv=received?"لا":"نعم"});save();renderAll()};
+      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll()};
       d.className="x";d.textContent="حذف";d.onclick=function(){S.rows.splice(x.i,1);save();renderAll()};
       bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
       [salaryForRow(r),r.adv,r.abs,netForRow(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
@@ -499,6 +498,35 @@ function fgrp(){var q=nk($("q").value);return grp().filter(function(g){return ma
 function frows(gs){var k={};gs.forEach(function(g){k[g.key]=1});return S.rows.filter(function(r){return k[nk(r.name)]})}
 function noData(){if(!fgrp().length){say("xmsg",$("q").value.trim()?"لا توجد نتائج للبحث":"الأرشيف فاضي","bad");return true}return false}
 function fname(gs,ext){var n="الرواتب - الراتب";if($("q").value.trim()&&gs.length===1)n+=" - "+gs[0].name.replace(/[\/\\:*?"<>|]/g,"");return n+ext}
+function showExcelPreview(wb,name){
+  var old=$("excelPreview");if(old)old.remove();
+  var names=wb.SheetNames,active=0,overlay=document.createElement("div");
+  overlay.id="excelPreview";
+  overlay.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box";
+  overlay.innerHTML="<div style='background:#fff;color:#18352d;width:100%;max-width:900px;max-height:92vh;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;direction:rtl;font-family:Arial,Tahoma,sans-serif'><div style='padding:14px;background:#064e3b;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:8px'><b>معاينة ملف Excel قبل الحفظ</b><button id='excelPreviewClose' type='button' style='border:0;border-radius:8px;padding:8px 12px;background:#fff;color:#064e3b;font-size:18px'>×</button></div><div style='padding:10px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #ddd'><button id='excelSheet0' type='button' style='padding:9px 12px;border:0;border-radius:8px;background:#dcefe6;color:#064e3b'>"+names[0]+"</button><button id='excelSheet1' type='button' style='padding:9px 12px;border:0;border-radius:8px;background:#eee;color:#333'>"+names[1]+"</button></div><div id='excelPreviewTable' style='overflow:auto;padding:10px;flex:1;min-height:180px;color:#222'></div><div style='padding:12px;display:flex;gap:8px;border-top:1px solid #ddd'><button id='excelPreviewSave' type='button' style='flex:1;padding:12px;border:0;border-radius:9px;background:#0f766e;color:white;font-weight:bold'>حفظ ملف Excel</button><button id='excelPreviewCancel' type='button' style='padding:12px 16px;border:1px solid #aaa;border-radius:9px;background:white;color:#333'>إلغاء</button></div></div>";
+  document.body.appendChild(overlay);
+  function showSheet(i){
+    active=i;
+    $("excelPreviewTable").innerHTML=XLSX.utils.sheet_to_html(wb.Sheets[names[i]]);
+    var buttons=[$("excelSheet0"),$("excelSheet1")];
+    buttons.forEach(function(b,k){b.style.background=k===i?"#dcefe6":"#eee";b.style.color=k===i?"#064e3b":"#333"});
+    var table=$("excelPreviewTable").querySelector("table");
+    if(table)table.style.cssText="border-collapse:collapse;min-width:100%;font-size:13px;white-space:nowrap";
+    $("excelPreviewTable").querySelectorAll("td,th").forEach(function(c){c.style.cssText="border:1px solid #cbd5d1;padding:7px;text-align:right"});
+  }
+  $("excelSheet0").onclick=function(){showSheet(0)};
+  $("excelSheet1").onclick=function(){showSheet(1)};
+  function close(){overlay.remove()}
+  $("excelPreviewClose").onclick=close;$("excelPreviewCancel").onclick=close;
+  $("excelPreviewSave").onclick=function(){
+    try{
+      var data=XLSX.write(wb,{bookType:"xlsx",type:"array",compression:true});
+      if(data instanceof ArrayBuffer)data=new Uint8Array(data);
+      close();outFile(name,data);
+    }catch(e){say("xmsg","تعذر تجهيز ملف Excel للحفظ","bad")}
+  };
+  showSheet(0);
+}
 function exportXlsx(){
   if(noData())return;
   if(typeof XLSX==="undefined"){say("xmsg","مكتبة الإكسل لم تُحمّل","bad");return}
@@ -519,9 +547,7 @@ function exportXlsx(){
   w2["!cols"]=[{wch:12},{wch:20},{wch:14},{wch:12},{wch:12},{wch:10},{wch:12},{wch:16},{wch:48}];
   XLSX.utils.book_append_sheet(wb,w1,tx("أرشيف الرواتب"));XLSX.utils.book_append_sheet(wb,w2,tx("تفاصيل القيود"));
   wb.Workbook={Views:[{RTL:!en},{RTL:!en}]};
-  var xlsxData=XLSX.write(wb,{bookType:"xlsx",type:"array",compression:true});
-  if(xlsxData instanceof ArrayBuffer)xlsxData=new Uint8Array(xlsxData);
-  outFile(fname(gs,".xlsx"),xlsxData);
+  showExcelPreview(wb,fname(gs,".xlsx"));
 }
 function pdfPage(rows,no,pages,t){
   var tx=window.appTranslate||function(v){return v},en=S.cfg&&S.cfg.lang==="en";
