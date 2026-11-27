@@ -1,4 +1,4 @@
-const CACHE_NAME = "salary-app-v70-qr-photo-clarity-20261127";
+const CACHE_NAME = "salary-app-v71-qr-photo-refresh-20261127";
 const APP_FILES = ["./", "./index.html", "./1.html", "./manifest.webmanifest", "./icon.svg", "./qrcode.min.js"];
 
 self.addEventListener("install", event => {
