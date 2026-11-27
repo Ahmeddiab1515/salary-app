@@ -440,7 +440,7 @@ function renderArch(){
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
       p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم التسليم":"لم يتم التسليم";
       p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll();if(r.recv==="نعم"){var employeeRows=S.rows.filter(function(row){return nk(row.name)===nk(r.name)}),allReceived=employeeRows.length>0&&employeeRows.every(function(row){return row.recv==="نعم"}),totalDue=r2(employeeRows.reduce(function(sum,row){return sum+netForRow(row)},0));if(allReceived&&totalDue>0){confirmEmployeeClear(r.name,totalDue,function(){S.rows=S.rows.filter(function(row){return nk(row.name)!==nk(r.name)});save();renderAll()})}}};
-      d.className="x";d.textContent="حذف";d.onclick=function(){S.rows.splice(x.i,1);save();renderAll()};
+      d.className="x";d.textContent="حذف";d.onclick=function(){var deletedName=r.name;S.rows.splice(x.i,1);if(!S.rows.some(function(row){return nk(row.name)===nk(deletedName)})){S.emps=S.emps.filter(function(employee){return nk(employee)!==nk(deletedName)});delete openG["emp:"+nk(deletedName)]}save();renderAll()};
       bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
       [salaryForRow(r),r.adv,r.abs,netForRow(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
     });
@@ -1391,8 +1391,8 @@ function qrPhotoThumb(name){
     var el=o.querySelector("#qrCanvas");if(!el)throw new Error("أُغلقت نافذة الباركود.");
     el.innerHTML="";new QRCode(el,{text:url,width:240,height:240,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});
     o.querySelector("#qrProtectedResult").hidden=false;
-    o.querySelector("#qrNewPass").value="";o.querySelector("#qrNewPass2").value="";
-    o.querySelector("#qrNewPass").disabled=true;o.querySelector("#qrNewPass2").disabled=true;
+    o.querySelector("#qrNewPass").value="";
+    o.querySelector("#qrNewPass").disabled=true;
     btn.hidden=true;
     var saveBtn=o.querySelector("#qrPng");saveBtn.onclick=function(){
      var cv=el.querySelector("canvas"),im=el.querySelector("img"),a=document.createElement("a");
