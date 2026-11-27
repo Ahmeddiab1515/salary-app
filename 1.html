@@ -928,10 +928,15 @@ function apply(){
 }
 var sec=document.createElement("section");sec.className="tab";sec.id="t3";
 sec.innerHTML='<div class="card"><button type="button" id="langFontToggle" style="width:100%;text-align:center">اللغة والخط</button><div id="langFontPanel" hidden style="margin-top:14px"><h2>اللغة</h2><div class="seg"><button type="button" id="lAr">العربية</button><button type="button" id="lEn">English</button></div><h2 style="margin-top:16px">الخط</h2><select id="fSel"></select></div></div>'
-+'<div class="card"><h2>شعار التطبيق</h2><div class="row" style="align-items:center"><img id="logoPrev" class="av big" alt=""><label class="up">رفع شعار<input id="logoIn" type="file" accept="image/*" hidden></label><button type="button" id="logoRst" class="x">إعادة ضبط</button></div><p class="note">الشعار بيظهر جوه التطبيق، وأيقونة الشاشة الرئيسية بتتغير من إعدادات الجهاز.</p></div>'
++'<div class="card"><h2>شعار التطبيق</h2><div class="row" style="align-items:center"><img id="logoPrev" class="av big" alt=""><label class="up">رفع شعار<input id="logoIn" type="file" accept="image/*" hidden></label><button type="button" id="logoRst" class="x">إعادة ضبط</button></div><p class="note" data-help-text>الشعار بيظهر جوه التطبيق، وأيقونة الشاشة الرئيسية بتتغير من إعدادات الجهاز.</p></div>'
 +'<div class="card"><h2>ألوان التطبيق</h2><label>اللون الأساسي</label><div class="sw" id="sw"></div><input id="cPri" type="color"><label>لون الهامش (الخلفية)</label><input id="cBg" type="color"><div style="margin-top:12px"><button type="button" id="cRst" class="x">إعادة ضبط</button></div></div>'
-+'<p class="note" style="text-align:center">صورة العامل بتتحفظ في المتصفح، وبتظهر في تبويب الموظفين والأرشيف.</p>';
++'<p class="note" data-help-text style="text-align:center">صورة العامل بتتحفظ في المتصفح، وبتظهر في تبويب الموظفين والأرشيف.</p>';
 document.querySelector("main").appendChild(sec);
+var helpStyle=document.createElement("style");helpStyle.textContent=".hide-help-text [data-help-text]{display:none!important}";document.head.appendChild(helpStyle);
+var helpCard=document.createElement("div");helpCard.className="card";helpCard.id="helpTextSettings";helpCard.innerHTML='<h2>الكتابات التوضيحية</h2><label style="display:flex;align-items:center;gap:10px"><input id="helpTextToggle" type="checkbox" style="width:20px;height:20px"> إظهار الكتابات التوضيحية أسفل الخانات</label>';sec.insertBefore(helpCard,sec.firstChild);
+function applyHelpText(){var visible=S.cfg.helpText!==false;document.documentElement.classList.toggle("hide-help-text",!visible);var control=document.getElementById("helpTextToggle");if(control)control.checked=visible;}
+var helpControl=document.getElementById("helpTextToggle");helpControl.onchange=function(){S.cfg.helpText=helpControl.checked;save();applyHelpText()};
+applyHelpText();
 var nb=document.createElement("button");nb.type="button";nb.dataset.t="3";nb.innerHTML="<b>⚙️</b>الإعدادات";nb.onclick=function(){showTab(3)};document.querySelector("nav").appendChild(nb);
 FONTS.forEach(function(f){var o=document.createElement("option");o.value=f[1];o.textContent=f[0];document.getElementById("fSel").appendChild(o)});
 SW.forEach(function(c){var b=document.createElement("button");b.type="button";b.style.background=c;b.onclick=function(){S.cfg.color=c;save();apply()};document.getElementById("sw").appendChild(b)});
@@ -1185,7 +1190,7 @@ window.previewXlsx=function(){
   var cfg = S.cfg = S.cfg || {};
   var card = document.createElement("div");
   card.className = "card";
-  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note">اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label id="pwLabel" for="pwEntry">كلمة المرور</label><input id="pwEntry" type="password" autocomplete="new-password" placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button></div><p id="pwMsg" class="note" role="status"></p>';
+  card.innerHTML = '<h2>حماية التطبيق بكلمة مرور</h2><p class="note" data-help-text>اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.</p><label id="pwLabel" for="pwEntry">كلمة المرور</label><input id="pwEntry" type="password" autocomplete="new-password" placeholder="اكتب كلمة مرور من ٦ أحرف على الأقل"><div class="row" style="gap:8px;margin-top:12px"><button type="button" id="pwSave">حفظ</button><button type="button" class="x" id="pwRemove">إلغاء كلمة المرور</button></div><p id="pwMsg" class="note" role="status"></p>';
   var settings = document.getElementById("t3");
   if(settings) settings.appendChild(card);
   var pwStage="new";
@@ -1289,7 +1294,7 @@ function hexBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++
 function derive(p,salt){return crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]).then(function(k){return crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:180000,hash:"SHA-256"},k,256)})}
 function verify(p){var c=S.cfg||{};if(!c.passHash)return Promise.resolve(false);return derive(p,hexBytes(c.passSalt)).then(function(h){return bytesHex(h)===c.passHash})}
 function askPassword(name,done){
- var c=S.cfg=S.cfg||{},isSet=!!c.passHash,html='<p class="qr-note">'+(isSet?'أدخل كلمة مرور التطبيق لعرض بيانات العامل.':'لا توجد كلمة مرور محفوظة بعد. أنشئ كلمة مرور من ٦ أحرف على الأقل لحماية عرض كشوف العامل.')+'</p><label>كلمة المرور</label><input id="qrPass" type="password" autocomplete="current-password" placeholder="كلمة المرور"><p id="qrErr" class="qr-note" role="alert"></p><button id="qrEnter" type="button">'+(isSet?'عرض البيانات':'حفظ كلمة المرور وفتح الحساب')+'</button>';
+ var c=S.cfg=S.cfg||{},isSet=!!c.passHash,html='<p class="qr-note" data-help-text>'+(isSet?'أدخل كلمة مرور التطبيق لعرض بيانات العامل.':'لا توجد كلمة مرور محفوظة بعد. أنشئ كلمة مرور من ٦ أحرف على الأقل لحماية عرض كشوف العامل.')+'</p><label>كلمة المرور</label><input id="qrPass" type="password" autocomplete="current-password" placeholder="كلمة المرور"><p id="qrErr" class="qr-note" role="alert"></p><button id="qrEnter" type="button">'+(isSet?'عرض البيانات':'حفظ كلمة المرور وفتح الحساب')+'</button>';
  if(!isSet)html+='<label>تأكيد كلمة المرور</label><input id="qrPass2" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور">';
  var o=overlay("حماية حساب "+name,html),go=o.querySelector("#qrEnter");
  go.onclick=function(){var p=o.querySelector("#qrPass").value;if(p.length<6){o.querySelector("#qrErr").textContent="كلمة المرور لازم تكون ٦ أحرف على الأقل.";return}
@@ -1375,7 +1380,7 @@ function qrPhotoThumb(name,size,quality){
  function showQr(name){
  var rs=records(name),g=totals(name);
  var data={v:1,n:name,c:S.co||"",d:today(),t:Object.assign({},g,{sal:rs.length?(Number(rs[rs.length-1].sal)||0):0}),r:rs.map(function(r){return [r.date,Number(salaryForRow(r))||0,Number(r.adv)||0,r.advDt||"",Number(r.abs)||0,Number(dedOf(r))||0,Number(netForRow(r))||0,r.recv==="نعم"?"نعم":"لا"]})};
- var html='<p class="qr-note">أنشئ كلمة مرور لهذا الباركود. أعطِ كلمة المرور للعامل بطريقة منفصلة عن صورة الباركود.</p><label id="qrPassLabel" for="qrNewPass">كلمة مرور الباركود</label><input id="qrNewPass" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل"><p id="qrCreateErr" class="qr-note" role="alert"></p><button id="qrCreate" type="button">التالي: تأكيد كلمة المرور</button><div id="qrProtectedResult" hidden><div class="qr-code" id="qrCanvas"></div><p class="qr-note">البيانات داخل الباركود مشفّرة. بعد أي تعديل على بيانات العامل، أنشئ باركودًا جديدًا.</p><p class="qr-note">احتفظ بكلمة المرور وأرسلها للعامل بشكل منفصل عن صورة الباركود.</p><button class="secondary" id="qrPng" type="button">حفظ صورة QR</button></div>';
+ var html='<p class="qr-note" data-help-text>أنشئ كلمة مرور لهذا الباركود. أعطِ كلمة المرور للعامل بطريقة منفصلة عن صورة الباركود.</p><label id="qrPassLabel" for="qrNewPass">كلمة مرور الباركود</label><input id="qrNewPass" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل"><p id="qrCreateErr" class="qr-note" role="alert"></p><button id="qrCreate" type="button">التالي: تأكيد كلمة المرور</button><div id="qrProtectedResult" hidden><div class="qr-code" id="qrCanvas"></div><p class="qr-note" data-help-text>البيانات داخل الباركود مشفّرة. بعد أي تعديل على بيانات العامل، أنشئ باركودًا جديدًا.</p><p class="qr-note" data-help-text>احتفظ بكلمة المرور وأرسلها للعامل بشكل منفصل عن صورة الباركود.</p><button class="secondary" id="qrPng" type="button">حفظ صورة QR</button></div>';
  var o=overlay("QR Code محمي — "+name,html),qrPassword="",qrConfirmStep=false;
  o.querySelector("#qrCreate").onclick=function(){
   var field=o.querySelector("#qrNewPass"),p=field.value,err=o.querySelector("#qrCreateErr"),btn=o.querySelector("#qrCreate");
@@ -1456,7 +1461,7 @@ if(wid){var worker=getWorker(wid);if(worker){var tryOpen=function(){var gate=doc
 var card=document.createElement("div");
 card.className="card";
 card.id="backupCard";
-card.innerHTML='<h2>النسخ الاحتياطي اليدوي على Google Drive</h2><p class="note">لإنشاء نسخة، اضغط الزر واختر Google Drive من قائمة المشاركة. وللاستعادة، نزّل النسخة من Google Drive إلى «الملفات» ثم اخترها هنا. لا يتم رفع أو تنزيل أي ملف دون اختيارك.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" id="makeBackup">حفظ نسخة على Google Drive</button><button type="button" class="x" id="restoreBackup">استعادة نسخة من Drive أو الملفات</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p id="backupMsg" class="note" role="status">النسخ اليدوي: اختر Google Drive بعد فتح قائمة المشاركة، أو اختر «حفظ في الملفات».</p>';
+card.innerHTML='<h2>النسخ الاحتياطي اليدوي على Google Drive</h2><p class="note" data-help-text>لإنشاء نسخة، اضغط الزر واختر Google Drive من قائمة المشاركة. وللاستعادة، نزّل النسخة من Google Drive إلى «الملفات» ثم اخترها هنا. لا يتم رفع أو تنزيل أي ملف دون اختيارك.</p><div class="row" style="gap:8px;flex-wrap:wrap"><button type="button" id="makeBackup">حفظ نسخة على Google Drive</button><button type="button" class="x" id="restoreBackup">استعادة نسخة من Drive أو الملفات</button><input type="file" id="backupFile" accept=".json,application/json" hidden></div><p id="backupMsg" class="note" role="status">النسخ اليدوي: اختر Google Drive بعد فتح قائمة المشاركة، أو اختر «حفظ في الملفات».</p>';
 var settings=document.getElementById("t3");
 if(settings)settings.appendChild(card);
 function status(t,bad){var el=document.getElementById("backupMsg");if(el){el.textContent=t;el.style.color=bad?"#b42318":""}}
@@ -1627,7 +1632,7 @@ var settings=document.getElementById("t3");
 if(settings&&!document.getElementById("currencyCard")){
  var card=document.createElement("div");
  card.className="card";card.id="currencyCard";
- card.innerHTML='<h2>العملة</h2><label for="currencySelect">اختار العملة</label><select id="currencySelect" style="width:100%;min-height:46px"><option value="AED">الدرهم الإماراتي (د.إ)</option><option value="USD">الدولار الأمريكي ($)</option><option value="EGP">الجنيه المصري (ج.م)</option><option value="CNY">اليوان الصيني (¥)</option></select><p class="note">تغيير رمز واسم العملة فقط، بدون تحويل أو تغيير أي مبلغ.</p>';
+ card.innerHTML='<h2>العملة</h2><label for="currencySelect">اختار العملة</label><select id="currencySelect" style="width:100%;min-height:46px"><option value="AED">الدرهم الإماراتي (د.إ)</option><option value="USD">الدولار الأمريكي ($)</option><option value="EGP">الجنيه المصري (ج.م)</option><option value="CNY">اليوان الصيني (¥)</option></select><p class="note" data-help-text>تغيير رمز واسم العملة فقط، بدون تحويل أو تغيير أي مبلغ.</p>';
  settings.insertBefore(card,settings.firstChild);
  var sel=document.getElementById("currencySelect");
  sel.value=choices[S.cfg.currency]?S.cfg.currency:"AED";
