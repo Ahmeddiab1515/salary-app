@@ -1399,7 +1399,7 @@ function qrPhotoThumb(name,size,quality){
   buildQrUrl().then(function(url){
    return ensureQr().then(function(){
     var el=o.querySelector("#qrCanvas");if(!el)throw new Error("أُغلقت نافذة الباركود.");
-    el.innerHTML="";new QRCode(el,{text:url,width:240,height:240,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});
+    el.innerHTML="";new QRCode(el,{text:url,width:600,height:600,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});var qrCanvas=el.querySelector("canvas"),qrImage=el.querySelector("img");if(qrCanvas){qrCanvas.style.width="240px";qrCanvas.style.height="240px";qrCanvas.style.maxWidth="100%"}if(qrImage){qrImage.style.width="240px";qrImage.style.height="240px";qrImage.style.maxWidth="100%"}
     o.querySelector("#qrProtectedResult").hidden=false;
     o.querySelector("#qrNewPass").value="";
     o.querySelector("#qrNewPass").disabled=true;
