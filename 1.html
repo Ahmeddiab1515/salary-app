@@ -947,7 +947,7 @@ function av(n,sm){var k=nk(n),p=S.photos[k],i=document.createElement(p?"img":"sp
 function photoBtn(n){
   var l=document.createElement("label");l.className="up";l.textContent="📷 صورة";
   var inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.hidden=true;
-  inp.onchange=function(){var f=inp.files[0];if(f)img2url(f,160,"image/jpeg",function(u){if(!u){alert("تعذر قراءة الصورة. جرّب صورة أخرى.");return}img2url(f,64,"image/jpeg",function(q){S.photos=S.photos||{};S.qrPhotos=S.qrPhotos||{};S.photos[nk(n)]=u;if(q)S.qrPhotos[nk(n)]=q;else delete S.qrPhotos[nk(n)];save();renderAll()},0.4)},0.85)};
+  inp.onchange=function(){var f=inp.files[0];if(f)img2url(f,160,"image/jpeg",function(u){if(!u){alert("تعذر قراءة الصورة. جرّب صورة أخرى.");return}img2url(f,160,"image/jpeg",function(q){S.photos=S.photos||{};S.qrPhotos=S.qrPhotos||{};S.photos[nk(n)]=u;if(q)S.qrPhotos[nk(n)]=q;else delete S.qrPhotos[nk(n)];save();renderAll()},0.4)},0.85)};
   l.appendChild(inp);return l;
 }
 function decEmp(){var groups=grp();document.querySelectorAll("#elist .emp").forEach(function(d,i){var n=S.emps[i];if(n===undefined)return;var g=groups.filter(function(x){return x.key===nk(n)})[0];d.insertBefore(av(n),d.firstChild);var actions=document.createElement("div");actions.className="emp-photo-actions";actions.appendChild(photoBtn(n));if(g&&g.n>0){var status=document.createElement("span");status.className="emp-payment-status";status.textContent=g.allReceived?"تم الاستلام":"لم يتم الاستلام";status.style.cssText="display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:9px;font-size:12px;font-weight:800;white-space:nowrap;background:"+(status.textContent==="تم الاستلام"?"#e5f5e9":"#fff0e8")+";color:"+(status.textContent==="تم الاستلام"?"#18743a":"#a94720");actions.appendChild(status)}var del=document.createElement("button");del.type="button";del.className="x";del.textContent="حذف";del.setAttribute("aria-label","حذف الموظف "+n);del.onclick=function(e){e.stopPropagation();if(!confirm("هل تريد حذف الموظف من القائمة؟ لن يتم حذف كشوفه المحفوظة."))return;var at=S.emps.findIndex(function(v){return nk(v)===nk(n)});if(at<0)return;S.emps.splice(at,1);save();renderAll()};actions.appendChild(del);d.insertBefore(actions,d.lastChild)})}
@@ -1369,7 +1369,7 @@ function packEncryptedCard(data,password){
 function qrPhotoThumb(name){
   var key=empKey(name),small=(S.qrPhotos||{})[key];if(small)return Promise.resolve(small);
   var src=(S.photos||{})[key];if(!src)return Promise.resolve("");
-  return new Promise(function(resolve){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas"),size=64;c.width=size;c.height=size;var ctx=c.getContext("2d"),side=Math.min(im.width,im.height),sx=(im.width-side)/2,sy=(im.height-side)/2;ctx.drawImage(im,sx,sy,side,side,0,0,size,size);resolve(c.toDataURL("image/jpeg",.4))}catch(e){resolve("")}};im.onerror=function(){resolve("")};im.src=src});
+  return new Promise(function(resolve){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas"),size=160;c.width=size;c.height=size;var ctx=c.getContext("2d"),side=Math.min(im.width,im.height),sx=(im.width-side)/2,sy=(im.height-side)/2;ctx.drawImage(im,sx,sy,side,side,0,0,size,size);resolve(c.toDataURL("image/jpeg",.75))}catch(e){resolve("")}};im.onerror=function(){resolve("")};im.src=src});
  }
  function showQr(name){
  var rs=records(name),g=totals(name);
