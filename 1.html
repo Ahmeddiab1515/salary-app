@@ -1366,10 +1366,10 @@ function packEncryptedCard(data,password){
   });
  });
 }
-function qrPhotoThumb(name){
-  var key=empKey(name),small=(S.qrPhotos||{})[key];if(small)return Promise.resolve(small);
-  var src=(S.photos||{})[key];if(!src)return Promise.resolve("");
-  return new Promise(function(resolve){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas"),size=160;c.width=size;c.height=size;var ctx=c.getContext("2d"),side=Math.min(im.width,im.height),sx=(im.width-side)/2,sy=(im.height-side)/2;ctx.drawImage(im,sx,sy,side,side,0,0,size,size);resolve(c.toDataURL("image/jpeg",.75))}catch(e){resolve("")}};im.onerror=function(){resolve("")};im.src=src});
+function qrPhotoThumb(name,size,quality){
+  var src=(S.photos||{})[empKey(name)];if(!src)return Promise.resolve("");
+  size=size||160;quality=typeof quality==="number"?quality:.72;
+  return new Promise(function(resolve){var im=new Image();im.onload=function(){try{var c=document.createElement("canvas");c.width=size;c.height=size;var ctx=c.getContext("2d"),side=Math.min(im.width,im.height),sx=(im.width-side)/2,sy=(im.height-side)/2;ctx.drawImage(im,sx,sy,side,side,0,0,size,size);resolve(c.toDataURL("image/jpeg",quality))}catch(e){resolve("")}};im.onerror=function(){resolve("")};im.src=src});
  }
  function showQr(name){
  var rs=records(name),g=totals(name);
@@ -1385,9 +1385,18 @@ function qrPhotoThumb(name){
   if(p!==qrPassword){err.textContent="كلمة المرور غير متطابقة. حاول التأكيد مرة ثانية.";field.value="";field.focus();return}
   if(!window.crypto||!crypto.subtle){err.textContent="هذا المتصفح لا يدعم التشفير الآمن. افتح التطبيق من رابط HTTPS حديث.";return}
   btn.disabled=true;btn.textContent="جاري تشفير البيانات…";err.textContent="";
-  qrPhotoThumb(name).then(function(photo){return packEncryptedCard(Object.assign({},data,{p:photo}),qrPassword)}).then(function(payload){
-   var url=location.origin+location.pathname+"?card="+encodeURIComponent(payload);
-   if(new TextEncoder().encode(url).length>2700)throw new Error("حجم بيانات العامل أكبر من سعة باركود واحد. قلّل عدد القيود أو استخدم كشفًا مختصرًا.");
+  var photoSizes=(S.photos||{})[empKey(name)]?[160,128,96,80,64]:[0],photoIndex=0,selectedPhoto="";
+  function buildQrUrl(){
+   var size=photoSizes[photoIndex]||160,quality=photoIndex===0?.72:.62;
+   return qrPhotoThumb(name,size,quality).then(function(photo){selectedPhoto=photo;return packEncryptedCard(Object.assign({},data,{p:photo}),qrPassword)}).then(function(payload){
+    var url=location.origin+location.pathname+"?card="+encodeURIComponent(payload);
+    if(new TextEncoder().encode(url).length>2700&&photoIndex<photoSizes.length-1){photoIndex++;return buildQrUrl()}
+    if(new TextEncoder().encode(url).length>2700)throw new Error("حجم بيانات العامل أكبر من سعة باركود واحد. قلّل عدد القيود أو استخدم كشفًا مختصرًا.");
+    if(selectedPhoto){S.qrPhotos=S.qrPhotos||{};S.qrPhotos[empKey(name)]=selectedPhoto;save()}
+    return url;
+   });
+  }
+  buildQrUrl().then(function(url){
    return ensureQr().then(function(){
     var el=o.querySelector("#qrCanvas");if(!el)throw new Error("أُغلقت نافذة الباركود.");
     el.innerHTML="";new QRCode(el,{text:url,width:240,height:240,colorDark:"#102a2a",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.L});
