@@ -1676,5 +1676,45 @@ obs.observe(document.body,{childList:true,subtree:true,characterData:true});
 applyCurrencyText(document.body);
 })();
 </script>
+
+<style id="page-back-button-style">
+.page-history-back{display:none;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:8px 16px;margin:0 0 12px auto;border:1px solid #cbd5e1;border-radius:24px;background:#eff6ff;color:#164e9a;font:700 15px Tahoma,Arial,sans-serif;cursor:pointer}
+.page-history-back svg{width:19px;height:19px;flex:0 0 auto}
+.page-history-back:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+</style>
+<script id="page-history-back-button">
+(function(){
+"use strict";
+var previousPages=[];
+function activePage(){return document.querySelector("main > .tab.on")}
+function refreshButtons(){
+ document.querySelectorAll(".page-history-back").forEach(function(b){b.style.display=previousPages.length?"inline-flex":"none"});
+}
+function installButton(section){
+ if(!section||section.querySelector(":scope > .page-history-back"))return;
+ var b=document.createElement("button");
+ b.type="button";b.className="page-history-back";b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span>رجوع</span>';
+ b.setAttribute("aria-label","رجوع إلى الصفحة السابقة");
+ b.addEventListener("click",function(){
+  var target=previousPages.pop();
+  if(target&&document.getElementById(target)&&typeof window.showTab==="function"){window.showTab(target.replace(/^t/,""));refreshButtons()}
+  else{previousPages=[];refreshButtons()}
+ });
+ section.insertBefore(b,section.firstChild);
+}
+document.querySelectorAll("main > .tab").forEach(installButton);
+var observer=new MutationObserver(function(records){records.forEach(function(rec){rec.addedNodes.forEach(function(node){if(node.nodeType===1){if(node.matches&&node.matches("main > .tab"))installButton(node);if(node.querySelectorAll)node.querySelectorAll("main > .tab").forEach(installButton)}})});refreshButtons()});
+observer.observe(document.querySelector("main")||document.body,{childList:true,subtree:true});
+document.querySelectorAll("nav button[data-t]").forEach(function(button){
+ button.addEventListener("click",function(){
+  var current=activePage(),next=document.getElementById("t"+button.dataset.t);
+  if(current&&next&&current!==next){previousPages.push(current.id);if(previousPages.length>30)previousPages.shift()}
+  setTimeout(refreshButtons,0);
+ });
+});
+refreshButtons();
+})();
+</script>
+
 </body>
 </html>
