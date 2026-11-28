@@ -1017,7 +1017,7 @@ function pass(){
   while(n=w.nextNode()){
     var p=n.parentNode;
     if(!p||p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="NOSCRIPT")continue;
-    if(p.closest&&p.closest('input,textarea,select,[contenteditable="true"],[data-no-translate],.emp-name,.nm,[data-user-value]'))continue;
+    if(p.closest&&p.closest('input,textarea,[contenteditable="true"],[data-no-translate],.emp-name,.nm,[data-user-value],#empPick,#empList'))continue;
     if(n.__base===undefined)n.__base=n.nodeValue;
     var base=n.__base,trimmed=base.trim(),translated;
     if(en)translated=tr(trimmed);
@@ -1027,7 +1027,7 @@ function pass(){
     else if(!lastRenderedText.has(n))lastRenderedText.set(n,next);
   }
   document.querySelectorAll("[placeholder],[title],[aria-label],[alt],[value]").forEach(function(e){
-    if(e.matches('[contenteditable="true"],[data-no-translate],[data-user-value]'))return;
+    if(e.matches('option,[contenteditable="true"],[data-no-translate],[data-user-value]'))return;
     var rendered=lastRenderedAttrs.get(e)||{};
     var attrs=e.matches('input,textarea,select')?["placeholder","title","aria-label","alt"]:["placeholder","title","aria-label","alt","value"];
     attrs.forEach(function(a){
