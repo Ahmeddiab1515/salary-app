@@ -424,7 +424,7 @@ function archiveGroups(){
   var month=$("archiveMonth").value,year=$("archiveYear").value,company=$("archiveCompany").value,status=$("archiveStatus").value;
   var grouped=grp(),out=[];
   grouped.forEach(function(g){
-    var recs=g.recs.filter(function(x){var r=x.r,date=String(r.date||"");return (!month||date.slice(5,7)===month)&&(!year||date.slice(0,4)===year)&&(!company||String(r.co||"")===company)&&(!status||r.recv===status)});
+    var recs=g.recs.filter(function(x){var r=x.r,date=String(r.date||"");return (!month||date.slice(5,7)===month)&&(!year||date.slice(0,4)===year)&&(!company||String(r.co||"").trim()===company)&&(!status||r.recv===status)});
     if(!recs.length)return;
     var ng={key:g.key,name:g.name,n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,allReceived:false,recs:recs};
     recs.forEach(function(x){var r=x.r,net=netForRow(r);ng.n++;ng.sal=salaryForRow(r);ng.adv+=Number(r.adv)||0;ng.abs+=Number(r.abs)||0;ng.ded+=dedOf(r);ng.net+=net;if(r.recv==="نعم")ng.rec+=net;else ng.pend+=net});
@@ -441,8 +441,8 @@ function fillArchiveFilters(){
 }
 function renderArch(){
   fillArchiveFilters();
-  var q=nk($("q").value),all=grp(),filtered=archiveGroups(),gs=filtered.filter(function(g){return matchG(g,q)}),T=sums(gs),tb=$("arch");
-  $("qn").textContent=q?"النتائج: "+gs.length+" من "+all.length:"";$("qc").style.display=$("q").value?"block":"none";
+  var q=nk($("q").value),filtered=archiveGroups(),gs=filtered.filter(function(g){return matchG(g,q)}),T=sums(gs),tb=$("arch");
+  $("qn").textContent=q?"النتائج: "+gs.length+" من "+filtered.length:"";$("qc").style.display=$("q").value?"block":"none";
   var sp=$("sprof");
   if(q&&gs.length===1){
     var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");
@@ -462,7 +462,7 @@ function renderArch(){
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
       p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم التسليم":"لم يتم التسليم";
       p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll();if(r.recv==="نعم"){var employeeRows=S.rows.filter(function(row){return nk(row.name)===nk(r.name)}),allReceived=employeeRows.length>0&&employeeRows.every(function(row){return row.recv==="نعم"}),totalDue=r2(employeeRows.reduce(function(sum,row){return sum+netForRow(row)},0));if(allReceived&&totalDue>0){confirmEmployeeClear(r.name,totalDue,function(){S.rows=S.rows.filter(function(row){return nk(row.name)!==nk(r.name)});save();renderAll()})}}};
-      d.className="x";d.textContent="حذف";d.onclick=function(){var deletedName=r.name;S.rows.splice(x.i,1);if(!S.rows.some(function(row){return nk(row.name)===nk(deletedName)})){S.emps=S.emps.filter(function(employee){return nk(employee)!==nk(deletedName)});delete openG["emp:"+nk(deletedName)]}save();renderAll()};
+      d.className="x";d.textContent="حذف";d.onclick=function(){if(!window.confirm("هل أنت متأكد من حذف سجل هذا العامل بتاريخ "+(r.date||"—")+"؟ لا يمكن التراجع عن حذف السجل."))return;var deletedName=r.name;S.rows.splice(x.i,1);if(!S.rows.some(function(row){return nk(row.name)===nk(deletedName)})){S.emps=S.emps.filter(function(employee){return nk(employee)!==nk(deletedName)});delete openG["emp:"+nk(deletedName)]}save();renderAll()};
       bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
       [salaryForRow(r),r.adv,r.abs,netForRow(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
     });
