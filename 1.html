@@ -432,11 +432,12 @@ function sums(gs){var o={n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};gs.forE
 function records(name){return S.rows.filter(function(r){return nk(r.name)===nk(name)})}
 function salaryForRow(r){return Number(r.sal)||0}
 function netForRow(r){return r2(salaryForRow(r)-(Number(r.adv)||0)-dedOf(r))}
-function stRec(r){var n=netForRow(r),paid=r.recv==="نعم"?n:r.recv==="جزئي"?Math.max(0,Number(r.receivedAmount)||0):0;if(paid>0&&paid<n)return "تم استلام: "+paid+" درهم — المتبقي: "+r2(n-paid)+" درهم";if(r.recv==="نعم")return "تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم";if(n<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(n)+" درهم";return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
-function stGrp(g){
-  if(g.pend===0)return "تم استلام الراتب — السلف: "+g.adv+" — المبلغ: "+g.net+" درهم";
-  if(g.rec===0){if(g.pend<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(g.pend)+" درهم — السلف: "+g.adv;return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+g.pend+" درهم — السلف: "+g.adv}
-  return "تم استلام: "+g.rec+" درهم — لم يُستلم (المتبقي): "+g.pend+" درهم — السلف: "+g.adv;
+function moneyUnit(){return window.salaryCurrencySymbol?window.salaryCurrencySymbol():"درهم"}
+function stRec(r){var n=netForRow(r),paid=r.recv==="نعم"?n:r.recv==="جزئي"?Math.max(0,Number(r.receivedAmount)||0):0,u=moneyUnit();if(paid>0&&paid<n)return "تم استلام: "+paid+" "+u+" — المتبقي: "+r2(n-paid)+" "+u;if(r.recv==="نعم")return "تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" "+u;if(n<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(n)+" "+u;return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" "+u}
+function stGrp(g){var u=moneyUnit();
+  if(g.pend===0)return "تم استلام الراتب — السلف: "+g.adv+" — المبلغ: "+g.net+" "+u;
+  if(g.rec===0){if(g.pend<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(g.pend)+" "+u+" — السلف: "+g.adv;return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+g.pend+" "+u+" — السلف: "+g.adv}
+  return "تم استلام: "+g.rec+" "+u+" — لم يُستلم (المتبقي): "+g.pend+" "+u+" — السلف: "+g.adv;
 }
 function showTab(n){
   document.querySelectorAll(".tab").forEach(function(t,i){t.className="tab"+(i==n?" on":"")});
@@ -484,7 +485,7 @@ function confirmEmployeeClear(name,amount,onYes){
         ctx.fillStyle="#263746";ctx.font="bold 78px Arial";ctx.fillText((name.trim()[0]||"?"),450,182);
       }
       ctx.fillStyle="#17212b";ctx.font="bold 42px Arial";ctx.fillText(receiptEn?"Payment delivery receipt":"إثبات تسليم مبلغ",450,330);
-      ctx.font="bold 48px Arial";ctx.fillText(amountText+(receiptEn?" AED":" درهم"),450,415);
+      ctx.font="bold 48px Arial";ctx.fillText(amountText+" "+(window.salaryCurrencySymbol?window.salaryCurrencySymbol():(receiptEn?"AED":"درهم")),450,415);
       ctx.font="bold 34px Arial";ctx.fillText(name,450,490);
       ctx.font="26px Arial";ctx.fillStyle="#66717d";ctx.fillText(new Date().toLocaleDateString(receiptEn?"en-GB":"ar-EG"),450,550);
       var blob=await new Promise(function(resolve){canvas.toBlob(resolve,"image/png")});
