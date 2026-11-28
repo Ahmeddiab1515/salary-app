@@ -1677,52 +1677,5 @@ applyCurrencyText(document.body);
 })();
 </script>
 
-<style id="page-back-button-style">
-.page-history-back{display:none;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:8px 16px;margin:0 0 12px auto;border:1px solid #cbd5e1;border-radius:24px;background:#eff6ff;color:#000000;font:700 15px Tahoma,Arial,sans-serif;cursor:pointer}
-.page-history-back svg{width:19px;height:19px;flex:0 0 auto;stroke:#000000!important}
-.page-history-back span{color:#000000!important}
-.page-history-back:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
-.bar{flex-wrap:wrap}
-.bar>h1{flex:0 0 100%;width:100%}
-.bar>.page-history-back{flex:0 0 auto;width:max-content;max-width:max-content;min-height:30px;padding:4px 10px;margin:8px 0 0 auto;gap:6px;font-size:12px;order:2}
-.bar>.page-history-back svg{width:15px;height:15px}
-.bar>#coTag{order:3}
-</style>
-<script id="page-history-back-button">
-(function(){
-"use strict";
-var previousPages=[];
-function activePage(){return document.querySelector("main > .tab.on")}
-function refreshButtons(){
- var b=document.querySelector(".bar > .page-history-back");
- if(b)b.style.display=previousPages.length?"inline-flex":"none";
-}
-function installHeaderButton(){
- var bar=document.querySelector(".bar");
- if(!bar||bar.querySelector(":scope > .page-history-back"))return;
- var b=document.createElement("button");
- b.type="button";b.className="page-history-back";b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span>رجوع</span>';
- b.setAttribute("aria-label","رجوع إلى الصفحة السابقة");
- b.addEventListener("click",function(){
-  var target=previousPages.pop();
-  if(target&&document.getElementById(target)&&typeof window.showTab==="function"){window.showTab(target.replace(/^t/,""));refreshButtons()}
-  else{previousPages=[];refreshButtons()}
- });
- bar.appendChild(b);
-}
-installHeaderButton();
-var observer=new MutationObserver(function(){installHeaderButton();refreshButtons()});
-observer.observe(document.querySelector(".bar")||document.body,{childList:true,subtree:true});
-document.querySelectorAll("nav button[data-t]").forEach(function(button){
- button.addEventListener("click",function(){
-  var current=activePage(),next=document.getElementById("t"+button.dataset.t);
-  if(current&&next&&current!==next){previousPages.push(current.id);if(previousPages.length>30)previousPages.shift()}
-  setTimeout(refreshButtons,0);
- },true);
-});
-refreshButtons();
-})();
-</script>
-
 </body>
 </html>
