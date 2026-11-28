@@ -290,32 +290,12 @@ th{white-space:normal!important;line-height:1.3}
 </section>
 
 
-<section class="tab" id="t4">
-  <div class="card">
-    <h2>التقرير الشهري</h2>
-    <p class="note">اعرض تقرير عامل واحد أو تقريرًا يجمع كل العمال خلال الشهر المحدد.</p>
-    <label for="monthlyReportMonth">الشهر</label>
-    <input id="monthlyReportMonth" type="month">
-    <label for="monthlyReportWorker">العامل</label>
-    <select id="monthlyReportWorker" style="width:100%;min-height:46px">
-      <option value="__all__">كل العمال</option>
-    </select>
-    <div class="row" style="gap:8px;margin-top:12px">
-      <button type="button" id="monthlyReportShow" style="flex:1">عرض التقرير</button>
-      <button type="button" id="monthlyReportPrint" class="x" style="flex:1">طباعة / حفظ PDF</button>
-    </div>
-    <p id="monthlyReportMessage" class="note" role="status">اختار الشهر والعامل ثم اضغط «عرض التقرير».</p>
-  </div>
-  <div class="card" id="monthlyReportOutput" aria-live="polite">
-    <div style="text-align:center;padding:16px">اختار الشهر والعامل لعرض التقرير.</div>
-  </div>
-</section>
+
 </main>
 <nav>
   <button type="button" data-t="0" class="on"><b>📝</b>الكشف</button>
   <button type="button" data-t="1"><b>🗂️</b>الأرشيف</button>
   <button type="button" data-t="2"><b>👥</b>الموظفين</button>
-<button type="button" data-t="4" id="monthlyReportTab"><b>📊</b>التقرير الشهري</button>
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -1700,107 +1680,9 @@ applyCurrencyText(document.body);
 </script>
 
 
-<style id="monthly-report-style">
-#monthlyReportOutput{direction:rtl;color:var(--tx)}
-#monthlyReportOutput .mr-head{text-align:center;margin-bottom:16px}
-#monthlyReportOutput .mr-head h2{margin:0 0 6px}
-#monthlyReportOutput .mr-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
-#monthlyReportOutput .mr-stat{border:1px solid var(--bd);border-radius:10px;padding:10px;min-width:0}
-#monthlyReportOutput .mr-stat small{display:block;color:var(--mut);font-size:12px}
-#monthlyReportOutput .mr-stat b{display:block;margin-top:4px;overflow-wrap:anywhere}
-#monthlyReportOutput .mr-table-wrap{width:100%;overflow-x:auto;margin-top:12px}
-#monthlyReportOutput table{width:100%;border-collapse:collapse;font-size:12px;min-width:650px}
-#monthlyReportOutput th,#monthlyReportOutput td{border:1px solid var(--bd);padding:7px;text-align:center}
-#monthlyReportOutput th{background:var(--soft)}
-#monthlyReportOutput h3{margin:18px 0 8px}
-@media print{
-  body *{visibility:hidden!important}
-  #monthlyReportOutput,#monthlyReportOutput *{visibility:visible!important}
-  #monthlyReportOutput{display:block!important;position:absolute!important;inset:0 auto auto 0!important;width:100%!important;margin:0!important;padding:12px!important;background:#fff!important;color:#111!important;box-shadow:none!important;border:0!important}
-  #monthlyReportOutput .mr-stat{border:1px solid #bbb!important}
-  #monthlyReportOutput .mr-stat small{color:#444!important}
-  #monthlyReportOutput th{background:#eee!important;color:#111!important}
-  #monthlyReportOutput table{font-size:10px!important;min-width:0!important}
-  #monthlyReportOutput th,#monthlyReportOutput td{border:1px solid #888!important;padding:5px!important;color:#111!important}
-}
-</style>
 
-<script id="monthly-report-feature">
-(function(){
-"use strict";
-var monthEl=document.getElementById("monthlyReportMonth");
-var workerEl=document.getElementById("monthlyReportWorker");
-var output=document.getElementById("monthlyReportOutput");
-var message=document.getElementById("monthlyReportMessage");
-if(!monthEl||!workerEl||!output||typeof S==="undefined")return;
-function reportEsc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
-function reportNum(v){return (Number(v)||0).toLocaleString("en-US",{maximumFractionDigits:2})}
-function reportUnit(){var c=S.cfg&&S.cfg.currency;return ({AED:"د.إ",USD:"$",EGP:"ج.م",CNY:"¥"})[c]||"درهم"}
-function reportDateLabel(v){var p=String(v||"").split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:String(v||"—")}
-function fillWorkers(){
- var selected=workerEl.value||"__all__",names=(S.emps||[]).slice();
- (S.rows||[]).forEach(function(r){if(r.name&&!names.some(function(n){return nk(n)===nk(r.name)}))names.push(r.name)});
- workerEl.innerHTML='<option value="__all__">كل العمال</option>'+names.map(function(n){return '<option value="'+reportEsc(nk(n))+'">'+reportEsc(n)+'</option>'}).join("");
- if(selected!=="__all__"&&names.some(function(n){return nk(n)===selected}))workerEl.value=selected;else workerEl.value="__all__";
-}
-function getMonthlyRows(month){
- return (S.rows||[]).filter(function(r){return String(r.date||"").slice(0,7)===month});
-}
-function buildReport(){
- var month=monthEl.value,selected=workerEl.value||"__all__";
- if(!month){message.textContent="اختار الشهر أولًا.";return}
- var monthly=getMonthlyRows(month),names=(S.emps||[]).slice();
- monthly.forEach(function(r){if(r.name&&!names.some(function(n){return nk(n)===nk(r.name)}))names.push(r.name)});
- if(selected!=="__all__")names=names.filter(function(n){return nk(n)===selected});
- var unit=reportUnit(),reports=names.map(function(name){
-   var rows=monthly.filter(function(r){return nk(r.name)===nk(name)});
-   var basic=rows.length?salaryForRow(rows[rows.length-1]):0;
-   var totals={adv:0,abs:0,ded:0,net:0,rec:0,pend:0};
-   rows.forEach(function(r){var net=netForRow(r);totals.adv+=Number(r.adv)||0;totals.abs+=Number(r.abs)||0;totals.ded+=dedOf(r);totals.net+=net;if(r.recv==="نعم")totals.rec+=net;else totals.pend+=net});
-   Object.keys(totals).forEach(function(k){totals[k]=r2(totals[k])});
-   return {name:name,rows:rows,basic:basic,totals:totals};
- });
- var totals={basic:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};
- reports.forEach(function(g){totals.basic+=g.basic;Object.keys(g.totals).forEach(function(k){totals[k]+=g.totals[k]})});
- Object.keys(totals).forEach(function(k){totals[k]=r2(totals[k])});
- var monthParts=month.split("-"),monthLabel=monthParts[1]+"/"+monthParts[0],company=String(S.co||"").trim();
- var html='<div class="mr-head"><h2>التقرير الشهري</h2><b>'+reportEsc(company||"")+'</b><div>الشهر: '+reportEsc(monthLabel)+'</div><div>'+(selected==="__all__"?"تقرير جميع العمال":"تقرير العامل: "+reportEsc(reports[0]?reports[0].name:""))+'</div></div>';
- if(!reports.length){html+='<p style="text-align:center;padding:18px">لم يتم العثور على العامل المحدد.</p>';output.innerHTML=html;message.textContent="لا توجد بيانات لهذا الاختيار.";return}
- html+='<div class="mr-summary">'+[
- ["الراتب الأساسي",totals.basic],["إجمالي السلف",totals.adv],["أيام الغياب",totals.abs],["خصم الغياب",totals.ded],["المجموع بعد الخصم",totals.net],["المبلغ المستلم",totals.rec],["المتبقي غير المستلم",totals.pend]
- ].map(function(x){return '<div class="mr-stat"><small>'+x[0]+'</small><b>'+reportNum(x[1])+(x[0]==="أيام الغياب"?"":" "+unit)+'</b></div>'}).join("")+'</div>';
- if(selected==="__all__"){
-  html+='<h3>ملخص كل عامل</h3><div class="mr-table-wrap"><table><thead><tr><th>العامل</th><th>الراتب الأساسي</th><th>السلف</th><th>الغياب</th><th>خصم الغياب</th><th>المجموع</th><th>المستلم</th><th>المتبقي</th></tr></thead><tbody>';
-  reports.forEach(function(g){html+='<tr><td>'+reportEsc(g.name)+'</td><td>'+reportNum(g.basic)+'</td><td>'+reportNum(g.totals.adv)+'</td><td>'+reportNum(g.totals.abs)+'</td><td>'+reportNum(g.totals.ded)+'</td><td>'+reportNum(g.totals.net)+'</td><td>'+reportNum(g.totals.rec)+'</td><td>'+reportNum(g.totals.pend)+'</td></tr>'});
-  html+='</tbody></table></div>';
- }
- reports.forEach(function(g){
-  html+='<h3>تفاصيل العامل: '+reportEsc(g.name)+'</h3>';
-  if(!g.rows.length){html+='<p>لا توجد قيود مسجلة لهذا العامل خلال الشهر.</p>';return}
-  html+='<div class="mr-table-wrap"><table><thead><tr><th>التاريخ</th><th>الراتب الأساسي</th><th>السلفة</th><th>تاريخ السلفة</th><th>الغياب</th><th>خصم الغياب</th><th>المجموع بعد الخصم</th><th>حالة الاستلام</th></tr></thead><tbody>';
-  g.rows.forEach(function(r){html+='<tr><td>'+reportEsc(reportDateLabel(r.date))+'</td><td>'+reportNum(salaryForRow(r))+'</td><td>'+reportNum(r.adv)+'</td><td>'+reportEsc(reportDateLabel(r.advDt))+'</td><td>'+reportNum(r.abs)+'</td><td>'+reportNum(dedOf(r))+'</td><td>'+reportNum(netForRow(r))+'</td><td>'+reportEsc(r.recv==="نعم"?"تم الاستلام":"لم يتم الاستلام")+'</td></tr>'});
-  html+='</tbody></table></div>';
- });
- html+='<p style="text-align:center;font-size:11px;margin-top:18px">تم إنشاء التقرير من القيود المحفوظة في أرشيف التطبيق.</p>';
- output.innerHTML=html;
- message.textContent="تم عرض التقرير. استخدم «طباعة / حفظ PDF» لحفظه كملف PDF.";
-}
-monthEl.value=(typeof today==="function"?today():new Date().toISOString().slice(0,10)).slice(0,7);
-fillWorkers();
-document.getElementById("monthlyReportShow").onclick=buildReport;
-workerEl.onchange=buildReport;
-monthEl.onchange=buildReport;
-document.getElementById("monthlyReportPrint").onclick=function(){
- if(!output.innerHTML||output.textContent.indexOf("اختار الشهر والعامل")===0)buildReport();
- if(!output.innerHTML||!output.textContent.trim())return;
- window.print();
-};
-var reportTab=document.getElementById("monthlyReportTab");
-if(reportTab)reportTab.onclick=function(){fillWorkers();showTab(4);buildReport()};
-var oldRenderAll=window.renderAll;
-if(typeof oldRenderAll==="function")window.renderAll=function(){oldRenderAll();fillWorkers();if(document.getElementById("t4").classList.contains("on"))buildReport()};
-})();
-</script>
+
+
 
 </body>
 </html>
