@@ -922,7 +922,7 @@ function tr(s){
 var mo,timer;
 function toArabic(s){
   if(EN_AR[s]!==undefined)return EN_AR[s];
-  var employeeCount=s.match(/^(\\d+) employees$/);
+  var employeeCount=s.match(/^(\d+) employees$/);
   if(employeeCount)return employeeCount[1]+" "+(Number(employeeCount[1])===1?"موظف":"موظفين");
   for(var i=0;i<PAT_AR.length;i++)if(PAT_AR[i][0].test(s))return s.replace(PAT_AR[i][0],PAT_AR[i][1]);
   var out=s,keys=Object.keys(EN_AR).filter(function(k){return k.length>=4||k==="AED"}).sort(function(a,b){return b.length-a.length});
