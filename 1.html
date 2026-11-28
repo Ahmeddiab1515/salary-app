@@ -419,7 +419,7 @@ function grp(){
     var k=nk(r.name),g=m[k],salary=Number(r.sal)||0,advance=Number(r.adv)||0,absence=Number(r.abs)||0,deduction=dedOf(r),net=netForRow(r);
     if(!g){g=m[k]={key:k,name:canon(r.name),n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,allReceived:false,recs:[]};o.push(g)}
     g.n++;g.sal=salary;g.adv+=advance;g.abs+=absence;g.ded+=deduction;g.net+=net;
-    if(r.recv==="نعم")g.rec+=net;else g.pend+=net;
+    var paid=r.recv==="نعم"?net:r.recv==="جزئي"?Math.max(0,Math.min(net,Number(r.receivedAmount)||0)):0;g.rec+=paid;g.pend+=net-paid;
     g.recs.push({r:r,i:i});
   });
   o.forEach(function(g){
@@ -432,15 +432,10 @@ function sums(gs){var o={n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0};gs.forE
 function records(name){return S.rows.filter(function(r){return nk(r.name)===nk(name)})}
 function salaryForRow(r){return Number(r.sal)||0}
 function netForRow(r){return r2(salaryForRow(r)-(Number(r.adv)||0)-dedOf(r))}
-function stRec(r){var n=netForRow(r);if(r.recv==="نعم")return "تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم";if(n<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(n)+" درهم";return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
+function stRec(r){var n=netForRow(r),paid=r.recv==="نعم"?n:r.recv==="جزئي"?Math.max(0,Number(r.receivedAmount)||0):0;if(paid>0&&paid<n)return "تم استلام: "+paid+" درهم — المتبقي: "+r2(n-paid)+" درهم";if(r.recv==="نعم")return "تم استلام الراتب بعد خصم السلف والغياب — المبلغ: "+n+" درهم";if(n<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(n)+" درهم";return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+n+" درهم"}
 function stGrp(g){
-  var receivedCount=g.recs.filter(function(x){return x.r.recv==="نعم"}).length,pendingCount=g.recs.length-receivedCount;
-  if(pendingCount===0)return "تم استلام الراتب — السلف: "+g.adv+" — المبلغ: "+g.net+" درهم";
-  if(receivedCount===0){
-    if(g.pend<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(g.pend)+" درهم — السلف: "+g.adv;
-    return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+g.pend+" درهم — السلف: "+g.adv;
-  }
-  if(g.pend<0)return "تم استلام: "+g.rec+" درهم — الخصومات تجاوزت الراتب غير المستلم بمقدار: "+Math.abs(g.pend)+" درهم — السلف: "+g.adv;
+  if(g.pend===0)return "تم استلام الراتب — السلف: "+g.adv+" — المبلغ: "+g.net+" درهم";
+  if(g.rec===0){if(g.pend<0)return "لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: "+Math.abs(g.pend)+" درهم — السلف: "+g.adv;return "لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: "+g.pend+" درهم — السلف: "+g.adv}
   return "تم استلام: "+g.rec+" درهم — لم يُستلم (المتبقي): "+g.pend+" درهم — السلف: "+g.adv;
 }
 function showTab(n){
@@ -535,9 +530,10 @@ function renderArch(){
       var c1=td(sr,r.date),bx=document.createElement("div"),p=document.createElement("button"),d=document.createElement("button");
       bx.style.cssText="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;justify-content:center";
       p.className="pill"+(r.recv==="نعم"?" y":"");p.textContent=r.recv==="نعم"?"تم التسليم":"لم يتم التسليم";
-      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";save();renderAll();if(r.recv==="نعم"){var employeeRows=S.rows.filter(function(row){return nk(row.name)===nk(r.name)}),allReceived=employeeRows.length>0&&employeeRows.every(function(row){return row.recv==="نعم"}),totalDue=r2(employeeRows.reduce(function(sum,row){return sum+netForRow(row)},0));if(allReceived&&totalDue>0){confirmEmployeeClear(r.name,totalDue,function(){S.rows=S.rows.filter(function(row){return nk(row.name)!==nk(r.name)});save();renderAll()})}}};
+      p.onclick=function(){r.recv=r.recv==="نعم"?"لا":"نعم";delete r.receivedAmount;save();renderAll()};
+      var part=document.createElement("button");part.className="pill";part.textContent="استلام جزء";part.onclick=function(){var due=netForRow(r),current=Number(r.receivedAmount)||0,cur=S.cfg&&S.cfg.currency||"AED",symbol=cur==="USD"?"$":cur==="EGP"?"ج.م":cur==="CNY"?"¥":"د.إ",answer=prompt("اكتب المبلغ الذي تم استلامه ("+symbol+")",current?String(current):"");if(answer===null)return;var amount=Number(String(answer).replace(/,/g,"").trim());if(!isFinite(amount)||amount<=0||amount>due){alert("اكتب مبلغًا أكبر من صفر ولا يتجاوز المستحق: "+due);return}r.receivedAmount=r2(amount);r.recv=amount>=due?"نعم":"جزئي";if(r.recv==="نعم")delete r.receivedAmount;save();renderAll()};
       d.className="x";d.textContent="حذف";d.onclick=function(){var deletedName=r.name;S.rows.splice(x.i,1);if(!S.rows.some(function(row){return nk(row.name)===nk(deletedName)})){S.emps=S.emps.filter(function(employee){return nk(employee)!==nk(deletedName)});delete openG["emp:"+nk(deletedName)]}save();renderAll()};
-      bx.appendChild(p);bx.appendChild(d);c1.appendChild(bx);
+      bx.appendChild(p);bx.appendChild(part);bx.appendChild(d);c1.appendChild(bx);
       [salaryForRow(r),r.adv,r.abs,netForRow(r)].forEach(function(v){td(sr,v)});tb.appendChild(sr);
     });
   });
@@ -587,7 +583,7 @@ function renderEmps(){
         var r=item.r,rec=document.createElement("div");rec.className="emp-record";
         var top=document.createElement("div");top.className="emp-record-head";
         var title=document.createElement("b");title.textContent="كشف بتاريخ "+(r.date||"—");
-        var status=document.createElement("span");status.className="emp-record-status"+(r.recv==="نعم"?" is-received":"");status.textContent=r.recv==="نعم"?"تم الاستلام":"لم يتم الاستلام";
+        var status=document.createElement("span");status.className="emp-record-status"+(r.recv==="نعم"?" is-received":"");status.textContent=r.recv==="نعم"?"تم الاستلام":r.recv==="جزئي"?"تم استلام جزء":"لم يتم الاستلام";
         top.appendChild(title);top.appendChild(status);rec.appendChild(top);
         var cells=document.createElement("div");cells.className="emp-record-grid";
         function cell(label,value){var c=document.createElement("div");c.className="emp-record-cell";var k=document.createElement("span"),v=document.createElement("b");k.textContent=label;v.textContent=value;k.className="emp-record-label";v.className="emp-record-value";c.appendChild(k);c.appendChild(v);cells.appendChild(c)}
@@ -596,7 +592,7 @@ function renderEmps(){
         cell("تاريخ السلفة",r.advDt||"—");
         cell("الغياب",r.abs+" يوم");
         cell("خصم الغياب",dedOf(r)+" درهم");
-        cell("المجموع",netOf(r)+" درهم");
+        cell("المجموع",netOf(r)+" درهم");if(r.recv==="جزئي")cell("المستلم",r2(Number(r.receivedAmount)||0)+" درهم");
         rec.appendChild(cells);records.appendChild(rec);
       });
       details.appendChild(records);
@@ -1815,48 +1811,32 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape")closeInfo()}
 "use strict";
 if(typeof S==="undefined")return;
 S.cfg=S.cfg||{};
-var choices={
- AED:{symbol:"د.إ",ar:"الدرهم الإماراتي",en:"UAE dirham"},
- USD:{symbol:"$",ar:"الدولار الأمريكي",en:"US dollar"},
- EGP:{symbol:"ج.م",ar:"الجنيه المصري",en:"Egyptian pound"},
- CNY:{symbol:"¥",ar:"اليوان الصيني",en:"Chinese yuan"}
-};
+var choices={AED:{symbol:"د.إ",ar:"الدرهم الإماراتي",en:"UAE dirham"},USD:{symbol:"$",ar:"الدولار الأمريكي",en:"US dollar"},EGP:{symbol:"ج.م",ar:"الجنيه المصري",en:"Egyptian pound"},CNY:{symbol:"¥",ar:"اليوان الصيني",en:"Chinese yuan"}};
 function selected(){return choices[S.cfg.currency]||choices.AED}
 function unit(){return selected().symbol}
+function convertText(value){
+ return String(value).replace(/الدرهم الإماراتي|UAE dirham|درهم|AED|د\.إ|ج\.م|\$|¥|الدولار الأمريكي|US dollar|الجنيه المصري|Egyptian pound|اليوان الصيني|Chinese yuan/g,function(){return unit()});
+}
 function applyCurrencyText(root){
  var walker=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT),nodes=[];
  while(walker.nextNode())nodes.push(walker.currentNode);
- nodes.forEach(function(n){
-  if(n.parentElement&&n.parentElement.closest("#currencyCard"))return;
-  var v=n.nodeValue,old=v;
-  v=v.replace(/الدرهم الإماراتي/g,selected().ar)
-     .replace(/UAE dirham/g,selected().en)
-     .replace(/درهم/g,unit())
-     .replace(/AED/g,unit());
-  if(v!==old)n.nodeValue=v;
- });
+ nodes.forEach(function(n){if(n.parentElement&&n.parentElement.closest("#currencyCard"))return;var v=n.nodeValue,next=convertText(v);if(next!==v)n.nodeValue=next});
 }
 var settings=document.getElementById("t3");
 if(settings&&!document.getElementById("currencyCard")){
- var card=document.createElement("div");
- card.className="card";card.id="currencyCard";
+ var card=document.createElement("div");card.className="card";card.id="currencyCard";
  card.innerHTML='<h2>العملة</h2><label for="currencySelect">اختار العملة</label><select id="currencySelect" style="width:100%;min-height:46px"><option value="AED">الدرهم الإماراتي (د.إ)</option><option value="USD">الدولار الأمريكي ($)</option><option value="EGP">الجنيه المصري (ج.م)</option><option value="CNY">اليوان الصيني (¥)</option></select><p class="note" data-help-text>تغيير رمز واسم العملة فقط، بدون تحويل أو تغيير أي مبلغ.</p>';
  settings.insertBefore(card,settings.firstChild);
- var sel=document.getElementById("currencySelect");
- sel.value=choices[S.cfg.currency]?S.cfg.currency:"AED";
+ var sel=document.getElementById("currencySelect");sel.value=choices[S.cfg.currency]?S.cfg.currency:"AED";
  sel.onchange=function(){S.cfg.currency=sel.value;save();applyCurrencyText(document.body)};
 }
-var obs=new MutationObserver(function(records){
+var busy=false,obs=new MutationObserver(function(records){
+ if(busy)return;busy=true;
  records.forEach(function(rec){
-  if(rec.type==="characterData"){
-   var n=rec.target;if(n.parentElement&&n.parentElement.closest("#currencyCard"))return;var v=n.nodeValue;
-   var next=v.replace(/الدرهم الإماراتي/g,selected().ar).replace(/UAE dirham/g,selected().en).replace(/درهم/g,unit()).replace(/AED/g,unit());
-   if(next!==v)n.nodeValue=next;
-  }else rec.addedNodes&&rec.addedNodes.forEach(function(n){
-   if(n.nodeType===Node.TEXT_NODE){var v=n.nodeValue,next=v.replace(/الدرهم الإماراتي/g,selected().ar).replace(/UAE dirham/g,selected().en).replace(/درهم/g,unit()).replace(/AED/g,unit());if(next!==v)n.nodeValue=next}
-   else if(n.nodeType===Node.ELEMENT_NODE&&n.id!=="currencyCard")applyCurrencyText(n);
-  });
+  if(rec.type==="characterData"){var n=rec.target;if(n.parentElement&&n.parentElement.closest("#currencyCard"))return;var next=convertText(n.nodeValue);if(next!==n.nodeValue)n.nodeValue=next}
+  else if(rec.addedNodes)rec.addedNodes.forEach(function(n){if(n.nodeType===Node.TEXT_NODE){var next=convertText(n.nodeValue);if(next!==n.nodeValue)n.nodeValue=next}else if(n.nodeType===Node.ELEMENT_NODE&&n.id!=="currencyCard")applyCurrencyText(n)});
  });
+ busy=false;
 });
 obs.observe(document.body,{childList:true,subtree:true,characterData:true});
 applyCurrencyText(document.body);
