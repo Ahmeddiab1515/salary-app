@@ -227,6 +227,23 @@ th{white-space:normal!important;line-height:1.3}
 .qn{color:var(--mut);font-size:12px;margin:8px 4px 0;min-height:14px}
 .sprof{align-items:center;gap:14px}.sprof .av{width:60px;height:60px;font-size:26px;border:2px solid var(--pri)}.sprof b{font-size:18px}.sprof small{display:block;color:var(--mut);font-size:12.5px;margin-top:3px;line-height:1.4}
 
+/* Interactive archive export icons: visual-only; original click handlers are preserved */
+.archive-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.archive-action{--action:#0f766e;--action-soft:rgba(15,118,110,.10);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:76px;padding:10px 6px!important;border:1px solid color-mix(in srgb,var(--action) 25%,var(--bd))!important;border-radius:16px!important;background:linear-gradient(145deg,var(--card),var(--action-soft))!important;color:var(--tx)!important;font-weight:800;font-size:12px!important;box-shadow:0 4px 12px rgba(15,23,42,.07);overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
+.archive-action:before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.24) 48%,transparent 70%);transform:translateX(-130%);transition:transform .55s ease;pointer-events:none}
+.archive-action:hover:before,.archive-action:focus-visible:before{transform:translateX(130%)}
+.archive-action:active{transform:translateY(2px) scale(.96);box-shadow:0 1px 4px rgba(15,23,42,.12)}
+.archive-action:focus-visible{outline:3px solid color-mix(in srgb,var(--action) 45%,transparent);outline-offset:2px}
+.archive-action-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--action);color:#fff;box-shadow:0 4px 10px color-mix(in srgb,var(--action) 28%,transparent);transition:transform .2s ease}
+.archive-action-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.archive-action:hover .archive-action-icon,.archive-action:focus-visible .archive-action-icon{transform:translateY(-2px) rotate(-4deg)}
+.archive-action-label{position:relative;z-index:1;white-space:nowrap}
+.excel-action{--action:#16834a;--action-soft:rgba(22,131,74,.11)}
+.pdf-action{--action:#d64b45;--action-soft:rgba(214,75,69,.10)}
+.share-action{--action:#3974c6;--action-soft:rgba(57,116,198,.11)}
+@media(max-width:360px){.archive-actions{gap:6px}.archive-action{min-height:70px;padding:8px 3px!important}.archive-action-icon{width:32px;height:32px}.archive-action-label{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.archive-action,.archive-action-icon,.archive-action:before{transition:none}}
+
 /* Archive lower section: card layout; upper archive summary and search remain unchanged */
 #t1 .wrap{overflow:visible;margin-top:12px!important}
 #t1 .wrap table{width:100%;min-width:0!important;border-collapse:separate;border-spacing:0 10px;table-layout:fixed}
@@ -302,7 +319,11 @@ th{white-space:normal!important;line-height:1.3}
   </div>
   <div class="card">
     <div class="sbox"><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="🔍 ابحث (اسم، تاريخ، مبلغ، مستلم…)"><button type="button" id="qc" class="qc">×</button></div><div id="qn" class="qn"></div>
-    <div class="row" style="margin-top:10px"><button id="xl" type="button" style="flex:1">📊 حفظ إكسل</button><button id="pd" type="button" style="flex:1">📄 حفظ PDF</button><button id="sh" type="button" style="flex:1">📤 مشاركة</button></div>
+    <div class="archive-actions" role="group" aria-label="تصدير ومشاركة الأرشيف">
+      <button id="xl" class="archive-action excel-action" type="button" aria-label="حفظ إكسل"><span class="archive-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 12l5 7M13 12l-5 7"/></svg></span><span class="archive-action-label">حفظ إكسل</span></button>
+      <button id="pd" class="archive-action pdf-action" type="button" aria-label="حفظ PDF"><span class="archive-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 16h2a2 2 0 0 0 0-4H8v6m6-6v6h1a3 3 0 0 0 0-6z"/></svg></span><span class="archive-action-label">حفظ PDF</span></button>
+      <button id="sh" class="archive-action share-action" type="button" aria-label="مشاركة"><span class="archive-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"/></svg></span><span class="archive-action-label">مشاركة</span></button>
+    </div>
     <div id="xmsg"></div>
     <div class="wrap" style="margin-top:10px"><table>
       <thead><tr><th>العامل</th><th>الراتب الأساسي</th><th>السلف</th><th>الغياب</th><th>المجموع بعد الخصم</th></tr></thead>
