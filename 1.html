@@ -965,6 +965,16 @@ PAT_AR.push(
 [/^Added to the existing name: (.+)$/,"تمت الإضافة على نفس الاسم: $1"],
 [/^Company: (.+)$/,"الشركة: $1"]
 );
+PAT.push(
+ [/^تم تسليم المبلغ ([\d,.-]+) درهم$/,"Amount delivered: $1 AED"],
+ [/^QR Code محمي — (.+)$/,"Protected QR code — $1"],
+ [/^(\d+) موظف$/,"$1 employees"]
+);
+PAT_AR.push(
+ [/^Amount delivered: ([\d,.-]+) AED$/,"تم تسليم المبلغ $1 درهم"],
+ [/^Protected QR code — (.+)$/,"QR Code محمي — $1"],
+ [/^(\d+) employees$/,"$1 موظف"]
+);
 window.appTranslate=function(value){
   var text=String(value==null?"":value);
   return S.cfg&&S.cfg.lang==="en"?tr(text):toArabic(text);
