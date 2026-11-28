@@ -1052,9 +1052,10 @@ function pass(){
     document.head.appendChild(directionStyle);
   }
   document.querySelectorAll('[dir="rtl"],[dir="ltr"]').forEach(function(e){
-    if(e!==document.documentElement&&e!==document.body)e.setAttribute("dir",en?"ltr":"rtl");
+    if(e!==document.documentElement&&e!==document.body&&!(e.closest&&e.closest('[data-no-translate]')))e.setAttribute("dir",en?"ltr":"rtl");
   });
   document.querySelectorAll("[style]").forEach(function(e){
+    if(e.closest&&e.closest('[data-no-translate]'))return;
     if(e.style.direction==="rtl"||e.style.direction==="ltr")e.style.direction=en?"ltr":"rtl";
     if(e.style.textAlign==="right"||e.style.textAlign==="left")e.style.textAlign=en?"left":"right";
   });
