@@ -338,7 +338,7 @@ th{white-space:normal!important;line-height:1.3}
     <div class="row"><input id="newName" placeholder="اكتب اسم الموظف"><button id="addEmp" type="button">إضافة</button></div>
     <div id="emsg"></div>
   </div>
-  <div class="card"><h2>الموظفين</h2><div id="elist"></div></div>
+  <div class="card employees-list-card"><div class="employees-heading"><h2>قائمة الموظفين</h2><span id="employeesCount" class="employees-count">0 موظف</span></div><div class="employees-search"><span aria-hidden="true">⌕</span><input id="employeesSearch" type="search" placeholder="ابحث باسم الموظف..." autocomplete="off"></div><div class="employees-overview"><div class="employees-overview-card"><span>إجمالي الموظفين</span><b id="employeesTotal">0</b></div><div class="employees-overview-card dues"><span>مستحقات الموظفين</span><b id="employeesDues">0 درهم</b></div></div><div id="elist"></div></div>
   <div class="card"><label for="co">اسم الشركة</label><input id="co" value="GCC"></div>
   <p style="color:var(--mut);font-size:12px;text-align:center">البيانات بتتحفظ في المتصفح اللي بتستخدمه.</p>
 </section>
@@ -511,12 +511,17 @@ function renderEmps(){
   if(!S.emps.length){l.innerHTML="<div class='empty'>لا يوجد موظفين، أضف أول موظف</div>";return}
   S.emps.forEach(function(n,i){
     var g=all.filter(function(x){return x.key===nk(n)})[0]||{n:0,sal:0,adv:0,abs:0,ded:0,net:0,rec:0,pend:0,recs:[]};
-    var d=document.createElement("div");d.className="emp"+(openG["emp:"+nk(n)]?" is-open":"");
+    var d=document.createElement("div");d.className="emp"+(openG["emp:"+nk(n)]?" is-open":"");d.setAttribute("data-employee-name",n);
     var head=document.createElement("div");head.className="emp-top";
     var info=document.createElement("div");info.style.flex="1";info.style.minWidth="0";
     var b=document.createElement("button");b.type="button";b.className="emp-name";b.setAttribute("aria-expanded",String(!!openG["emp:"+nk(n)]));b.textContent=(openG["emp:"+nk(n)]?"▾ ":"▸ ")+n;
     info.appendChild(b);head.appendChild(info);
     d.appendChild(head);
+    var face=document.createElement("div");face.className="employee-face-summary";
+    var company=document.createElement("span");company.className="employee-company";company.textContent="الشركة: "+(S.co||"—");face.appendChild(company);
+    var moneyFace=document.createElement("div");moneyFace.className="employee-face-money";
+    function faceCell(label,value,kind){var c=document.createElement("div");c.className="employee-face-cell"+(kind?" "+kind:"");var a=document.createElement("span"),v=document.createElement("b");a.textContent=label;v.textContent=value+" درهم";c.appendChild(a);c.appendChild(v);moneyFace.appendChild(c)}
+    faceCell("الراتب الأساسي",g.sal||0,"base");faceCell("السلف والغياب",(Number(g.adv)||0)+(Number(g.ded)||0),"deductions");faceCell("المجموع",g.net||0,"total");face.appendChild(moneyFace);d.appendChild(face);
     var details=document.createElement("div");details.className="emp-details";details.hidden=!openG["emp:"+nk(n)];
     function section(title){var h=document.createElement("h3");h.className="emp-section-title";h.textContent=title;details.appendChild(h)}
     function stat(label,value,extra){var card=document.createElement("div");card.className="emp-stat"+(extra?" "+extra:"");var k=document.createElement("span"),v=document.createElement("b");k.textContent=label;v.textContent=value;k.className="emp-stat-label";v.className="emp-stat-value";card.appendChild(k);card.appendChild(v);return card}
@@ -1737,6 +1742,64 @@ applyCurrencyText(document.body);
 
 
 
+
+
+<style id="employees-page-redesign">
+#t2 .employees-list-card{padding:16px;overflow:hidden}
+#t2 .employees-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+#t2 .employees-heading h2{margin:0;font-size:19px}
+#t2 .employees-count{background:#dcfce7;color:#166534;border-radius:30px;padding:7px 12px;font-weight:800;font-size:13px;white-space:nowrap}
+#t2 .employees-search{display:flex;align-items:center;gap:9px;border:1.5px solid var(--bd);background:var(--bg);border-radius:15px;padding:0 12px;margin-bottom:12px}
+#t2 .employees-search>span{font-size:25px;color:var(--pri);line-height:1}
+#t2 .employees-search input{border:0!important;box-shadow:none!important;background:transparent!important;min-width:0;flex:1;width:100%;padding:13px 2px}
+#t2 .employees-overview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+#t2 .employees-overview-card{border:1px solid var(--bd);border-radius:15px;padding:12px 10px;background:var(--card);display:flex;flex-direction:column;gap:5px;min-width:0}
+#t2 .employees-overview-card span{font-size:12px;color:var(--mut)}
+#t2 .employees-overview-card b{font-size:20px;color:#1d4ed8;overflow-wrap:anywhere}
+#t2 .employees-overview-card.dues b{color:#ea580c}
+#t2 #elist{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+#t2 #elist .emp{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;padding:13px;border:1px solid var(--bd);border-radius:19px;background:var(--card);box-shadow:var(--sh);min-width:0}
+#t2 #elist .emp>.av{grid-column:1;grid-row:1;width:64px;height:64px;border-radius:50%;margin:0;align-self:center}
+#t2 #elist .emp>.emp-top{grid-column:2;grid-row:1;display:flex;align-items:center;min-width:0;width:100%;flex-basis:auto}
+#t2 #elist .emp-name{font-size:19px;padding:5px 0;text-decoration:none;text-align:right;white-space:normal;overflow-wrap:anywhere}
+#t2 #elist .emp-photo-actions{grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:7px;margin:0;width:100%}
+#t2 #elist .emp-payment-status{margin-inline-start:auto}
+#t2 #elist .employee-face-summary{grid-column:1/-1;grid-row:3;min-width:0}
+#t2 #elist .employee-company{display:block;color:var(--mut);font-size:12px;margin-bottom:8px}
+#t2 #elist .employee-face-money{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--bd);border-radius:13px;overflow:hidden;background:var(--bg)}
+#t2 #elist .employee-face-cell{padding:10px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;text-align:center;border-inline-start:1px solid var(--bd)}
+#t2 #elist .employee-face-cell:first-child{border-inline-start:0}
+#t2 #elist .employee-face-cell span{font-size:11px;color:var(--mut);line-height:1.4}
+#t2 #elist .employee-face-cell b{font-size:15px;color:#1d4ed8;overflow-wrap:anywhere}
+#t2 #elist .employee-face-cell.deductions b{color:#ea580c}
+#t2 #elist .employee-face-cell.total{background:var(--net)}
+#t2 #elist .employee-face-cell.total b{color:var(--ok);font-size:17px}
+#t2 #elist .emp>.emp-details{grid-column:1/-1;grid-row:4;margin-top:0}
+#t2 #elist .emp-details .qr-actions{display:flex;gap:8px;flex-wrap:wrap}
+#t2 #elist .emp-details .qr-actions button{flex:1;min-width:120px;min-height:42px}
+#t2 #elist .emp-details .emp-detail-actions{margin-top:12px}
+@media(max-width:360px){#t2 .employees-overview-card b{font-size:17px}#t2 #elist .employee-face-cell{padding:8px 3px}#t2 #elist .employee-face-cell b{font-size:13px}}
+</style>
+<script id="employees-page-live-summary">
+(function(){
+  function updateEmployeeOverview(){
+    if(typeof S==="undefined"||typeof grp!=="function")return;
+    var gs=grp(),tot=typeof sums==="function"?sums(gs):{net:0};
+    var count=document.getElementById("employeesCount"),total=document.getElementById("employeesTotal"),dues=document.getElementById("employeesDues");
+    if(count)count.textContent=S.emps.length+" موظف";
+    if(total)total.textContent=S.emps.length.toLocaleString("en-US");
+    if(dues)dues.textContent=(Number(tot.net)||0).toLocaleString("en-US")+" درهم";
+  }
+  function filterEmployees(){
+    var field=document.getElementById("employeesSearch"),q=field?String(field.value||"").trim().toLowerCase():"";
+    document.querySelectorAll("#elist .emp").forEach(function(card){var name=String(card.getAttribute("data-employee-name")||"").toLowerCase();card.style.display=!q||name.indexOf(q)!==-1?"":"none"});
+  }
+  var search=document.getElementById("employeesSearch");if(search)search.addEventListener("input",filterEmployees);
+  if(typeof renderAll==="function"){var previous=renderAll;renderAll=function(){previous();updateEmployeeOverview();filterEmployees()}}
+  if(typeof renderEmps==="function"){var previousEmps=renderEmps;renderEmps=function(){previousEmps();filterEmployees()}}
+  updateEmployeeOverview();filterEmployees();
+})();
+</script>
 
 </body>
 </html>
