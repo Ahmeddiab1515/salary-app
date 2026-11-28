@@ -1688,10 +1688,12 @@ applyCurrencyText(document.body);
 var previousPages=[];
 function activePage(){return document.querySelector("main > .tab.on")}
 function refreshButtons(){
- document.querySelectorAll(".page-history-back").forEach(function(b){b.style.display=previousPages.length?"inline-flex":"none"});
+ var b=document.querySelector(".bar > .page-history-back");
+ if(b)b.style.display=previousPages.length?"inline-flex":"none";
 }
-function installButton(section){
- if(!section||section.querySelector(":scope > .page-history-back"))return;
+function installHeaderButton(){
+ var bar=document.querySelector(".bar");
+ if(!bar||bar.querySelector(":scope > .page-history-back"))return;
  var b=document.createElement("button");
  b.type="button";b.className="page-history-back";b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span>رجوع</span>';
  b.setAttribute("aria-label","رجوع إلى الصفحة السابقة");
@@ -1700,11 +1702,11 @@ function installButton(section){
   if(target&&document.getElementById(target)&&typeof window.showTab==="function"){window.showTab(target.replace(/^t/,""));refreshButtons()}
   else{previousPages=[];refreshButtons()}
  });
- section.insertBefore(b,section.firstChild);
+ bar.appendChild(b);
 }
-document.querySelectorAll("main > .tab").forEach(installButton);
-var observer=new MutationObserver(function(records){records.forEach(function(rec){rec.addedNodes.forEach(function(node){if(node.nodeType===1){if(node.matches&&node.matches("main > .tab"))installButton(node);if(node.querySelectorAll)node.querySelectorAll("main > .tab").forEach(installButton)}})});refreshButtons()});
-observer.observe(document.querySelector("main")||document.body,{childList:true,subtree:true});
+installHeaderButton();
+var observer=new MutationObserver(function(){installHeaderButton();refreshButtons()});
+observer.observe(document.querySelector(".bar")||document.body,{childList:true,subtree:true});
 document.querySelectorAll("nav button[data-t]").forEach(function(button){
  button.addEventListener("click",function(){
   var current=activePage(),next=document.getElementById("t"+button.dataset.t);
