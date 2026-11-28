@@ -1001,6 +1001,7 @@ PAT_AR.push(
  [/^Salary not received — Deductions exceed salary by: (.+) AED — Advances: (.+)$/,"لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: $1 درهم — السلف: $2"],
  [/^Received: (.+) AED — Deductions exceed unpaid salary by: (.+) AED — Advances: (.+)$/,"تم استلام: $1 درهم — الخصومات تجاوزت الراتب غير المستلم بمقدار: $2 درهم — السلف: $3"]
 );
+Object.assign(EN,{"جزئي":"Partial","استلام جزء":"Partial payment","المبلغ المستلم جزئيًا":"Partially received amount","اكتب المبلغ المستلم":"Enter amount received","اكتب المبلغ المستلم بشكل صحيح، ولا يتجاوز المجموع المستحق.":"Enter a valid amount that does not exceed the amount due.","تم استلام جزء":"Partially received","تم استلام: ":"Received: ","المتبقي: ":"Remaining: "});
 window.appTranslate=function(value){
   var text=String(value==null?"":value);
   return S.cfg&&S.cfg.lang==="en"?tr(text):toArabic(text);
