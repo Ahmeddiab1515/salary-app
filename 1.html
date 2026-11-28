@@ -110,7 +110,7 @@ nav{grid-template-columns:repeat(4,1fr)!important}
 .note{color:var(--mut);font-size:12px;margin:8px 0 0}
 .bar h1 span{background:none!important;padding:0!important;border-radius:0!important;font-weight:inherit!important;font-size:inherit!important}
 body{padding-bottom:110px}
-nav{left:12px!important;right:12px!important;bottom:calc(-3px + env(safe-area-inset-bottom,0px))!important;max-width:520px!important;margin-inline:auto!important;padding:6px!important;border:1px solid var(--bd)!important;border-radius:28px!important;box-shadow:0 10px 30px rgba(10,25,40,.25)!important;background:var(--card)}
+nav{left:max(12px,env(safe-area-inset-left,0px))!important;right:max(12px,env(safe-area-inset-right,0px))!important;bottom:calc(env(safe-area-inset-bottom,0px) + 2px)!important;max-width:520px!important;margin-inline:auto!important;padding:6px!important;border:1px solid var(--bd)!important;border-radius:28px!important;box-shadow:0 10px 30px rgba(10,25,40,.25)!important;background:var(--card)}
 nav button{border-radius:22px!important;padding:8px 4px!important}
 nav button.on{background:rgba(127,140,150,.16)!important}
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
