@@ -606,7 +606,7 @@ function renderEmps(){
     d.appendChild(details);l.appendChild(d);
   });
 }
-function renderAll(){empOpts();renderArch();renderEmps();var ct=$("coTag"),cn=String(S.co||"").trim();ct.textContent=cn;ct.style.display=cn?"block":"none"}
+function renderAll(){empOpts();renderArch();renderEmps();var ct=$("coTag"),cn=String(S.co||"").trim();ct.setAttribute("data-no-translate","true");ct.textContent=cn;ct.style.display=cn?"block":"none"}
 function saveFile(name,data){
   var isPdf=String(name).toLowerCase().slice(-4)===".pdf";
   var mime=isPdf?"application/pdf":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -917,6 +917,7 @@ function tr(s){
   for(var i=0;i<PAT.length;i++)if(PAT[i][0].test(s))return s.replace(PAT[i][0],PAT[i][1]);
   var out=s,keys=Object.keys(EN).filter(function(k){return k.length>=4&&/[\u0600-\u06FF]/.test(k)}).sort(function(a,b){return b.length-a.length});
   keys.forEach(function(k){if(out.indexOf(k)>-1)out=out.split(k).join(EN[k])});
+  Object.keys(EN).filter(function(k){return k.length>0&&k.length<4&&/[\u0600-\u06FF]/.test(k)}).forEach(function(k){var re=new RegExp("(^|[^\\u0600-\\u06FF])"+k+"(?=$|[^\\u0600-\\u06FF])","g");out=out.replace(re,function(_,before){return before+EN[k]})});
   return out;
 }
 var mo,timer;
@@ -929,6 +930,7 @@ function toArabic(s){
   for(var i=0;i<PAT_AR.length;i++)if(PAT_AR[i][0].test(s))return s.replace(PAT_AR[i][0],PAT_AR[i][1]);
   var out=s,keys=Object.keys(EN_AR).filter(function(k){return k.length>=4||k==="AED"}).sort(function(a,b){return b.length-a.length});
   keys.forEach(function(k){if(out.indexOf(k)>-1)out=out.split(k).join(EN_AR[k])});
+  Object.keys(EN_AR).filter(function(k){return k.length>0&&k.length<4&&/^[A-Za-z]+$/.test(k)}).forEach(function(k){var re=new RegExp("(^|[^A-Za-z0-9_])"+k+"(?=$|[^A-Za-z0-9_])","g");out=out.replace(re,function(_,before){return before+EN_AR[k]})});
   return out;
 }
 var EN_AR={};Object.keys(EN).forEach(function(k){EN_AR[EN[k]]=k});
