@@ -1,0 +1,46 @@
+name: Playwright safe app checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - setup/playwright-safe
+    paths:
+      - 'package.json'
+      - 'playwright.config.js'
+      - 'tests/**'
+      - '.github/workflows/playwright.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-check:
+    if: github.ref == 'refs/heads/setup/playwright-safe'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out test branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser checks
+        run: npx playwright test
+      - name: Upload screenshots and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots-and-report
+          path: |
+            artifacts/
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
