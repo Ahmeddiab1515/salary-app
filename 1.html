@@ -521,7 +521,7 @@ function renderArch(){
   if(q&&gs.length===1){
     var g1=gs[0],ph=S.photos[nk(g1.name)],av=document.createElement(ph?"img":"div"),bx=document.createElement("div"),bb=document.createElement("b"),s1=document.createElement("small"),s2=document.createElement("small");
     sp.innerHTML="";av.className="av";if(ph){av.src=ph;av.alt=""}else av.textContent=g1.name.charAt(0);
-    bb.textContent=g1.name;s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex";
+    bb.textContent=g1.name;bb.setAttribute("data-no-translate","true");s1.textContent=g1.n+" قيد";s2.textContent=stGrp(g1);bx.appendChild(bb);bx.appendChild(s1);bx.appendChild(s2);sp.appendChild(av);sp.appendChild(bx);sp.style.display="flex";
   }else sp.style.display="none";
   tb.innerHTML="";
   gs.forEach(function(g){
@@ -999,7 +999,7 @@ function pass(){
   while(n=w.nextNode()){
     var p=n.parentNode;
     if(!p||p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="NOSCRIPT")continue;
-    if(p.closest&&p.closest('input,textarea,select,[contenteditable="true"],[data-no-translate],.emp-name,[data-user-value]'))continue;
+    if(p.closest&&p.closest('input,textarea,select,[contenteditable="true"],[data-no-translate],.emp-name,.nm,[data-user-value]'))continue;
     if(n.__base===undefined)n.__base=n.nodeValue;
     var base=n.__base,trimmed=base.trim(),translated;
     if(en)translated=tr(trimmed);
@@ -1502,7 +1502,7 @@ function showWorker(name){
   ["عدد القيود",g.count]
  ];
  var html='<div class="qr-note">كشف حساب الموظف · '+today()+'</div>'+
- '<div style="background:#eff7f5;border:1px solid #d8e9e5;border-radius:14px;padding:12px;margin:10px 0 14px;text-align:center"><div style="font-size:12px;color:#64748b">اسم الموظف</div><div style="font-size:20px;font-weight:700;color:#0f766e;margin-top:4px">'+escQ(name)+'</div><div style="font-size:12px;color:#64748b;margin-top:4px">الشركة: '+escQ(S.co||"—")+'</div></div>'+
+ '<div style="background:#eff7f5;border:1px solid #d8e9e5;border-radius:14px;padding:12px;margin:10px 0 14px;text-align:center"><div style="font-size:12px;color:#64748b">اسم الموظف</div><div style="font-size:20px;font-weight:700;color:#0f766e;margin-top:4px"><span data-no-translate="true">'+escQ(name)+'</span></div><div style="font-size:12px;color:#64748b;margin-top:4px">الشركة: <span data-no-translate="true">'+escQ(S.co||"—")+'</span></div></div>'+
  '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0">'+
  stats.map(function(x,i){return '<div style="background:'+(i===4?'#e4f2ee':'#f5f7f7')+';border:1px solid #e1e9e8;border-radius:11px;padding:11px;min-width:0"><div style="font-size:11px;color:#64748b">'+x[0]+'</div><div style="font-size:16px;font-weight:700;color:'+(i===4?'#0f766e':'#24343a')+';margin-top:5px;overflow-wrap:anywhere">'+escQ(x[1])+'</div></div>'}).join("")+
  '</div><button id="qrMakePdf">إنشاء كشف PDF جديد</button><button class="secondary" id="qrHistory">الكشوف السابقة</button><div id="qrHistoryList"></div><h3 style="font-size:15px;margin-top:18px">تفاصيل القيود</h3>';
@@ -1517,7 +1517,7 @@ function makePdf(name){
  var g=totals(name),rs=records(name),stamp=new Date(),date=today(),host=document.createElement("div");
  host.dir=en?"ltr":"rtl";
  host.style.cssText="position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#111;padding:34px;box-sizing:border-box;font-family:Tahoma,Arial,sans-serif";
- var html='<h2 style="color:#0f766e">'+tx("كشف حساب العامل")+'</h2><h3>'+escQ(name)+'</h3><p>'+tx("الشركة")+': '+escQ(S.co||"")+' | '+tx("تاريخ إصدار الكشف")+': '+date+'</p><hr><p>'+tx("عدد القيود")+': '+g.count+' | '+tx("الراتب الأساسي")+': '+g.sal+' '+tx("درهم")+' | '+tx("السلف")+': '+g.adv+' '+tx("درهم")+' | '+tx("الغياب")+': '+g.abs+' '+tx("يوم")+' | '+tx("خصم الغياب")+': '+g.ded+' '+tx("درهم")+'</p><h3>'+tx("المجموع بعد الخصم")+': '+g.net+' '+tx("درهم")+'</h3><p>'+tx("المستلم")+': '+g.rec+' '+tx("درهم")+' | '+tx("المتبقي")+': '+g.pend+' '+tx("درهم")+'</p><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e5eeee"><th style="border:1px solid #aaa;padding:7px">'+tx("التاريخ")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الراتب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("السلفة")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("تاريخ السلفة")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الغياب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("خصم الغياب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الصافي")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الحالة")+'</th></tr>';
+ var html='<h2 style="color:#0f766e">'+tx("كشف حساب العامل")+'</h2><h3><span data-no-translate="true">'+escQ(name)+'</span></h3><p>'+tx("الشركة")+': <span data-no-translate="true">'+escQ(S.co||"")+'</span> | '+tx("تاريخ إصدار الكشف")+': '+date+'</p><hr><p>'+tx("عدد القيود")+': '+g.count+' | '+tx("الراتب الأساسي")+': '+g.sal+' '+tx("درهم")+' | '+tx("السلف")+': '+g.adv+' '+tx("درهم")+' | '+tx("الغياب")+': '+g.abs+' '+tx("يوم")+' | '+tx("خصم الغياب")+': '+g.ded+' '+tx("درهم")+'</p><h3>'+tx("المجموع بعد الخصم")+': '+g.net+' '+tx("درهم")+'</h3><p>'+tx("المستلم")+': '+g.rec+' '+tx("درهم")+' | '+tx("المتبقي")+': '+g.pend+' '+tx("درهم")+'</p><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="background:#e5eeee"><th style="border:1px solid #aaa;padding:7px">'+tx("التاريخ")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الراتب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("السلفة")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("تاريخ السلفة")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الغياب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("خصم الغياب")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الصافي")+'</th><th style="border:1px solid #aaa;padding:7px">'+tx("الحالة")+'</th></tr>';
  rs.forEach(function(r){html+='<tr>'+[r.date,salaryForRow(r),r.adv,r.advDt||"—",r.abs,dedOf(r),netForRow(r),tx(r.recv==="نعم"?"تم الاستلام بعد الخصم":"لم يُستلم")].map(function(v){return '<td style="border:1px solid #aaa;padding:6px;text-align:center">'+escQ(v)+'</td>'}).join("")+'</tr>'});
  host.innerHTML=html+'</table><p style="margin-top:24px;color:#555;font-size:11px">'+tx("تم إنشاء هذا الكشف من تطبيق كشف الرواتب.")+'</p>';
  document.body.appendChild(host);
