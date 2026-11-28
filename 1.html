@@ -924,12 +924,15 @@ function toArabic(s){
   if(EN_AR[s]!==undefined)return EN_AR[s];
   var employeeCount=s.match(/^(\d+) employees$/);
   if(employeeCount)return employeeCount[1]+" "+(Number(employeeCount[1])===1?"موظف":"موظفين");
+  var entryCount=s.match(/^(\d+) entries$/);
+  if(entryCount)return entryCount[1]+" "+(Number(entryCount[1])===1?"قيد":"قيود");
   for(var i=0;i<PAT_AR.length;i++)if(PAT_AR[i][0].test(s))return s.replace(PAT_AR[i][0],PAT_AR[i][1]);
   var out=s,keys=Object.keys(EN_AR).filter(function(k){return k.length>=4||k==="AED"}).sort(function(a,b){return b.length-a.length});
   keys.forEach(function(k){if(out.indexOf(k)>-1)out=out.split(k).join(EN_AR[k])});
   return out;
 }
 var EN_AR={};Object.keys(EN).forEach(function(k){EN_AR[EN[k]]=k});
+EN_AR["Entry"]="إدخال";EN_AR["Not received"]="لم يُستلم";EN_AR["Payment delivery receipt"]="إثبات تسليم مبلغ";
 var PAT_AR=[[/^Employee statement · (.+)$/,"كشف حساب الموظف · $1"],[/^Employee statement: (.+)$/,"كشف حساب العامل: $1"],[/^Protect account (.+)$/,"حماية حساب $1"],
  [/^Filtered by search: (.+)$/,"مصفّى حسب البحث: $1"],
  [/^Results: (\d+) of (\d+)$/,"النتائج: $1 من $2"],
