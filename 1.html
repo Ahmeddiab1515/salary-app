@@ -648,7 +648,7 @@ function saveFile(name,data){
 function fgrp(){var q=nk($("q").value);return grp().filter(function(g){return matchG(g,q)})}
 function frows(gs){var k={};gs.forEach(function(g){k[g.key]=1});return S.rows.filter(function(r){return k[nk(r.name)]})}
 function noData(){if(!fgrp().length){say("xmsg",$("q").value.trim()?"لا توجد نتائج للبحث":"الأرشيف فاضي","bad");return true}return false}
-function fname(gs,ext){var n="الرواتب - الراتب";if($("q").value.trim()&&gs.length===1)n+=" - "+gs[0].name.replace(/[\/\\:*?"<>|]/g,"");return n+ext}
+function fname(gs,ext){var n=S.cfg&&S.cfg.lang==="en"?"Payroll":"الرواتب - الراتب";if($("q").value.trim()&&gs.length===1)n+=" - "+gs[0].name.replace(/[\/\\:*?"<>|]/g,"");return n+ext}
 function showExcelPreview(wb,name){
   var old=$("excelPreview");if(old)old.remove();
   var names=wb.SheetNames,active=0,overlay=document.createElement("div");
@@ -1543,7 +1543,7 @@ function makePdf(name){
  window.html2canvas(host,{scale:2,backgroundColor:"#fff"}).then(function(cv){
   var pdf=new window.jspdf.jsPDF({unit:"pt",format:"a4"}),pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),img=cv.toDataURL("image/jpeg",.94),iw=pw,ih=cv.height*pw/cv.width,y=0;
   while(y<ih){if(y)pdf.addPage();pdf.addImage(img,"JPEG",0,-y,iw,ih);y+=ph}
-  var blob=pdf.output("blob"),filename="كشف-"+name+"-"+date+"-"+stamp.getTime()+".pdf";
+  var blob=pdf.output("blob"),filename=(en?"Statement-":"كشف-")+name+"-"+date+"-"+stamp.getTime()+".pdf";
   return dbAdd({key:empKey(name),name:name,created:Date.now(),date:date,filename:filename,blob:blob}).then(function(){
    if(window.outFile)window.outFile(filename,blob);
    say("xmsg","تم إنشاء كشف PDF جديد وحفظه في أرشيف العامل على هذا الجهاز ✓","ok");
@@ -1553,7 +1553,7 @@ function makePdf(name){
 function history(name,parent){
  var target=parent.querySelector("#qrHistoryList");target.innerHTML='<p class="qr-note">جاري تحميل الكشوف المحفوظة…</p>';
  dbAll(empKey(name)).then(function(items){target.innerHTML="";if(!items.length){target.textContent="لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.";return}
- items.forEach(function(it){var d=document.createElement("div");d.className="qr-row";var b=document.createElement("button");b.textContent="عرض PDF";b.onclick=function(){var preview=window.open("about:blank","_blank");dbGet(it.id).then(function(x){if(!x){if(preview)preview.close();return}var u=URL.createObjectURL(x.blob);if(preview){preview.location.href=u;setTimeout(function(){URL.revokeObjectURL(u)},300000)}else{var a=document.createElement("a");a.href=u;a.download=x.filename;a.click();setTimeout(function(){URL.revokeObjectURL(u)},60000)}}).catch(function(){if(preview)preview.close();alert("تعذر فتح ملف PDF.")})};d.textContent=it.date+" — "+it.filename+" ";d.appendChild(b);target.appendChild(d)})}).catch(function(){target.textContent="تعذر قراءة أرشيف PDF."});
+ items.forEach(function(it){var d=document.createElement("div");d.className="qr-row";var fileLabel=String(it.filename||"");if(S.cfg&&S.cfg.lang==="en")fileLabel=fileLabel.replace(/^كشف-/,"Statement-");else fileLabel=fileLabel.replace(/^Statement-/,"كشف-");var dateLabel=document.createElement("span");dateLabel.textContent=it.date+" — ";var fileLabelNode=document.createElement("span");fileLabelNode.setAttribute("data-no-translate","true");fileLabelNode.textContent=fileLabel;d.appendChild(dateLabel);d.appendChild(fileLabelNode);d.appendChild(document.createTextNode(" "));var b=document.createElement("button");b.textContent="عرض PDF";b.onclick=function(){var preview=window.open("about:blank","_blank");dbGet(it.id).then(function(x){if(!x){if(preview)preview.close();return}var u=URL.createObjectURL(x.blob);if(preview){preview.location.href=u;setTimeout(function(){URL.revokeObjectURL(u)},300000)}else{var a=document.createElement("a");a.href=u;a.download=x.filename;a.click();setTimeout(function(){URL.revokeObjectURL(u)},60000)}}).catch(function(){if(preview)preview.close();alert("تعذر فتح ملف PDF.")})};d.appendChild(b);target.appendChild(d)})}).catch(function(){target.textContent="تعذر قراءة أرشيف PDF."});
 }
 function bytesToB64Url(bytes){var bin="";for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
 function b64UrlToBytes(str){var b=str.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";var bin=atob(b),out=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out}
