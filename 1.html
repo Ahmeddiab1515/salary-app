@@ -1683,7 +1683,10 @@ applyCurrencyText(document.body);
 .page-history-back span{color:#000000!important}
 .page-history-back:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
 .bar{flex-wrap:wrap}
-.bar>.page-history-back{flex:0 0 100%;width:max-content;max-width:max-content;margin:8px 0 0 auto;order:3}
+.bar>h1{flex:0 0 100%;width:100%}
+.bar>.page-history-back{flex:0 0 auto;width:max-content;max-width:max-content;min-height:30px;padding:4px 10px;margin:8px 0 0 auto;gap:6px;font-size:12px;order:2}
+.bar>.page-history-back svg{width:15px;height:15px}
+.bar>#coTag{order:3}
 </style>
 <script id="page-history-back-button">
 (function(){
