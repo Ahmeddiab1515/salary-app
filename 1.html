@@ -339,7 +339,7 @@ th{white-space:normal!important;line-height:1.3}
         <div class="entry-field entry-wide"><label for="advDt">تاريخ السلفة</label><input id="advDt" type="date"></div>
       </div>
       <div class="two entry-two"><div class="entry-field"><label for="abs">الغياب (أيام)</label><select id="abs"></select></div><div class="entry-field"><label for="rate">خصم اليوم (درهم)</label><select id="rate"></select></div></div>
-      <div class="entry-received"><label>استلمت الراتب؟</label><div class="seg"><button type="button" id="yes" class="yes">نعم</button><button type="button" id="no" class="no on">لا</button></div></div>
+      <div class="entry-received"><label>استلمت الراتب؟</label><div class="seg"><button type="button" id="yes" class="yes">نعم</button><button type="button" id="no" class="no on">لا</button><button type="button" id="partRecv" class="no">جزئي</button></div><div id="recvAmountWrap" hidden style="margin-top:10px"><label for="recvAmountInput">المبلغ المستلم جزئيًا (<span id="recvUnit">درهم</span>)</label><input id="recvAmountInput" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="اكتب المبلغ المستلم" style="width:100%;margin-top:6px"></div></div>
     </section>
     <div class="net"><small>المجموع بعد خصم السلف والغياب</small><b id="net">—</b><small id="calc"></small></div>
     <button class="go" id="transfer" type="button"><svg class="archive-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:21px;height:21px;vertical-align:-5px;margin-left:7px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"><path d="M3 4.5h18v4H3z"/><path d="M5 8.5v11h14v-11M9 12h6M10 15h4"/></svg>حفظ في الأرشيف</button>
@@ -399,7 +399,7 @@ th{white-space:normal!important;line-height:1.3}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-var KEY="salary_preview_v1",S={emps:[],rows:[],co:"GCC"},recv="لا",openG={};
+var KEY="salary_preview_v1",S={emps:[],rows:[],co:"GCC"},recv="لا",recvAmount=0,openG={};
 function $(i){return document.getElementById(i)}
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.rows)S=d}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -727,8 +727,8 @@ function exportPdf(){
 }
 $("xl").onclick=exportXlsx;$("pd").onclick=exportPdf;
 $("deleteArchive").onclick=function(){if(!S.rows.length){say("xmsg","الأرشيف فاضي");return}if(!confirm("هل أنت متأكد من حذف الأرشيف كله؟ لا يمكن التراجع عن هذا الحذف."))return;S.rows=[];save();renderArch();if(typeof renderEmps==="function")renderEmps();say("xmsg","تم حذف جميع سجلات الأرشيف. بيانات الموظفين والإعدادات محفوظة.","ok")};
-function setRecv(v){recv=v;$("yes").className="yes"+(v==="نعم"?" on":"");$("no").className="no"+(v==="لا"?" on":"")}
-$("yes").onclick=function(){setRecv("نعم")};$("no").onclick=function(){setRecv("لا")};
+function setRecv(v){recv=v;if(v!=="جزئي")recvAmount=0;$("yes").className="yes"+(v==="نعم"?" on":"");$("no").className="no"+(v==="لا"?" on":"");$("partRecv").className="no"+(v==="جزئي"?" on":"");$("recvAmountWrap").hidden=v!=="جزئي";if(v==="جزئي")$("recvAmountInput").focus()}
+$("yes").onclick=function(){setRecv("نعم")};$("no").onclick=function(){setRecv("لا")};$("partRecv").onclick=function(){setRecv("جزئي")};
 ["sal","adv","abs","rate"].forEach(function(i){$(i).onchange=calc});
 $("q").oninput=renderArch;
 $("co").oninput=function(){S.co=$("co").value;save();var ct=$("coTag"),cn=String(S.co||"").trim();ct.textContent=cn;ct.style.display=cn?"block":"none"};
@@ -743,11 +743,12 @@ $("transfer").onclick=function(){
   if(!raw){say("msg","اكتب اسم العامل","bad");return}
   if(net===null){say("msg","اختار الراتب الأساسي","bad");return}
   if(S.rows.length>=500){say("msg","الأرشيف امتلأ","bad");return}
+  var partialAmount=0;if(recv==="جزئي"){partialAmount=Number($("recvAmountInput").value);if(!isFinite(partialAmount)||partialAmount<=0||partialAmount>net){say("msg","اكتب المبلغ المستلم بشكل صحيح، ولا يتجاوز المجموع المستحق.","bad");return}}
   var name=canon(raw),had=S.rows.some(function(r){return nk(r.name)===nk(name)});
   if(S.emps.indexOf(name)<0)S.emps.push(name);
-  S.rows.push({date:$("dt").value||today(),co:S.co,name:name,sal:parseFloat($("sal").value),adv:parseFloat($("adv").value)||0,advDt:$("advDt").value,abs:parseFloat($("abs").value)||0,rate:parseFloat($("rate").value)||0,recv:recv});
+  S.rows.push({date:$("dt").value||today(),co:S.co,name:name,sal:parseFloat($("sal").value),adv:parseFloat($("adv").value)||0,advDt:$("advDt").value,abs:parseFloat($("abs").value)||0,rate:parseFloat($("rate").value)||0,recv:recv,receivedAmount:recv==="جزئي"?r2(partialAmount):0});
   save();renderAll();
-  $("emp").value="";$("sal").value="";$("adv").value="";$("advDt").value="";$("abs").value="";$("rate").value="";setRecv("لا");calc();
+  $("emp").value="";$("sal").value="";$("adv").value="";$("advDt").value="";$("abs").value="";$("rate").value="";$("recvAmountInput").value="";setRecv("لا");calc();
   say("msg",had?"تمت الإضافة على نفس الاسم: "+name+" ✓":"تم الحفظ في الأرشيف ✓","ok");
 };
 load();$("co").value=S.co||"GCC";$("dt").value=today();
