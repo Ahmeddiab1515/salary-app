@@ -1230,6 +1230,28 @@ window.previewXlsx=function(){
     privacyCurtain.id="appPrivacyCurtain";
     privacyCurtain.style.cssText="position:fixed;inset:0;z-index:2147483646;background:radial-gradient(ellipse at 50% 43%,rgba(52,211,153,.13),transparent 42%),linear-gradient(145deg,#064e3b,#0f766e 58%,#042f2e);";
     document.body.appendChild(privacyCurtain);
+    var protectedBodyNodes=[];
+    function protectBodyNode(node){
+      if(!node || node===privacyCurtain || node.id==="passwordGate" || protectedBodyNodes.some(function(x){return x.node===node;}))return;
+      protectedBodyNodes.push({node:node,inert:!!node.inert,ariaHidden:node.getAttribute("aria-hidden")});
+      node.inert=true;
+      node.setAttribute("aria-hidden","true");
+    }
+    Array.prototype.slice.call(document.body.children).forEach(protectBodyNode);
+    if(document.activeElement && document.activeElement!==document.body && typeof document.activeElement.blur==="function")document.activeElement.blur();
+    var privacyBodyObserver=new MutationObserver(function(records){
+      records.forEach(function(record){Array.prototype.forEach.call(record.addedNodes,function(node){if(node.nodeType===1)protectBodyNode(node);});});
+    });
+    privacyBodyObserver.observe(document.body,{childList:true});
+    function releaseProtectedBody(){
+      privacyBodyObserver.disconnect();
+      protectedBodyNodes.forEach(function(item){
+        item.node.inert=item.inert;
+        if(item.ariaHidden===null)item.node.removeAttribute("aria-hidden");
+        else item.node.setAttribute("aria-hidden",item.ariaHidden);
+      });
+      protectedBodyNodes=[];
+    }
     var gate=document.createElement("div");
     gate.id="passwordGate";
     gate.style.cssText="position:fixed;inset:0;z-index:2147483647;background:radial-gradient(ellipse at 50% 43%,rgba(52,211,153,.13),transparent 42%),linear-gradient(145deg,#064e3b,#0f766e 58%,#042f2e);display:none;align-items:center;justify-content:center;padding:22px;direction:rtl;font-family:Tahoma,Arial,sans-serif";
@@ -1237,7 +1259,7 @@ window.previewXlsx=function(){
     document.body.appendChild(gate);
     window.addEventListener("salarySplashFinished",function(){gate.style.display="flex";},{once:true});
     var lockMark=document.getElementById("lockMark");if(lockMark)lockMark.onclick=function(){lockMark.classList.remove("is-active");void lockMark.offsetWidth;lockMark.classList.add("is-active");setTimeout(function(){lockMark.classList.remove("is-active")},1600)};
-    document.getElementById("gateForm").onsubmit=function(e){e.preventDefault();var p=document.getElementById("gatePass").value;check(p).then(function(ok){if(ok){gate.remove();privacyCurtain.remove();}else{document.getElementById("gateMsg").textContent="كلمة المرور غير صحيحة.";document.getElementById("gatePass").value="";document.getElementById("gatePass").focus();}}).catch(function(){document.getElementById("gateMsg").textContent="تعذر التحقق من كلمة المرور على هذا المتصفح.";});};
+    document.getElementById("gateForm").onsubmit=function(e){e.preventDefault();var p=document.getElementById("gatePass").value;check(p).then(function(ok){if(ok){gate.remove();privacyCurtain.remove();releaseProtectedBody();}else{document.getElementById("gateMsg").textContent="كلمة المرور غير صحيحة.";document.getElementById("gatePass").value="";document.getElementById("gatePass").focus();}}).catch(function(){document.getElementById("gateMsg").textContent="تعذر التحقق من كلمة المرور على هذا المتصفح.";});};
     setTimeout(function(){var p=document.getElementById("gatePass");if(p)p.focus();},100);
   }
 })();
