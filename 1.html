@@ -991,6 +991,16 @@ PAT_AR.push(
 PAT_AR.push([/^QR Code محمي — (.+)$/,"باركود محمي — $1"]);
 PAT.push([/^حذف الموظف (.+)$/,"Delete employee $1"]);
 PAT_AR.push([/^Delete employee (.+)$/,"حذف الموظف $1"]);
+PAT.push(
+ [/^لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: (.+) درهم — السلف: (.+)$/,"Salary not received — Remaining amount after deductions: $1 AED — Advances: $2"],
+ [/^لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: (.+) درهم — السلف: (.+)$/,"Salary not received — Deductions exceed salary by: $1 AED — Advances: $2"],
+ [/^تم استلام: (.+) درهم — الخصومات تجاوزت الراتب غير المستلم بمقدار: (.+) درهم — السلف: (.+)$/,"Received: $1 AED — Deductions exceed unpaid salary by: $2 AED — Advances: $3"]
+);
+PAT_AR.push(
+ [/^Salary not received — Remaining amount after deductions: (.+) AED — Advances: (.+)$/,"لم يتم استلام الراتب — المبلغ المتبقي بعد الخصم: $1 درهم — السلف: $2"],
+ [/^Salary not received — Deductions exceed salary by: (.+) AED — Advances: (.+)$/,"لم يتم استلام الراتب — الخصومات تجاوزت الراتب بمقدار: $1 درهم — السلف: $2"],
+ [/^Received: (.+) AED — Deductions exceed unpaid salary by: (.+) AED — Advances: (.+)$/,"تم استلام: $1 درهم — الخصومات تجاوزت الراتب غير المستلم بمقدار: $2 درهم — السلف: $3"]
+);
 window.appTranslate=function(value){
   var text=String(value==null?"":value);
   return S.cfg&&S.cfg.lang==="en"?tr(text):toArabic(text);
