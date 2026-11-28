@@ -561,8 +561,7 @@ function renderEmps(){
       });
       details.appendChild(records);
     }
-    var actions=document.createElement("div");actions.className="emp-detail-actions";
-    var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){var tries=0;function openQrWhenReady(){if(typeof window.salaryShowQr==="function"){window.salaryShowQr(n);return}if(tries++<30){setTimeout(openQrWhenReady,100);return}alert("تعذر تشغيل ميزة QR في هذه الصفحة. أغلق التطبيق وافتح الرابط من جديد، وإذا استمرت المشكلة أرسل لي هذه الرسالة.");}openQrWhenReady()};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);actions.appendChild(qa);details.appendChild(actions);
+    var qa=document.createElement("div");qa.className="qr-actions";var qb=document.createElement("button"),pb=document.createElement("button");qb.type=pb.type="button";qb.textContent="▦ QR العامل";pb.textContent="📄 كشوف PDF";qb.onclick=function(){var tries=0;function openQrWhenReady(){if(typeof window.salaryShowQr==="function"){window.salaryShowQr(n);return}if(tries++<30){setTimeout(openQrWhenReady,100);return}alert("تعذر تشغيل ميزة QR في هذه الصفحة. أغلق التطبيق وافتح الرابط من جديد، وإذا استمرت المشكلة أرسل لي هذه الرسالة.");}openQrWhenReady()};pb.onclick=function(){if(window.salaryPdfHistory)window.salaryPdfHistory(n);else alert("أرشيف PDF لم يجهز بعد. حدّث الصفحة وحاول مرة أخرى.")};qa.appendChild(qb);qa.appendChild(pb);face.appendChild(qa);
     function toggleEmployee(){openG["emp:"+nk(n)]=!openG["emp:"+nk(n)];renderEmps()}b.onclick=toggleEmployee;head.onclick=function(e){if(e.target.closest("button"))return;toggleEmployee()};
     d.appendChild(details);l.appendChild(d);
   });
@@ -1767,6 +1766,8 @@ applyCurrencyText(document.body);
 #t2 #elist .employee-face-summary{grid-column:1/-1;grid-row:3;min-width:0}
 #t2 #elist .employee-company{display:block;color:var(--mut);font-size:12px;margin-bottom:8px}
 #t2 #elist .employee-face-money{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--bd);border-radius:13px;overflow:hidden;background:var(--bg)}
+#t2 #elist .employee-face-summary .qr-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;width:100%}
+#t2 #elist .employee-face-summary .qr-actions button{flex:1 1 120px;min-height:40px}
 #t2 #elist .employee-face-cell{padding:10px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;text-align:center;border-inline-start:1px solid var(--bd)}
 #t2 #elist .employee-face-cell:first-child{border-inline-start:0}
 #t2 #elist .employee-face-cell span{font-size:11px;color:var(--mut);line-height:1.4}
