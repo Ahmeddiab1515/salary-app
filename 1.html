@@ -1710,7 +1710,7 @@ document.querySelectorAll("nav button[data-t]").forEach(function(button){
   var current=activePage(),next=document.getElementById("t"+button.dataset.t);
   if(current&&next&&current!==next){previousPages.push(current.id);if(previousPages.length>30)previousPages.shift()}
   setTimeout(refreshButtons,0);
- });
+ },true);
 });
 refreshButtons();
 })();
