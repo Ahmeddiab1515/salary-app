@@ -1217,7 +1217,7 @@ window.previewXlsx=function(){
     if(pwStage==="remove"){
       check(v).then(function(ok){
         if(!ok){pwEntry.value="";pwEntry.focus();msg("كلمة المرور القديمة غير صحيحة.");return;}
-        delete cfg.passHash;delete cfg.passSalt;save();resetPw();msg("تم إلغاء كلمة المرور بنجاح.");
+        var oldHash=cfg.passHash,oldSalt=cfg.passSalt;delete cfg.passHash;delete cfg.passSalt;try{localStorage.setItem(KEY,JSON.stringify(S));var saved=JSON.parse(localStorage.getItem(KEY)||"null");if(!saved||!saved.cfg||saved.cfg.passHash||saved.cfg.passSalt)throw new Error("password removal was not persisted");resetPw();msg("تم إلغاء كلمة المرور بنجاح.");}catch(e){cfg.passHash=oldHash;cfg.passSalt=oldSalt;msg("تعذر حفظ إلغاء كلمة المرور. لم يتم إلغاء الحماية؛ حاول مرة أخرى.");}
       }).catch(function(){msg("تعذر إلغاء الحماية.");});
     }
   };
