@@ -1538,7 +1538,7 @@ function qrPhotoThumb(name,size,quality){
   }).catch(function(e){err.textContent=e&&e.message?e.message:"تعذر إنشاء الباركود المحمي.";btn.disabled=false;btn.textContent="إنشاء باركود محمي"});
  };
 }
-window.salaryShowQr=showQr;window.salaryPdfHistory=function(name){askPassword(name,function(){showWorker(name)})};
+window.salaryShowQr=showQr;window.salaryPdfHistory=function(name){showWorker(name)};
 function renderSharedCard(){
  var params=new URLSearchParams(location.search),packed=params.get("card");if(!packed)return;
  document.body.style.overflow="hidden";
