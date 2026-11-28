@@ -478,7 +478,7 @@ function confirmEmployeeClear(name,amount,onYes){
     try{
       var canvas=document.createElement("canvas");canvas.width=900;canvas.height=620;
       var ctx=canvas.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,900,620);
-      ctx.fillStyle="#17212b";ctx.textAlign="center";ctx.direction="rtl";
+      var receiptEn=!!(S.cfg&&S.cfg.lang==="en");ctx.fillStyle="#17212b";ctx.textAlign="center";ctx.direction=receiptEn?"ltr":"rtl";
       var src=S.photos[nk(name)];
       if(src){
         var img=new Image();img.src=src;
@@ -488,17 +488,17 @@ function confirmEmployeeClear(name,amount,onYes){
         ctx.fillStyle="#e8edf2";ctx.beginPath();ctx.arc(450,155,86,0,Math.PI*2);ctx.fill();
         ctx.fillStyle="#263746";ctx.font="bold 78px Arial";ctx.fillText((name.trim()[0]||"?"),450,182);
       }
-      ctx.fillStyle="#17212b";ctx.font="bold 42px Arial";ctx.fillText("إثبات تسليم مبلغ",450,330);
-      ctx.font="bold 48px Arial";ctx.fillText(amountText+" درهم",450,415);
+      ctx.fillStyle="#17212b";ctx.font="bold 42px Arial";ctx.fillText(receiptEn?"Payment delivery receipt":"إثبات تسليم مبلغ",450,330);
+      ctx.font="bold 48px Arial";ctx.fillText(amountText+(receiptEn?" AED":" درهم"),450,415);
       ctx.font="bold 34px Arial";ctx.fillText(name,450,490);
-      ctx.font="26px Arial";ctx.fillStyle="#66717d";ctx.fillText(new Date().toLocaleDateString("ar-EG"),450,550);
+      ctx.font="26px Arial";ctx.fillStyle="#66717d";ctx.fillText(new Date().toLocaleDateString(receiptEn?"en-GB":"ar-EG"),450,550);
       var blob=await new Promise(function(resolve){canvas.toBlob(resolve,"image/png")});
       if(!blob)throw new Error("تعذر إنشاء الصورة");
-      var file=new File([blob],"إثبات-تسليم-"+name+".png",{type:"image/png"});
+      var file=new File([blob],(receiptEn?"Payment-receipt-":"إثبات-تسليم-")+name+".png",{type:"image/png"});
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file],title:"إثبات تسليم المبلغ"});
       }else{
-        var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="إثبات-تسليم-"+name+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1500);
+        var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=(receiptEn?"Payment-receipt-":"إثبات-تسليم-")+name+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1500);
         alert("تم تجهيز صورة الإثبات. إذا لم تُحفظ تلقائيًا، افتح الصورة واختر مشاركة ثم حفظ في الملفات.");
       }
     }catch(e){if(e.name!=="AbortError")alert("تعذر حفظ الصورة. جرّب مرة أخرى أو استخدم مشاركة ثم حفظ في الملفات.");}
@@ -558,7 +558,7 @@ function renderEmps(){
     info.appendChild(b);head.appendChild(info);
     d.appendChild(head);
     var face=document.createElement("div");face.className="employee-face-summary";
-    var company=document.createElement("span");company.className="employee-company";company.textContent="الشركة: "+(S.co||"—");face.appendChild(company);
+    var company=document.createElement("span");company.className="employee-company";var companyLabel=document.createElement("span"),companyValue=document.createElement("span");companyLabel.textContent="الشركة: ";companyValue.setAttribute("data-no-translate","true");companyValue.textContent=S.co||"—";company.appendChild(companyLabel);company.appendChild(companyValue);face.appendChild(company);
     var moneyFace=document.createElement("div");moneyFace.className="employee-face-money";
     function faceCell(label,value,kind){var c=document.createElement("div");c.className="employee-face-cell"+(kind?" "+kind:"");var a=document.createElement("span"),v=document.createElement("b");a.textContent=label;v.textContent=value+" درهم";c.appendChild(a);c.appendChild(v);moneyFace.appendChild(c)}
     faceCell("الراتب الأساسي",g.sal||0,"base");faceCell("السلف والغياب",(Number(g.adv)||0)+(Number(g.ded)||0),"deductions");faceCell("المجموع",g.net||0,"total");face.appendChild(moneyFace);d.appendChild(face);
@@ -900,6 +900,9 @@ Object.assign(EN,{
 Object.assign(EN,{
 "إدخال بيانات الراتب":"Enter payroll details","سجّل بيانات الموظف والراتب في خطوات واضحة":"Enter employee and salary details in clear steps","بيانات الموظف":"Employee details","تاريخ الحساب":"Statement date","بيانات الراتب":"Salary details","حفظ في الأرشيف":"Save to archive","إجمالي الموظفين":"Total employees","مستحقات الموظفين":"Employee dues","حذف الأرشيف كله":"Delete entire archive","إثبات تسليم مبلغ":"Payment delivery receipt","تعذر إنشاء الصورة":"Could not create the image","إثبات تسليم المبلغ":"Payment delivery receipt","تم تجهيز صورة الإثبات. إذا لم تُحفظ تلقائيًا، افتح الصورة واختر مشاركة ثم حفظ في الملفات.":"The receipt image is ready. If it was not saved automatically, open the image, tap Share, then Save to Files.","تعذر حفظ الصورة. جرّب مرة أخرى أو استخدم مشاركة ثم حفظ في الملفات.":"Could not save the image. Try again or use Share, then Save to Files.","حفظ الصورة في الملفات":"Save image to Files","حذف بيانات الراتب":"Delete payroll data","الاحتفاظ بالبيانات":"Keep data","تم التسليم":"Delivered","لم يتم التسليم":"Not delivered","الشركة: ":"Company: ","إجمالي المستحقات بعد الخصم (درهم)":"Total due after deductions (AED)","المبلغ المستلم (درهم)":"Amount received (AED)","المتبقي غير المستلم (درهم)":"Unpaid balance (AED)","إجمالي المستحقات بعد الخصم":"Total due after deductions","جاري تجهيز معاينة الـPDF…":"Preparing PDF preview…","تم تجهيز معاينة PDF. راجع الملف في النافذة الجديدة، ثم استخدم زر المشاركة أو الحفظ في المتصفح لحفظه.":"The PDF preview is ready. Review it in the new window, then use the browser's Share or Save option.","هل أنت متأكد من حذف الأرشيف كله؟ لا يمكن التراجع عن هذا الحذف.":"Are you sure you want to delete the entire archive? This action cannot be undone.","تم حذف جميع سجلات الأرشيف. بيانات الموظفين والإعدادات محفوظة.":"All archive records have been deleted. Employee data and settings are preserved.","تعذر قراءة الصورة. جرّب صورة أخرى.":"Could not read the image. Try another image.","تصغير الآلة الحاسبة":"Minimize calculator","تكبير الآلة الحاسبة":"Maximize calculator","تصغير":"Minimize","تكبير":"Maximize","تعذر حفظ إلغاء كلمة المرور. لم يتم إلغاء الحماية؛ حاول مرة أخرى.":"Could not save password removal. Protection is still enabled; try again.","تعذر تحميل أداة إنشاء الباركود. افتح التطبيق بالإنترنت مرة واحدة لتحديث ملفاته، ثم حاول مرة أخرى.":"Could not load the QR generator. Open the app online once to update its files, then try again.","تم الاستلام بعد الخصم":"Received after deductions","تعذر فتح ملف PDF.":"Could not open the PDF file.","تأكيد كلمة المرور وإنشاء الباركود":"Confirm password and create QR code","اكتب كلمة المرور مرة ثانية للتأكيد.":"Re-enter the password to confirm.","هذا المتصفح لا يدعم التشفير الآمن. افتح التطبيق من رابط HTTPS حديث.":"This browser does not support secure encryption. Open the app using a modern HTTPS link.","جاري تشفير البيانات…":"Encrypting data…","أُغلقت نافذة الباركود.":"The QR window was closed.","تعذر إنشاء الباركود المحمي.":"Could not create the protected QR code.","إنشاء باركود محمي":"Create protected QR code","هذا باركود قديم غير محمي. اطلب من صاحب العمل إنشاء باركود محمي جديد.":"This is an old, unprotected QR code. Ask the employer to create a new protected QR code.","المتصفح لا يدعم فك ضغط البيانات. افتح الرابط في إصدار حديث من Safari أو Chrome.":"This browser cannot decompress the data. Open the link in a recent version of Safari or Chrome.","تاريخ إصدار الباركود":"QR issue date","صورة العامل":"Employee photo","اكتب كلمة المرور أولًا.":"Enter the password first.","جاري التحقق…":"Verifying…","كلمة المرور غير صحيحة. حاول مرة أخرى.":"Incorrect password. Try again.","تعذر فك تشفير الباركود.":"Could not decrypt the QR code.","فتح كشف الحساب":"Open statement","الدولار الأمريكي":"US dollar","الجنيه المصري":"Egyptian pound","اليوان الصيني":"Chinese yuan","الدرهم الإماراتي":"UAE dirham"
 });
+Object.assign(EN,{
+"اكتب اسم الموظف أو اختاره":"Enter or select an employee","إدخال بيانات الراتب":"Enter salary details","سجّل بيانات الموظف والراتب في خطوات واضحة":"Record employee and salary details in clear steps","بيانات الموظف":"Employee details","اسم الموظف":"Employee name","تاريخ الحساب":"Statement date","بيانات الراتب":"Salary details","تصدير الأرشيف":"Export archive","حفظ إكسل":"Save Excel","حفظ PDF":"Save PDF","ابحث باسم الموظف...":"Search employees...","إجمالي الموظفين":"Total employees","مستحقات الموظفين":"Employee dues","حذف الأرشيف كله":"Delete entire archive","هل تريد حذف بيانات الرواتب الخاصة به؟":"Do you want to delete this employee's payroll data?","حفظ الصورة في الملفات":"Save image to Files","جاري تجهيز الصورة...":"Preparing image...","إثبات تسليم مبلغ":"Payment delivery receipt","حذف بيانات الراتب":"Delete salary data","الاحتفاظ بالبيانات":"Keep data","تم تجهيز صورة الإثبات. إذا لم تُحفظ تلقائيًا، افتح الصورة واختر مشاركة ثم حفظ في الملفات.":"The receipt image is ready. If it was not saved automatically, open it, choose Share, then Save to Files.","تعذر حفظ الصورة. جرّب مرة أخرى أو استخدم مشاركة ثم حفظ في الملفات.":"Could not save the image. Try again, or use Share then Save to Files.","إنشاء كشف PDF جديد":"Create new PDF statement","الكشوف السابقة":"Previous statements","لا توجد كشوف PDF محفوظة لهذا العامل حتى الآن.":"No PDF statements have been saved for this employee yet.","جاري تحميل الكشوف المحفوظة…":"Loading saved statements…","عرض PDF":"View PDF","تعذر قراءة أرشيف PDF.":"Could not read the PDF archive.","كشف حساب العامل":"Worker statement","تاريخ إصدار الكشف":"Statement issue date","الراتب":"Salary","الصافي":"Net","تم إنشاء هذا الكشف من تطبيق كشف الرواتب.":"This statement was created using the Payroll app.","مكتبة PDF لم تُحمّل. اتصل بالإنترنت ثم حاول مرة أخرى.":"The PDF library did not load. Connect to the internet and try again.","تعذر إنشاء ملف PDF.":"Could not create the PDF file.","تم إنشاء كشف PDF جديد وحفظه في أرشيف العامل على هذا الجهاز ✓":"A new PDF statement was created and saved in this employee's archive on this device ✓","كلمة المرور لازم تكون ٦ أحرف على الأقل.":"Password must contain at least 6 characters.","أعد كتابة كلمة المرور":"Re-enter the password","تأكيد كلمة المرور":"Confirm password","كلمة المرور غير متطابقة. حاول التأكيد مرة ثانية.":"Passwords do not match. Please try again.","كلمة مرور الباركود":"QR code password","أنشئ كلمة مرور لهذا الباركود. أعطِ كلمة المرور للعامل بطريقة منفصلة عن صورة الباركود.":"Create a password for this QR code. Give the password to the employee separately from the QR image.","البيانات داخل الباركود مشفّرة. بعد أي تعديل على بيانات العامل، أنشئ باركودًا جديدًا.":"The data in this QR code is encrypted. Create a new QR code after changing the employee's data.","احتفظ بكلمة المرور وأرسلها للعامل بشكل منفصل عن صورة الباركود.":"Keep the password and send it to the employee separately from the QR image.","التالي: تأكيد كلمة المرور":"Next: confirm password","تأكيد كلمة المرور وإنشاء الباركود":"Confirm password and create QR code","حفظ صورة QR":"Save QR image","تم استلام الراتب بعد الخصم":"Salary received after deductions","درهم":"AED","يوم":"day(s)","معلومات التطبيق":"App information","اللغة والخط":"Language and font","حماية التطبيق بكلمة مرور":"Protect the app with a password","اطلب كلمة المرور عند كل فتح للتطبيق على هذا الجهاز.":"Require a password each time the app is opened on this device.","إلغاء كلمة المرور":"Remove password","أدخل كلمة المرور لفتح التطبيق":"Enter your password to open the app"
+});
 var PAT=[[/^كشف حساب الموظف · (.+)$/,"Employee statement · $1"],[/^كشف حساب العامل: (.+)$/,"Employee statement: $1"],[/^حماية حساب (.+)$/,"Protect account $1"],[/^مصفّى حسب البحث: (.+)$/,"Filtered by search: $1"],[/^النتائج: (\d+) من (\d+)$/,"Results: $1 of $2"],[/^(\d+) قيد$/,"$1 entries"],[/^تم استلام الراتب — السلف: (.+) — المبلغ: (.+) درهم$/,"Salary received — Advance: $1 — Amount: $2 AED"],[/^لم يتم استلام الراتب — السلف: (.+) — المبلغ المتبقي: (.+) درهم$/,"Salary not received — Advance: $1 — Remaining amount: $2 AED"],[/^تم استلام: (.+) درهم — لم يُستلم \(المتبقي\): (.+) درهم — السلف: (.+)$/,"Received: $1 AED — Not received (remaining): $2 AED — Advance: $3"],[/^(\d+) قيد \| المجموع (.+) \| غير مستلم (.+)$/,"$1 entries | Total $2 | Unreceived $3"],[/^تمت الإضافة على نفس الاسم: (.+) ✓$/,"Added to the existing name: $1 ✓"],[/^(.+) \(خصم الغياب\)$/,"$1 (absence deduction)"],[/^([\d,.-]+) درهم$/,"$1 AED"]];
 function tr(s){
   if(EN[s]!==undefined)return EN[s];
@@ -976,24 +979,25 @@ function pass(){
   while(n=w.nextNode()){
     var p=n.parentNode;
     if(!p||p.nodeName==="SCRIPT"||p.nodeName==="STYLE"||p.nodeName==="NOSCRIPT")continue;
-    if(p.closest&&p.closest('input,textarea,select,[contenteditable="true"],[data-no-translate],.emp-name,.employee-company,[data-user-value]'))continue;
+    if(p.closest&&p.closest('input,textarea,select,[contenteditable="true"],[data-no-translate],.emp-name,[data-user-value]'))continue;
     if(n.__base===undefined)n.__base=n.nodeValue;
     var base=n.__base,trimmed=base.trim(),translated;
-    if(en)translated=/[\u0600-\u06FF]/.test(trimmed)?tr(trimmed):trimmed;
-    else translated=/[\u0600-\u06FF]/.test(trimmed)?trimmed:toArabic(trimmed);
+    if(en)translated=tr(trimmed);
+    else translated=toArabic(trimmed);
     var next=trimmed?base.replace(trimmed,translated):base;
     if(n.nodeValue!==next){n.nodeValue=next;lastRenderedText.set(n,next)}
     else if(!lastRenderedText.has(n))lastRenderedText.set(n,next);
   }
   document.querySelectorAll("[placeholder],[title],[aria-label],[alt],[value]").forEach(function(e){
-    if(e.matches('input,textarea,select,[contenteditable="true"],[data-no-translate],[data-user-value]'))return;
+    if(e.matches('[contenteditable="true"],[data-no-translate],[data-user-value]'))return;
     var rendered=lastRenderedAttrs.get(e)||{};
-    ["placeholder","title","aria-label","alt","value"].forEach(function(a){
+    var attrs=e.matches('input,textarea,select')?["placeholder","title","aria-label","alt"]:["placeholder","title","aria-label","alt","value"];
+    attrs.forEach(function(a){
       if(!e.hasAttribute(a))return;
       var key="__base_"+a;if(e[key]===undefined)e[key]=e.getAttribute(a);
       var base=e[key],v=base.trim(),translated;
-      if(en)translated=/[\u0600-\u06FF]/.test(v)?tr(v):v;
-      else translated=/[\u0600-\u06FF]/.test(v)?v:toArabic(v);
+      if(en)translated=tr(v);
+      else translated=toArabic(v);
       var next=base.replace(v,translated);
       if(e.getAttribute(a)!==next){e.setAttribute(a,next);rendered[a]=next}
       else if(rendered[a]===undefined)rendered[a]=next;
@@ -1006,7 +1010,7 @@ function pass(){
   var directionStyle=document.getElementById("languageDirectionRules");
   if(!directionStyle){
     directionStyle=document.createElement("style");directionStyle.id="languageDirectionRules";
-    directionStyle.textContent='html[dir="ltr"] .qr-overlay,html[dir="ltr"] .clh,html[dir="ltr"] .xt{direction:ltr!important}html[dir="ltr"] .emp-name,html[dir="ltr"] .emp-record-label{ text-align:left!important }html[dir="rtl"] .emp-name,html[dir="rtl"] .emp-record-label{text-align:right!important}';
+    directionStyle.textContent='html[dir="ltr"] .qr-overlay,html[dir="ltr"] .clh,html[dir="ltr"] .xt{direction:ltr!important}html[dir="ltr"] .emp-name,html[dir="ltr"] .emp-record-label{text-align:left!important}html[dir="rtl"] .emp-name,html[dir="rtl"] .emp-record-label{text-align:right!important}html[lang="en"] #t1 #arch tr:not(.sub) td:nth-child(2)::before,html[lang="en"] #t1 #arch tr.sub td:nth-child(2)::before{content:"Base salary"}html[lang="en"] #t1 #arch tr:not(.sub) td:nth-child(3)::before,html[lang="en"] #t1 #arch tr.sub td:nth-child(3)::before{content:"Advances"}html[lang="en"] #t1 #arch tr:not(.sub) td:nth-child(4)::before,html[lang="en"] #t1 #arch tr.sub td:nth-child(4)::before{content:"Absence"}html[lang="en"] #t1 #arch tr:not(.sub) td:nth-child(5)::before,html[lang="en"] #t1 #arch tr.sub td:nth-child(5)::before{content:"Total"}';
     document.head.appendChild(directionStyle);
   }
   document.querySelectorAll('[dir="rtl"],[dir="ltr"]').forEach(function(e){
@@ -1582,19 +1586,20 @@ window.salaryShowQr=showQr;window.salaryPdfHistory=function(name){showWorker(nam
 function renderSharedCard(){
  var params=new URLSearchParams(location.search),packed=params.get("card");if(!packed)return;
  document.body.style.overflow="hidden";
- var shareLang=params.get("cl")==="en"?"en":"ar",shareEn=shareLang==="en";var root=document.createElement("div");root.id="sharedSalaryCard";root.style.cssText="position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#f1f5f5;color:#17212b;padding:18px;box-sizing:border-box;direction:"+(shareEn?"ltr":"rtl")+";font-family:Tahoma,Arial,sans-serif";
+ var shareLang=params.get("cl")==="en"?"en":"ar",shareEn=shareLang==="en";var root=document.createElement("div");root.id="sharedSalaryCard";root.setAttribute("data-no-translate","true");root.style.cssText="position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#f1f5f5;color:#17212b;padding:18px;box-sizing:border-box;direction:"+(shareEn?"ltr":"rtl")+";font-family:Tahoma,Arial,sans-serif";
  root.innerHTML='<style>@page{margin:12mm}@media print{html,body{margin:0!important;padding:0!important;background:#fff!important}body>*:not(#sharedSalaryCard){display:none!important}#sharedSalaryCard{position:static!important;inset:auto!important;width:auto!important;height:auto!important;min-height:0!important;overflow:visible!important;background:#fff!important;padding:0!important;margin:0!important;box-shadow:none!important}#sharedSalaryCard .no-print,#sharedActions{display:none!important}.share-card{max-width:none!important;width:auto!important;margin:0!important;box-shadow:none!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.share-entry{break-inside:avoid;page-break-inside:avoid}}.share-card{max-width:680px;margin:0 auto;background:#fff;border:1px solid #dce6e6;border-radius:18px;padding:20px;box-shadow:0 8px 28px #1231}.share-card h1{font-size:23px;color:#0f766e;margin:0 0 8px}.share-card h2{font-size:16px;color:#0f766e;margin:20px 0 8px}.share-meta{color:#64748b;font-size:12px;line-height:1.8}.share-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}.share-stat{background:#f0f7f6;border-radius:12px;padding:11px}.share-stat small{display:block;color:#64748b;font-size:11px}.share-stat b{display:block;font-size:17px;margin-top:4px}.share-entry{border-top:1px solid #e5eeee;padding:10px 0;font-size:13px;line-height:1.9;overflow-wrap:anywhere}.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin:14px auto;max-width:680px}.share-actions button{border:0;border-radius:11px;padding:12px 16px;background:#0f766e;color:white;font-size:14px}.share-actions button.secondary{background:#e2eeee;color:#20323a}.share-pass{width:100%;box-sizing:border-box;padding:13px;border:1px solid #cbd5d5;border-radius:10px;font-size:16px;margin:8px 0 12px}.share-unlock{width:100%;padding:13px;border:0;border-radius:10px;background:#0f766e;color:#fff;font-size:16px;font-weight:bold}.share-error{color:#b42318;font-size:13px;min-height:22px}@media(max-width:380px){.share-card{padding:14px}.share-stats{gap:6px}.share-stat{padding:9px}.share-stat b{font-size:15px}}</style><div class="share-card"><div id="sharedCardContent"><h1>'+(shareEn?"Protected Worker Statement":"كشف حساب العامل محمي")+'</h1><p class="share-meta">'+(shareEn?"Enter the password provided by the employer to view your details.":"أدخل كلمة المرور التي استلمتها من صاحب العمل لعرض بياناتك.")+'</p><form id="sharedUnlockForm"><label for="sharedPass">'+(shareEn?"Password":"كلمة المرور")+'</label><input class="share-pass" id="sharedPass" type="password" autocomplete="current-password" required><button class="share-unlock" id="sharedUnlock" type="submit">'+(shareEn?"Open statement":"فتح كشف الحساب")+'</button><p class="share-error" id="sharedPassError" role="alert"></p></form></div></div><div class="share-actions no-print" id="sharedActions" style="display:none"><button id="sharedPrint">'+(shareEn?"Save / Print PDF":"حفظ / طباعة PDF")+'</button><button class="secondary" id="sharedClose">'+(shareEn?"Close page":"إغلاق الصفحة")+'</button></div>';
  document.body.appendChild(root);
- function fail(msg){var c=root.querySelector("#sharedCardContent");c.innerHTML='<h1>تعذر فتح الكشف</h1><p class="share-meta"></p>';c.querySelector("p").textContent=msg;root.querySelector("#sharedActions").style.display="none"}
+ function shareMsg(ar,en){return shareEn?en:ar}
+ function fail(msg){var c=root.querySelector("#sharedCardContent");c.innerHTML='<h1>'+shareMsg("تعذر فتح الكشف","Unable to open statement")+'</h1><p class="share-meta"></p>';c.querySelector("p").textContent=msg;root.querySelector("#sharedActions").style.display="none"}
  function decryptCard(password){
-  if(packed.slice(0,2)!=="e1")return Promise.reject(new Error("هذا باركود قديم غير محمي. اطلب من صاحب العمل إنشاء باركود محمي جديد."));
-  var all=b64UrlToBytes(packed.slice(2));if(all.length<46)return Promise.reject(new Error("بيانات الباركود غير مكتملة."));
+  if(packed.slice(0,2)!=="e1")return Promise.reject(new Error(shareMsg("هذا باركود قديم غير محمي. اطلب من صاحب العمل إنشاء باركود محمي جديد.","This is an old, unprotected QR code. Ask the employer to create a new protected QR code.")));
+  var all=b64UrlToBytes(packed.slice(2));if(all.length<46)return Promise.reject(new Error(shareMsg("بيانات الباركود غير مكتملة.","The QR code data is incomplete.")));
   var salt=all.slice(0,16),iv=all.slice(16,28),cipher=all.slice(28);
   return qrKey(password,salt).then(function(key){return crypto.subtle.decrypt({name:"AES-GCM",iv:iv},key,cipher)}).then(function(buf){
    var plain=new Uint8Array(buf),compressed=plain[0]===1,body=plain.slice(1);
-   if(compressed){if(typeof DecompressionStream==="undefined")throw new Error("المتصفح لا يدعم فك ضغط البيانات. افتح الرابط في إصدار حديث من Safari أو Chrome.");return new Response(new Blob([body]).stream().pipeThrough(new DecompressionStream("gzip"))).text()}
+   if(compressed){if(typeof DecompressionStream==="undefined")throw new Error(shareMsg("المتصفح لا يدعم فك ضغط البيانات. افتح الرابط في إصدار حديث من Safari أو Chrome.","This browser cannot decompress the data. Open the link in a recent version of Safari or Chrome."));return new Response(new Blob([body]).stream().pipeThrough(new DecompressionStream("gzip"))).text()}
    return new TextDecoder().decode(body);
-  }).then(function(json){var d=JSON.parse(json);if(!d||d.v!==1||!d.n||!Array.isArray(d.r))throw new Error("بيانات الباركود غير مكتملة.");return d});
+  }).then(function(json){var d=JSON.parse(json);if(!d||d.v!==1||!d.n||!Array.isArray(d.r))throw new Error(shareMsg("بيانات الباركود غير مكتملة.","The QR code data is incomplete."));return d});
  }
  function display(d){
   var en=d.lang==="en",L=en?{title:"Worker Statement",company:"Company",issued:"QR issue date",entries:"Entries",salary:"Basic salary",adv:"Total advances",abs:"Absence days",ded:"Absence deduction",net:"Total after deductions",rec:"Received",pend:"Remaining",details:"Entry details",rowSalary:"Salary",rowAdv:"Advance",advDate:"Advance date",rowAbs:"Absence",rowDed:"Absence deduction",rowNet:"Net",status:"Status",currency:"AED"}:{title:"كشف حساب العامل",company:"الشركة",issued:"تاريخ إصدار الباركود",entries:"عدد القيود",salary:"الراتب الأساسي",adv:"إجمالي السلف",abs:"أيام الغياب",ded:"خصم الغياب",net:"المجموع بعد الخصم",rec:"المستلم",pend:"المتبقي",details:"تفاصيل القيود",rowSalary:"الراتب",rowAdv:"السلفة",advDate:"تاريخ السلفة",rowAbs:"الغياب",rowDed:"خصم الغياب",rowNet:"الصافي",status:"الحالة",currency:"درهم"};
@@ -1606,12 +1611,12 @@ function renderSharedCard(){
  }
  root.querySelector("#sharedUnlockForm").onsubmit=function(e){
   e.preventDefault();var btn=root.querySelector("#sharedUnlock"),pass=root.querySelector("#sharedPass").value,err=root.querySelector("#sharedPassError");
-  if(!pass){err.textContent="اكتب كلمة المرور أولًا.";return}
-  btn.disabled=true;btn.textContent="جاري التحقق…";err.textContent="";
-  decryptCard(pass).then(display).catch(function(e){err.textContent=e&&e.name==="OperationError"?"كلمة المرور غير صحيحة. حاول مرة أخرى.":(e&&e.message?e.message:"تعذر فك تشفير الباركود.");btn.disabled=false;btn.textContent="فتح كشف الحساب";root.querySelector("#sharedPass").value=""});
+  if(!pass){err.textContent=shareMsg("اكتب كلمة المرور أولًا.","Enter the password first.");return}
+  btn.disabled=true;btn.textContent=shareMsg("جاري التحقق…","Verifying…");err.textContent="";
+  decryptCard(pass).then(display).catch(function(e){err.textContent=e&&e.name==="OperationError"?shareMsg("كلمة المرور غير صحيحة. حاول مرة أخرى.","Incorrect password. Try again."):(e&&e.message?e.message:shareMsg("تعذر فك تشفير الباركود.","Could not decrypt the QR code."));btn.disabled=false;btn.textContent=shareMsg("فتح كشف الحساب","Open statement");root.querySelector("#sharedPass").value=""});
  };
  root.querySelector("#sharedPrint").onclick=function(){window.print()};
- root.querySelector("#sharedClose").onclick=function(){if(history.length>1)history.back();else root.querySelector("#sharedCardContent").textContent="يمكنك إغلاق علامة تبويب المتصفح للعودة."};
+ root.querySelector("#sharedClose").onclick=function(){if(history.length>1)history.back();else root.querySelector("#sharedCardContent").textContent=shareMsg("يمكنك إغلاق علامة تبويب المتصفح للعودة.","You can close this browser tab to return.")};
 }
 renderSharedCard();
 var params=new URLSearchParams(location.search),wid=params.get("worker");
